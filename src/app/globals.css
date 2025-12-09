@@ -526,3 +526,266 @@ body {
         justify-content: flex-start;
     }
 }
+
+/* ===== DGP /dev HOMEPAGE & DASHBOARD EXTRA STYLES ===== */
+
+/* Shared layout for dev home + dashboard content */
+.dev-home,
+.dev-dashboard {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 32px 20px 48px;
+}
+
+/* Hero layout on /dev */
+.dev-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    margin-bottom: 56px;
+}
+
+.dev-hero-content {
+    flex: 1.5;
+}
+
+.dev-hero-visual {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hero text */
+.dev-eyebrow {
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.dev-hero-title {
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.dev-hero-subtitle {
+    font-size: 0.98rem;
+    color: var(--muted);
+    max-width: 520px;
+    margin-bottom: 18px;
+}
+
+/* Hero buttons */
+.dev-hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.dev-hero-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+    .dev-hero-btn.primary {
+        background: linear-gradient(135deg, var(--accent), var(--danger));
+        color: #ffffff;
+    }
+
+        .dev-hero-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+        }
+
+    .dev-hero-btn.secondary {
+        background: transparent;
+        color: var(--primary);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+        .dev-hero-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+/* Visual placeholder box */
+.visual-placeholder {
+    width: 100%;
+    max-width: 260px;
+    min-height: 160px;
+    border-radius: 20px;
+    border: 1px dashed rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    background: rgba(5, 3, 18, 0.85);
+}
+
+/* Sections on /dev */
+.dev-section {
+    max-width: 720px;
+    margin-bottom: 40px;
+}
+
+.dev-section-title {
+    font-size: 1.4rem;
+    margin-bottom: 8px;
+}
+
+.dev-section-intro {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+}
+
+/* "Our Pizza" grid */
+.dev-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+}
+
+.dev-feature-card {
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(8, 6, 24, 0.9);
+}
+
+    .dev-feature-card h3 {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+
+    .dev-feature-card p {
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+
+/* Split layout sections (arcade, careers/franchise) */
+.dev-section.split {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.dev-split-text {
+    flex: 1;
+    min-width: 260px;
+}
+
+    .dev-split-text ul {
+        margin-top: 10px;
+        margin-left: 18px;
+        font-size: 0.9rem;
+        color: var(--muted);
+    }
+
+.dev-split-visual {
+    flex: 1;
+    min-width: 260px;
+}
+
+/* Lore tags */
+.dev-lore-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.lore-pill {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(8, 6, 24, 0.9);
+}
+
+/* Plan Your Visit cards */
+.dev-visit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.visit-card {
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(8, 6, 24, 0.9);
+}
+
+    .visit-card h3 {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+
+    .visit-card p {
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+
+.dev-visit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    font-size: 0.88rem;
+    text-decoration: none;
+    color: var(--primary);
+}
+
+    .dev-visit-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+/* Small link-style buttons */
+.dev-link-btn {
+    display: inline-flex;
+    margin-top: 8px;
+    font-size: 0.88rem;
+    text-decoration: none;
+    color: var(--accent);
+}
+
+    .dev-link-btn:hover {
+        text-decoration: underline;
+    }
+
+/* Make hero stack on small screens */
+@media (max-width: 900px) {
+    .dev-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dev-hero-visual {
+        align-self: stretch;
+        justify-content: flex-start;
+    }
+
+    .visual-placeholder {
+        max-width: none;
+    }
+}
+
