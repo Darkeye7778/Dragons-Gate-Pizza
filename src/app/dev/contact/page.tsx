@@ -1,4 +1,4 @@
-export default function ContactPage() {
+﻿export default function ContactPage() {
     return (
         <section className="dev-section">
             <h1 className="dev-section-title">Contact Us</h1>

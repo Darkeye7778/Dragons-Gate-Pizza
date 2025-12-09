@@ -1,4 +1,4 @@
-export default function JoinOurTeamPage() {
+﻿export default function JoinOurTeamPage() {
     return (
         <section className="dev-section">
             <h1 className="dev-section-title">Join Our Team</h1>

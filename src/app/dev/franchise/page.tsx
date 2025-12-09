@@ -1,4 +1,4 @@
-export default function FranchisePage() {
+﻿export default function FranchisePage() {
     return (
         <section className="dev-section">
             <h1 className="dev-section-title">Franchise Opportunities</h1>

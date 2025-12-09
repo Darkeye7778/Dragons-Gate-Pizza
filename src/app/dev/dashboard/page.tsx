@@ -1,11 +1,11 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export default function DevDashboardPage() {
     return (
         <section className="dev-dashboard">
             <h1 className="dev-dashboard-title">Developer Dashboard</h1>
             <p className="dev-dashboard-subtitle">
-                Internal navigation for building Dragon�s Gate Pizza. Not visible to guests.
+                Internal navigation for building Dragon’s Gate Pizza. Not visible to guests.
             </p>
 
             <div className="dev-grid">

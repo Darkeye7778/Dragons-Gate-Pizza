@@ -1,4 +1,4 @@
-export default function MenuPage() {
+﻿export default function MenuPage() {
     return (
         <section className="dev-section">
             <h1 className="dev-section-title">Menu</h1>
