@@ -789,3 +789,69 @@ body {
     }
 }
 
+/* ===== FULLSCREEN HERO FOR /dev ===== */
+
+.dev-hero-full {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 20px;
+    overflow: hidden;
+}
+
+.dev-hero-video {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.dev-hero-video-el {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dev-hero-video-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top, rgba(0, 0, 0, 0.2), #05030b 70%);
+}
+
+/* content sits on top of video */
+
+.dev-hero-content-full {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    text-align: left;
+}
+
+/* tweak spacing so pizza section feels like the next "scene" */
+
+.dev-section {
+    max-width: 1120px;
+    margin: 0 auto 40px;
+}
+
+.dev-section-arcade {
+    padding-top: 40px;
+}
+
+.dev-section-arcade-layout {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+    .dev-section-arcade-layout {
+        flex-direction: column;
+    }
+
+    .dev-hero-content-full {
+        text-align: left;
+    }
+}

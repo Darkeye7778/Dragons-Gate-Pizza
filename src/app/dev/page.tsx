@@ -1,12 +1,25 @@
-﻿import Link from "next/link";
+﻿// src/app/dev/page.tsx
+import Link from "next/link";
 
 export default function DevHomePage() {
     return (
-        <main className="dev-home">
+        <div className="dev-home">
+            {/* FULLSCREEN HERO – PIZZA FOCUS */}
+            <section className="dev-hero-full">
+                <div className="dev-hero-video">
+                    {/* TODO: drop a real file at public/videos/pizza-loop.mp4 */}
+                    <video
+                        className="dev-hero-video-el"
+                        src="/videos/Test Background Video.mp4"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                    />
+                    <div className="dev-hero-video-overlay" />
+                </div>
 
-            {/* HERO */}
-            <section className="dev-hero">
-                <div className="dev-hero-content">
+                <div className="dev-hero-content dev-hero-content-full">
                     <span className="dev-eyebrow">Pizza • Arcades • Tabletop</span>
 
                     <h1 className="dev-hero-title">
@@ -27,14 +40,9 @@ export default function DevHomePage() {
                         </Link>
                     </div>
                 </div>
-
-                <div className="dev-hero-visual">
-                    {/* Placeholder for future animation */}
-                    <div className="visual-placeholder">[ Pizza Animation WIP ]</div>
-                </div>
             </section>
 
-            {/* OUR PIZZA SECTION */}
+            {/* OUR PIZZA */}
             <section className="dev-section">
                 <h2 className="dev-section-title">Our Pizza</h2>
                 <p className="dev-section-intro">
@@ -62,33 +70,38 @@ export default function DevHomePage() {
                 </div>
             </section>
 
-            {/* ARCADE SECTION */}
-            <section className="dev-section split">
-                <div className="dev-split-text">
-                    <h2 className="dev-section-title">Arcades & Games</h2>
-                    <p>
-                        From retro cabinets to modern prize games, DGP offers an arcade
-                        experience designed for every age.
-                    </p>
-                    <ul>
-                        <li>Retro arcade machines</li>
-                        <li>Prize and ticket games</li>
-                        <li>Tabletop zones & party rooms</li>
-                    </ul>
-                </div>
+            {/* ARCADES & GAMES */}
+            <section className="dev-section dev-section-arcade">
+                <h2 className="dev-section-title">Arcades &amp; Games</h2>
+                <p className="dev-section-intro">
+                    From retro cabinets to modern prize games, DGP offers an arcade
+                    experience designed for every age.
+                </p>
 
-                <div className="dev-split-visual">
-                    <div className="visual-placeholder">[ Arcade Visual WIP ]</div>
+                <div className="dev-section-arcade-layout">
+                    <div className="dev-split-text">
+                        <ul>
+                            <li>Retro arcade machines</li>
+                            <li>Prize and ticket games</li>
+                            <li>Tabletop zones &amp; party rooms</li>
+                        </ul>
+                    </div>
+                    <div className="dev-split-visual">
+                        {/* Later: swap for an arcade b-roll clip */}
+                        <div className="visual-placeholder">[ Arcade Visual WIP ]</div>
+                    </div>
                 </div>
             </section>
 
-            {/* LORE SECTION */}
+            {/* LORE / ANIMATRONICS */}
             <section className="dev-section">
                 <h2 className="dev-section-title">Welcome to the Gate</h2>
                 <p className="dev-section-intro">
-                    Meet Loric Flamecord and the adventuring band who retired from questing
-                    to become our animatronic performers.
+                    Meet Loric Flamecord and the adventuring band who retired from
+                    questing to become our animatronic performers. Their tales fuel the
+                    world of Dragon&apos;s Gate Pizza.
                 </p>
+
                 <div className="dev-lore-tags">
                     <span className="lore-pill">Animatronic Band</span>
                     <span className="lore-pill">Dark Eye Universe</span>
@@ -100,7 +113,7 @@ export default function DevHomePage() {
             <section className="dev-section">
                 <h2 className="dev-section-title">Plan Your Visit</h2>
                 <p className="dev-section-intro">
-                    Our first location is opening soon. Here's what to expect:
+                    Our first location is opening soon. Here&apos;s what to expect:
                 </p>
 
                 <div className="dev-visit-grid">
@@ -114,7 +127,7 @@ export default function DevHomePage() {
                     </div>
                     <div className="visit-card">
                         <h3>Parties</h3>
-                        <p>Birthdays, tournaments, tabletop nights.</p>
+                        <p>Birthdays, tournaments, tabletop nights, and more.</p>
                     </div>
                 </div>
 
@@ -124,29 +137,33 @@ export default function DevHomePage() {
             </section>
 
             {/* CAREERS + FRANCHISE */}
-            <section className="dev-section split">
-                <div className="dev-split-text">
-                    <h3 className="dev-subheading">Careers</h3>
-                    <p>
-                        Work in a place where the pizza’s hot and the dice never stop
-                        rolling.
-                    </p>
-                    <Link href="/dev/careers" className="dev-link-btn">
-                        View Careers
-                    </Link>
-                </div>
+            <section className="dev-section dev-section-arcade">
+                <div className="dev-section-arcade-layout">
+                    <div className="dev-split-text">
+                        <h3 className="dev-subheading">Careers</h3>
+                        <p>
+                            Work in a place where the pizza&apos;s hot and the dice never stop
+                            rolling. We&apos;re building a team that loves food, games, and
+                            story-driven experiences.
+                        </p>
+                        <Link href="/dev/careers" className="dev-link-btn">
+                            View Careers
+                        </Link>
+                    </div>
 
-                <div className="dev-split-text">
-                    <h3 className="dev-subheading">Franchise</h3>
-                    <p>
-                        Interested in helping expand the Dragon’s Gate experience to your
-                        city?
-                    </p>
-                    <Link href="/dev/franchise" className="dev-link-btn">
-                        Franchise Info
-                    </Link>
+                    <div className="dev-split-text">
+                        <h3 className="dev-subheading">Franchise</h3>
+                        <p>
+                            Interested in bringing Dragon&apos;s Gate Pizza to your city?
+                            Learn more about our concept, requirements, and application
+                            process.
+                        </p>
+                        <Link href="/dev/franchise" className="dev-link-btn">
+                            Franchise Info
+                        </Link>
+                    </div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }
