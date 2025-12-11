@@ -1,10 +1,15 @@
-﻿* {
+﻿/* RESET */
+
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* THEME VARIABLES */
+
 :root {
+    /* legacy vars used in coming-soon page */
     --bg-color: #05030b;
     --bg-accent: #1b0b3a;
     --primary: #f5f5ff;
@@ -13,6 +18,17 @@
     --accent-soft: rgba(200, 108, 255, 0.25);
     --danger: #ff467e;
     --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    /* DGP themed vars */
+    --bg-main: #120912;
+    --bg-surface: #20101a;
+    --bg-surface-soft: rgba(32, 16, 26, 0.9);
+    --accent-warm: #ffb347;
+    --accent-warm-secondary: #f16e34;
+    --accent-neon: #6d9bff;
+    --accent-neon-secondary: #ff5fd1;
+    --glow-warm: rgba(255, 179, 71, 0.4);
+    --glow-neon: rgba(109, 155, 255, 0.45);
+    --border-soft: rgba(245, 240, 230, 0.16);
 }
 
 html,
@@ -22,12 +38,13 @@ body {
 
 body {
     font-family: var(--font-main);
-    background: radial-gradient(circle at top, #22114b 0%, #05030b 45%, #000 100%);
+    /* warm tavern → deep arcane gradient, no vignette */
+    background: linear-gradient(180deg, #24121c 0%, #120912 55%, #0b0616 100%);
     color: var(--primary);
     margin: 0;
 }
 
-/* subtle background glow circle */
+/* subtle background glow circle (used on coming-soon) */
 .bg-glow {
     position: fixed;
     width: 600px;
@@ -44,12 +61,16 @@ body {
 
 .page-wrapper {
     width: 100%;
-    max-width: 960px;
-    padding: 32px 20px 24px;
-    margin: 0 auto;
+    max-width: 1280px;
+    padding: 32px 40px 24px;
     position: relative;
     z-index: 1;
+    margin : 0 auto;
 }
+
+/* ===================== */
+/*   COMING SOON PAGE    */
+/* ===================== */
 
 /* HEADER */
 
@@ -333,13 +354,26 @@ body {
     font-weight: 600;
 }
 
-/* ===== DEV AREA ===== */
+/* ===================== */
+/*       DEV AREA        */
+/* ===================== */
 
 .dev-root {
     min-height: 100vh;
-    max-width: 1120px;
+    width: 100%;
+    padding: 24px 40px 40px;
+}
+
+/* constrain header/main/footer inside dev-root */
+.dev-header,
+.dev-footer {
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 32px 20px 40px;
+    color: var(--primary);
+}
+
+.dev-main {
+    width: 100%;
 }
 
 .dev-header {
@@ -347,6 +381,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+    margin-bottom: 16px;
 }
 
 .dev-logo {
@@ -364,8 +399,8 @@ body {
 }
 
 .dev-nav-link {
-    font-size: 0.8rem;
-    padding: 6px 10px;
+    font-size: 0.85rem;
+    padding: 4px 10px;
     border-radius: 999px;
     border: 1px solid transparent;
     color: var(--muted);
@@ -408,7 +443,7 @@ body {
     text-align: center;
 }
 
-/* dev home grid */
+/* dev home grid (still used on dashboard) */
 
 .dev-home-title {
     font-size: 1.8rem;
@@ -459,7 +494,10 @@ body {
 /* generic dev sections */
 
 .dev-section {
-    max-width: 720px;
+    max-width: 1120px;
+    margin: 0 auto 40px;
+    padding: 32px 20px 40px;
+    border-radius: 24px;
 }
 
 .dev-section-title {
@@ -500,188 +538,71 @@ body {
     color: var(--muted);
 }
 
-/* responsive tweaks */
+/* ============= */
+/* THEME SECTIONS */
+/* ============= */
 
-@media (max-width: 640px) {
-    .site-header {
-        margin-bottom: 40px;
-    }
-
-    .notify-form {
-        flex-direction: column;
-    }
-
-    .notify-button {
-        width: 100%;
-    }
+.section-warm.dev-section {
+    background: radial-gradient( circle at top, #2d171d 0%, #1a0f14 55%, #0d060a 100% );
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
 }
 
-@media (max-width: 720px) {
-    .dev-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .dev-nav {
-        justify-content: flex-start;
-    }
+.section-neon.dev-section {
+    background: radial-gradient( circle at top, #28164a 0%, #130b24 55%, #06020a 100% );
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.75);
 }
 
-/* ===== DGP /dev HOMEPAGE & DASHBOARD EXTRA STYLES ===== */
+/* shared cards */
 
-/* Shared layout for dev home + dashboard content */
-.dev-home,
-.dev-dashboard {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 32px 20px 48px;
-}
-
-/* Hero layout on /dev */
-.dev-hero {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 32px;
-    margin-bottom: 56px;
-}
-
-.dev-hero-content {
-    flex: 1.5;
-}
-
-.dev-hero-visual {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Hero text */
-.dev-eyebrow {
-    font-size: 0.8rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--muted);
-    display: inline-block;
-    margin-bottom: 8px;
-}
-
-.dev-hero-title {
-    font-size: clamp(2.2rem, 4vw, 3rem);
-    font-weight: 800;
-    margin-bottom: 10px;
-}
-
-.dev-hero-subtitle {
-    font-size: 0.98rem;
-    color: var(--muted);
-    max-width: 520px;
-    margin-bottom: 18px;
-}
-
-/* Hero buttons */
-.dev-hero-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.dev-hero-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    border-radius: 999px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
-}
-
-    .dev-hero-btn.primary {
-        background: linear-gradient(135deg, var(--accent), var(--danger));
-        color: #ffffff;
-    }
-
-        .dev-hero-btn.primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
-        }
-
-    .dev-hero-btn.secondary {
-        background: transparent;
-        color: var(--primary);
-        border-color: rgba(255, 255, 255, 0.2);
-    }
-
-        .dev-hero-btn.secondary:hover {
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-/* Visual placeholder box */
-.visual-placeholder {
-    width: 100%;
-    max-width: 260px;
-    min-height: 160px;
-    border-radius: 20px;
-    border: 1px dashed rgba(255, 255, 255, 0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    color: var(--muted);
-    background: rgba(5, 3, 18, 0.85);
-}
-
-/* Sections on /dev */
-.dev-section {
-    max-width: 720px;
-    margin-bottom: 40px;
-}
-
-.dev-section-title {
-    font-size: 1.4rem;
-    margin-bottom: 8px;
-}
-
-.dev-section-intro {
-    font-size: 0.95rem;
-    color: var(--muted);
-    margin-bottom: 16px;
-}
-
-/* "Our Pizza" grid */
 .dev-feature-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 16px;
 }
 
-.dev-feature-card {
+.dev-feature-card,
+.visit-card {
     padding: 14px 16px;
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(8, 6, 24, 0.9);
+    background: var(--bg-surface-soft);
+    border: 1px solid var(--border-soft);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
 
-    .dev-feature-card h3 {
+    .dev-feature-card h3,
+    .visit-card h3 {
         font-size: 1rem;
         margin-bottom: 4px;
     }
 
-    .dev-feature-card p {
+    .dev-feature-card p,
+    .visit-card p {
         font-size: 0.85rem;
         color: var(--muted);
     }
 
-/* Split layout sections (arcade, careers/franchise) */
-.dev-section.split {
+.section-warm .dev-feature-card,
+.section-warm .visit-card {
+    box-shadow: 0 0 22px var(--glow-warm);
+}
+
+.section-neon .dev-feature-card,
+.section-neon .visit-card {
+    box-shadow: 0 0 20px var(--glow-neon);
+}
+
+.dev-feature-card:hover,
+.visit-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* split layout (arcade + careers/franchise) */
+
+.dev-section-arcade-layout {
     display: flex;
     gap: 32px;
-    align-items: flex-start;
     flex-wrap: wrap;
 }
 
@@ -702,7 +623,8 @@ body {
     min-width: 260px;
 }
 
-/* Lore tags */
+/* lore tags */
+
 .dev-lore-tags {
     display: flex;
     flex-wrap: wrap;
@@ -718,30 +640,14 @@ body {
     background: rgba(8, 6, 24, 0.9);
 }
 
-/* Plan Your Visit cards */
+/* Plan your visit grid */
+
 .dev-visit-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 16px;
     margin-bottom: 14px;
 }
-
-.visit-card {
-    padding: 14px 16px;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(8, 6, 24, 0.9);
-}
-
-    .visit-card h3 {
-        font-size: 1rem;
-        margin-bottom: 4px;
-    }
-
-    .visit-card p {
-        font-size: 0.85rem;
-        color: var(--muted);
-    }
 
 .dev-visit-btn {
     display: inline-flex;
@@ -753,43 +659,86 @@ body {
     font-size: 0.88rem;
     text-decoration: none;
     color: var(--primary);
+    transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
 }
 
     .dev-visit-btn:hover {
         background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-1px);
     }
 
-/* Small link-style buttons */
+/* Buttons - theme aware */
+
+.dev-hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.dev-hero-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    white-space: nowrap;
+}
+
+    .dev-hero-btn.primary {
+        background: linear-gradient( 135deg, var(--accent-warm), var(--accent-warm-secondary) );
+        color: #ffffff;
+    }
+
+.section-neon .dev-hero-btn.primary {
+    background: linear-gradient( 135deg, var(--accent-neon), var(--accent-neon-secondary) );
+}
+
+.dev-hero-btn.primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 24px var(--glow-warm);
+}
+
+.section-neon .dev-hero-btn.primary:hover {
+    box-shadow: 0 0 24px var(--glow-neon);
+}
+
+.dev-hero-btn.secondary {
+    background: transparent;
+    color: var(--primary);
+    border-color: rgba(255, 255, 255, 0.24);
+}
+
+    .dev-hero-btn.secondary:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+/* link-ish buttons */
+
 .dev-link-btn {
     display: inline-flex;
     margin-top: 8px;
     font-size: 0.88rem;
     text-decoration: none;
-    color: var(--accent);
+    color: var(--accent-neon);
 }
 
     .dev-link-btn:hover {
         text-decoration: underline;
     }
 
-/* Make hero stack on small screens */
-@media (max-width: 900px) {
-    .dev-hero {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+/* ========= */
+/* FULL HERO */
+/* ========= */
 
-    .dev-hero-visual {
-        align-self: stretch;
-        justify-content: flex-start;
-    }
-
-    .visual-placeholder {
-        max-width: none;
-    }
+.dev-home {
+    width: 100%;
 }
-
-/* ===== FULLSCREEN HERO FOR /dev ===== */
 
 .dev-hero-full {
     position: relative;
@@ -814,13 +763,12 @@ body {
     object-fit: cover;
 }
 
+/* cinematic overlay, no vignette ring */
 .dev-hero-video-overlay {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at top, rgba(0, 0, 0, 0.2), #05030b 70%);
+    background: linear-gradient( to bottom, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.7) );
 }
-
-/* content sits on top of video */
 
 .dev-hero-content-full {
     position: relative;
@@ -829,29 +777,64 @@ body {
     text-align: left;
 }
 
-/* tweak spacing so pizza section feels like the next "scene" */
-
-.dev-section {
-    max-width: 1120px;
-    margin: 0 auto 40px;
+.dev-eyebrow {
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: inline-block;
+    margin-bottom: 8px;
 }
 
-.dev-section-arcade {
-    padding-top: 40px;
+.dev-hero-title {
+    font-size: clamp(2.4rem, 4vw, 3.2rem);
+    font-weight: 800;
+    margin-bottom: 12px;
 }
 
-.dev-section-arcade-layout {
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
+.dev-hero-subtitle {
+    font-size: 0.98rem;
+    color: var(--muted);
+    max-width: 520px;
+    margin-bottom: 18px;
 }
+
+/* responsive tweaks */
 
 @media (max-width: 900px) {
-    .dev-section-arcade-layout {
-        flex-direction: column;
+    .dev-hero-full {
+        padding-top: 80px;
     }
 
     .dev-hero-content-full {
         text-align: left;
+    }
+
+    .dev-section {
+        padding: 24px 16px 32px;
+        border-radius: 20px;
+    }
+
+    .dev-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .dev-root {
+        padding: 20px 16px 32px;
+    }
+}
+
+@media (max-width: 640px) {
+    .site-header {
+        margin-bottom: 40px;
+    }
+
+    .notify-form {
+        flex-direction: column;
+    }
+
+    .notify-button {
+        width: 100%;
     }
 }

@@ -4,10 +4,10 @@ import Link from "next/link";
 export default function DevHomePage() {
     return (
         <div className="dev-home">
-            {/* FULLSCREEN HERO – PIZZA FOCUS */}
-            <section className="dev-hero-full">
+            {/* HERO – warm tavern pizza focus */}
+            <section className="dev-hero-full section-warm">
                 <div className="dev-hero-video">
-                    {/* TODO: drop a real file at public/videos/pizza-loop.mp4 */}
+                    {/* drop your stock video at public/videos/pizza-hero.mp4 */}
                     <video
                         className="dev-hero-video-el"
                         src="/videos/Test Background Video.mp4"
@@ -19,7 +19,7 @@ export default function DevHomePage() {
                     <div className="dev-hero-video-overlay" />
                 </div>
 
-                <div className="dev-hero-content dev-hero-content-full">
+                <div className="dev-hero-content-full">
                     <span className="dev-eyebrow">Pizza • Arcades • Tabletop</span>
 
                     <h1 className="dev-hero-title">
@@ -42,8 +42,8 @@ export default function DevHomePage() {
                 </div>
             </section>
 
-            {/* OUR PIZZA */}
-            <section className="dev-section">
+            {/* OUR PIZZA – warm tavern section */}
+            <section className="dev-section section-warm">
                 <h2 className="dev-section-title">Our Pizza</h2>
                 <p className="dev-section-intro">
                     Long-fermented dough. High-heat bake. Original recipes. Everything at
@@ -70,8 +70,8 @@ export default function DevHomePage() {
                 </div>
             </section>
 
-            {/* ARCADES & GAMES */}
-            <section className="dev-section dev-section-arcade">
+            {/* ARCADES & GAMES – neon underglow */}
+            <section className="dev-section section-neon">
                 <h2 className="dev-section-title">Arcades &amp; Games</h2>
                 <p className="dev-section-intro">
                     From retro cabinets to modern prize games, DGP offers an arcade
@@ -87,14 +87,13 @@ export default function DevHomePage() {
                         </ul>
                     </div>
                     <div className="dev-split-visual">
-                        {/* Later: swap for an arcade b-roll clip */}
                         <div className="visual-placeholder">[ Arcade Visual WIP ]</div>
                     </div>
                 </div>
             </section>
 
-            {/* LORE / ANIMATRONICS */}
-            <section className="dev-section">
+            {/* LORE – warm hybrid */}
+            <section className="dev-section section-warm">
                 <h2 className="dev-section-title">Welcome to the Gate</h2>
                 <p className="dev-section-intro">
                     Meet Loric Flamecord and the adventuring band who retired from
@@ -109,8 +108,8 @@ export default function DevHomePage() {
                 </div>
             </section>
 
-            {/* PLAN YOUR VISIT */}
-            <section className="dev-section">
+            {/* PLAN YOUR VISIT – warm */}
+            <section className="dev-section section-warm">
                 <h2 className="dev-section-title">Plan Your Visit</h2>
                 <p className="dev-section-intro">
                     Our first location is opening soon. Here&apos;s what to expect:
@@ -136,8 +135,8 @@ export default function DevHomePage() {
                 </Link>
             </section>
 
-            {/* CAREERS + FRANCHISE */}
-            <section className="dev-section dev-section-arcade">
+            {/* CAREERS + FRANCHISE – leaning a bit more arcade/ops */}
+            <section className="dev-section section-neon">
                 <div className="dev-section-arcade-layout">
                     <div className="dev-split-text">
                         <h3 className="dev-subheading">Careers</h3>
