@@ -10,7 +10,7 @@ type CountdownState = {
     seconds: number;
 };
 
-const launchTarget = new Date("2026-03-07T00:00:00-05:00").getTime();
+const launchTarget = new Date("2027-03-07T00:00:00-05:00").getTime();
 
 const DEV_USERNAME = "loric";      // change these to whatever you want
 const DEV_PASSWORD = "flamecord";
