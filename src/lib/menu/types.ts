@@ -1,4 +1,4 @@
-export type FulfillmentType = "pickup" | "delivery" | "dine_in";
+﻿export type FulfillmentType = "pickup" | "delivery" | "dine_in";
 
 export type Ingredient = {
     id: string;

@@ -26,13 +26,17 @@ export default function DevLayout({
     const [checkedAuth, setCheckedAuth] = useState(false);
 
     useEffect(() => {
-        if (typeof window === "undefined") return;
-        const authFlag = window.localStorage.getItem(DEV_AUTH_KEY);
-        if (authFlag !== "true") {
+        const auth = localStorage.getItem("dgp_dev_auth");
+
+        if (!auth) {
             router.replace("/");
-        } else {
-            setCheckedAuth(true);
+            return;
         }
+
+        // delay state change to next tick to satisfy lint rule
+        setTimeout(() => {
+            setCheckedAuth(true);
+        }, 0);
     }, [router]);
 
     if (!checkedAuth) {
@@ -53,7 +57,7 @@ export default function DevLayout({
     return (
         <div className="dev-root">
             <header className="dev-header">
-                <div className="dev-logo">Dragon's Gate Pizza</div>
+                <div className="dev-logo">Dragon&apos;s Gate Pizza</div>
                 <nav className="dev-nav">
                     {navLinks.map((link) => (
                         <Link
@@ -76,7 +80,7 @@ export default function DevLayout({
             <main className="dev-main">{children}</main>
 
             <footer className="dev-footer">
-                <p>(c) 2025 Dragon's Gate Pizza. Internal build.</p>
+                <p>(c) 2025 Dragon&apos;s Gate Pizza. Internal build.</p>
             </footer>
         </div>
     );

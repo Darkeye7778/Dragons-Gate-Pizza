@@ -1,4 +1,4 @@
-import type { MenuCatalog } from "@/lib/menu/types";
+ï»¿import type { MenuCatalog } from "@/lib/menu/types";
 
 export const MENU: MenuCatalog = {
     ingredients: [
@@ -46,7 +46,7 @@ export const MENU: MenuCatalog = {
         { id: "artichoke-hearts", name: "Artichoke Hearts", buildOrder: 60, isCrustOption: false, isActive: true },
         { id: "sun-dried-tomatoes", name: "Sun-dried Tomatoes", buildOrder: 60, isCrustOption: false, isActive: true },
         { id: "black-olives", name: "Black Olives", buildOrder: 60, isCrustOption: false, isActive: true },
-        { id: "jalapenos", name: "Jalapeños", buildOrder: 60, isCrustOption: false, isActive: true },
+        { id: "jalapenos", name: "JalapeÃ±os", buildOrder: 60, isCrustOption: false, isActive: true },
         { id: "roasted-red-peppers", name: "Roasted Red Peppers", buildOrder: 60, isCrustOption: false, isActive: true },
         { id: "roasted-garlic", name: "Roasted Garlic", buildOrder: 70, isCrustOption: false, isActive: true },
         { id: "caramelized-onions", name: "Caramelized Onions", buildOrder: 70, isCrustOption: false, isActive: true },
@@ -313,14 +313,14 @@ export const MENU: MenuCatalog = {
         },
         {
             id: "frost-mages-elixir",
-            name: "Frost Mage’s Elixir",
+            name: "Frost Mageâ€™s Elixir",
             description: "Lemon-lime soda + blue raspberry + vanilla cream",
             basePrice: 3.99,
             hasShimmer: true,
         },
         {
             id: "dragons-breath-fizz",
-            name: "Dragon’s Breath Fizz",
+            name: "Dragonâ€™s Breath Fizz",
             description: "Cola + raspberry + pineapple",
             basePrice: 3.99,
             hasShimmer: true,

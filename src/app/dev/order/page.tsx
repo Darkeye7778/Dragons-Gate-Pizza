@@ -1,21 +1,39 @@
-﻿export default function OrderAheadPage() {
+﻿// src/app/dev/order/page.tsx
+import Link from "next/link";
+import { MENU } from "@/data/menu";
+
+export default function DevOrderPage() {
     return (
-        <section className="dev-section">
-            <h1 className="dev-section-title">Order Ahead</h1>
-            <p className="dev-section-intro">
-                This will eventually be the flow for guests to place pickup orders
-                online. For now, use this page to design the UX: cart, time selection,
-                payment handoff, etc.
-            </p>
+        <main style={{ padding: 24, maxWidth: 1000, margin: "0 auto" }}>
+            <h1>Start an Order</h1>
             <p>
-                When you pick an ordering provider (Slice, Toast, in-house, whatever),
-                this page can either:
+                Pick a signature pizza below to start the current dev ordering flow.
             </p>
-            <ul className="dev-list">
-                <li>Embed their ordering widget, or</li>
-                <li>Link out to a white-label ordering URL, or</li>
-                <li>Use their API to build a fully custom flow.</li>
-            </ul>
-        </section>
+
+            <section
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                    gap: 16,
+                    marginTop: 24,
+                }}
+            >
+                {MENU.pizzas.map((pizza) => (
+                    <div
+                        key={pizza.id}
+                        style={{
+                            border: "1px solid #ddd",
+                            borderRadius: 10,
+                            padding: 16,
+                        }}
+                    >
+                        <h2 style={{ marginTop: 0 }}>{pizza.name}</h2>
+                        <p>{pizza.description}</p>
+                        <p style={{ opacity: 0.75 }}>{pizza.group}</p>
+                        <Link href={`/dev/order/${pizza.id}`}>Customize This Pizza</Link>
+                    </div>
+                ))}
+            </section>
+        </main>
     );
 }

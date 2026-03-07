@@ -75,7 +75,7 @@ export default function LandingPage() {
             <div className="bg-glow" />
 
             <header className="site-header">
-                <div className="logo">Dragon's Gate Pizza</div>
+                <div className="logo">Dragon&apos;s Gate Pizza</div>
                 <nav className="site-nav">
                     <span className="nav-pill">A Dark Eye Co. Project</span>
                     <button
@@ -147,7 +147,7 @@ export default function LandingPage() {
             </main>
 
             <footer className="site-footer">
-                <p>(c) 2025 Dragon's Gate Pizza. All rights reserved.</p>
+                <p>(c) 2025 Dragon&apos;s Gate Pizza. All rights reserved.</p>
             </footer>
 
             {showLogin && (

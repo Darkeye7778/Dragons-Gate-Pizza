@@ -1,4 +1,4 @@
-import type { BasePriceTable, PizzaSize } from "@/lib/pricing/types";
+﻿import type { BasePriceTable, PizzaSize } from "@/lib/pricing/types";
 
 export const PIZZA_SIZES: PizzaSize[] = [
     { id: "kids_9", label: 'Kids (9")', inches: 9, sortOrder: 10 },
