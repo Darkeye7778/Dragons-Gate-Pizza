@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
 const DEV_AUTH_KEY = "dgp_dev_auth";
+const PORTFOLIO_PREVIEW_COOKIE = "dgp_portfolio_preview";
 
 const navLinks = [
     { href: "/dev", label: "Home" },
@@ -26,7 +27,10 @@ export default function DevLayout({
     const [checkedAuth, setCheckedAuth] = useState(false);
 
     useEffect(() => {
-        const auth = localStorage.getItem("dgp_dev_auth");
+        const hasPreviewCookie = document.cookie
+            .split(";")
+            .some((cookie) => cookie.trim().startsWith(`${PORTFOLIO_PREVIEW_COOKIE}=`));
+        const auth = localStorage.getItem(DEV_AUTH_KEY) || hasPreviewCookie;
 
         if (!auth) {
             router.replace("/");
@@ -50,6 +54,7 @@ export default function DevLayout({
     const handleLogout = () => {
         if (typeof window !== "undefined") {
             window.localStorage.removeItem(DEV_AUTH_KEY);
+            document.cookie = `${PORTFOLIO_PREVIEW_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
         }
         router.push("/");
     };

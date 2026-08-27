@@ -50,6 +50,7 @@ export type PortfolioProject = {
     workstreams?: ProjectWorkstream[];
     media?: ProjectMedia[];
     github?: string;
+    site?: string;
     demo?: string;
     caseStudy?: string;
     placeholder?: boolean;
@@ -107,7 +108,7 @@ export const projects: PortfolioProject[] = [
         ],
         outcome:
             "I’ve implemented menu data, pricing rules, cart state, validation, and customer-interface foundations. I’m still developing parts of the end-to-end ordering experience, and I do not present any venue-scale concept below as operational.",
-        github: "https://github.com/Darkeye7778/Dragons-Gate-Pizza",
+        site: "https://dragonsgatepizza.com/preview",
         workstreams: [
             {
                 title: "Customer web experience",

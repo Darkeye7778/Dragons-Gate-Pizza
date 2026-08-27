@@ -11,6 +11,7 @@ function StatusBadge({ status }: { status: BadgeStatus }) {
 function ProjectLinks({ project }: { project: PortfolioProject }) {
     const links = [
         project.github && { href: project.github, label: "View on GitHub" },
+        project.site && { href: project.site, label: "View the site" },
         project.demo && { href: project.demo, label: "Open prototype" },
         project.caseStudy && { href: project.caseStudy, label: "Full case study" },
     ].filter((link): link is { href: string; label: string } => Boolean(link));
