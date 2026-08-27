@@ -444,6 +444,44 @@
 .project-category { color: var(--archive-muted); }
 .project-card h3 { margin-top: 0.45rem; font-size: clamp(1.7rem, 4vw, 3.5rem); font-weight: 560; letter-spacing: -0.035em; }
 
+.status-badge--implemented,
+.status-badge--pitch-ready,
+.status-badge--built,
+.status-badge--prototype,
+.status-badge--pitch-prototype {
+    border-color: rgba(121, 214, 195, 0.34);
+    color: var(--archive-cyan);
+    background: var(--archive-cyan-soft);
+}
+
+.status-badge--in-development {
+    border-color: rgba(215, 168, 91, 0.38);
+    color: var(--archive-amber);
+    background: var(--archive-amber-soft);
+}
+
+.status-badge--research,
+.status-badge--planned,
+.status-badge--concept {
+    color: #a6acae;
+    background: rgba(166, 172, 174, 0.06);
+}
+
+.project-status {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    align-items: flex-end;
+}
+
+.project-status-label {
+    color: var(--archive-dim);
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
 .status-badge {
     display: inline-flex;
     align-items: center;

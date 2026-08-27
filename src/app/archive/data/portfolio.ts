@@ -1,9 +1,17 @@
-export type ProjectStatus =
+export type ProjectMaturity =
     | "Built"
     | "Prototype"
+    | "Pitch Prototype"
     | "In Development"
     | "Concept"
     | "Research";
+
+export type WorkstreamStatus =
+    | "Implemented"
+    | "Pitch-Ready"
+    | "In Development"
+    | "Research"
+    | "Planned";
 
 export type ProjectLink = {
     label: string;
@@ -18,7 +26,7 @@ export type ProjectMedia = {
 
 export type ProjectWorkstream = {
     title: string;
-    status: ProjectStatus;
+    status: WorkstreamStatus;
     description: string;
 };
 
@@ -26,7 +34,7 @@ export type PortfolioProject = {
     id: string;
     title: string;
     category: string;
-    status?: ProjectStatus;
+    status?: ProjectMaturity;
     eyebrow?: string;
     summary: string;
     problem?: string;
@@ -96,12 +104,12 @@ export const projects: PortfolioProject[] = [
         workstreams: [
             {
                 title: "Customer web experience",
-                status: "Prototype",
+                status: "In Development",
                 description: "Responsive menu and customer-interface foundations; the full ordering journey remains in development.",
             },
             {
                 title: "Menu & pricing software",
-                status: "Prototype",
+                status: "Implemented",
                 description: "Typed catalog, pricing rules, cart totals, and checkout validation.",
             },
             {
@@ -111,7 +119,7 @@ export const projects: PortfolioProject[] = [
             },
             {
                 title: "BLE runner navigation",
-                status: "Concept",
+                status: "Planned",
                 description: "Indoor-positioning and route-optimization concepts for order delivery.",
             },
             {
@@ -121,7 +129,7 @@ export const projects: PortfolioProject[] = [
             },
             {
                 title: "Interactive venue systems",
-                status: "Concept",
+                status: "Planned",
                 description: "Arcade, tabletop, robotics, and animatronic integration concepts.",
             },
         ],
@@ -130,14 +138,18 @@ export const projects: PortfolioProject[] = [
         id: "just-in-time-training",
         title: "JustInTime Training",
         category: "XR training · Applied AI",
-        status: "Prototype",
+        status: "Pitch Prototype",
         eyebrow: "Integrated system study // 002",
+
         summary:
-            "An Unreal Engine 5.6 nursing-training prototype that connects an interactive IV-pump simulation to locally hosted speech, language-model, text-to-speech, and contextual-media services.",
+            "A pitch-ready Unreal Engine 5.6 nursing-training prototype that connects an interactive IV-pump simulation to locally hosted speech recognition, language-model, text-to-speech, and contextual-media systems.",
+
         problem:
             "Support hands-on equipment training with an assistant that can accept spoken questions and return useful answers, audio, and related training media inside an XR experience.",
+
         approach:
-            "Combine Unreal C++ interaction and audio components with an HTTP/JSON client and a Python FastAPI service for local model inference, speech output, and video search.",
+            "Combine Unreal C++ interaction and audio components with an HTTP/JSON client and a Python FastAPI service for local model inference, speech output, and contextual media.",
+
         technologies: [
             "Unreal Engine 5.6",
             "C++",
@@ -148,34 +160,42 @@ export const projects: PortfolioProject[] = [
             "Text-to-speech",
             "LoRA",
         ],
+    
         outcome:
-            "The repository establishes an integrated prototype path from an Unreal client to local AI and audio services. Retrieval grounding, full simulation-state awareness, and packaging remain in development.",
+            "The project reached its intended final state as a pitch-ready prototype. Core XR interaction, voice, AI, speech, knowledge, and contextual-media systems were completed and integrated to the level required for the final demonstration and pitch. It was developed as a proof-of-concept rather than a production deployment.",
+
         github: "https://github.com/Darkeye7778/JustInTimeTraining",
+
         workstreams: [
             {
                 title: "XR interaction layer",
-                status: "Prototype",
-                description: "Unreal C++ selectors, grabbers, controls, menus, and object-manipulation components.",
+                status: "Pitch-Ready",
+                description:
+                    "Unreal C++ selectors, grabbers, controls, menus, and object-manipulation systems completed for the pitched prototype.",
             },
             {
                 title: "Voice input pipeline",
-                status: "Prototype",
-                description: "Runtime microphone capture and speech-recognition integration for Unreal.",
+                status: "Pitch-Ready",
+                description:
+                    "Runtime microphone capture and speech-recognition integration completed for the final prototype.",
             },
             {
                 title: "Local AI & speech service",
-                status: "Prototype",
-                description: "FastAPI endpoints connect local model inference, speech synthesis, and WAV delivery.",
+                status: "Pitch-Ready",
+                description:
+                    "FastAPI services connected local model inference, speech synthesis, and audio delivery for the pitched system.",
             },
             {
                 title: "Knowledge retrieval",
-                status: "In Development",
-                description: "Curated training data exists; the repository identifies database retrieval as incomplete.",
+                status: "Pitch-Ready",
+                description:
+                    "Training knowledge and response systems were integrated to the level required for the final prototype and pitch.",
             },
             {
                 title: "Contextual training media",
-                status: "In Development",
-                description: "Video transcription and search components exist, with end-to-end XR wiring still evolving.",
+                status: "Pitch-Ready",
+                description:
+                    "Contextual media retrieval and supporting systems were integrated into the completed pitch prototype.",
             },
         ],
     },
@@ -209,7 +229,7 @@ export const projects: PortfolioProject[] = [
         id: "var-vr-interaction",
         title: "VAR — VR Interaction Framework",
         category: "Real-time interaction · Unreal Engine",
-        status: "Prototype",
+        status: "Built",
         eyebrow: "Interaction study // 004",
         summary:
             "A component-driven Unreal Engine C++ framework for manipulating and assembling objects in VR through direct selection, ray-based pointing, grabbing, docking, world movement, and simulated physical controls.",
@@ -231,22 +251,22 @@ export const projects: PortfolioProject[] = [
         workstreams: [
             {
                 title: "Selection systems",
-                status: "Prototype",
+                status: "Implemented",
                 description: "Direct, ray-based, and eye/hand selector components share a common interaction model.",
             },
             {
                 title: "Manipulation",
-                status: "Prototype",
+                status: "Implemented",
                 description: "Grabber and world-grabber components manage object and environment transforms.",
             },
             {
                 title: "Assembly & docking",
-                status: "Prototype",
+                status: "Implemented",
                 description: "Snap, detach, and unsnap-distance logic supports component assembly tasks.",
             },
             {
                 title: "Physical controls",
-                status: "Prototype",
+                status: "Implemented",
                 description: "Reusable dial and slider components model constrained interactive controls.",
             },
         ],
