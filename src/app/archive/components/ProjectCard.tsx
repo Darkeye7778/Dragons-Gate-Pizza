@@ -1,4 +1,5 @@
 import type { PortfolioProject, ProjectMaturity, WorkstreamStatus, } from "../data/portfolio";
+import { ProjectMedia } from "./ProjectMedia";
 
 type BadgeStatus = ProjectMaturity | WorkstreamStatus;
 
@@ -79,6 +80,8 @@ export function ProjectCard({ project, featured = false }: { project: PortfolioP
                     )}
                 </div>
             )}
+
+            <ProjectMedia media={project.media} />
 
             {project.workstreams && project.workstreams.length > 0 && (
                 <div className="workstream-block">

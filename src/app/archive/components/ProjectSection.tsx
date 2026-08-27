@@ -12,7 +12,7 @@ export function ProjectSection() {
                 index="01"
                 eyebrow="Selected work"
                 title="Systems, experiments, and applied engineering."
-                description="Case studies separate shipped work from prototypes, research, and future concepts."
+                description="Case studies separate completed work from prototypes, active development, research, and future concepts."
             />
             <span id="projects-title" className="visually-hidden">Featured projects</span>
             <ProjectCard project={featuredProject} featured />

@@ -25,6 +25,9 @@ export type ProjectMedia = {
     alt: string;
 };
 
+// Store future evidence under public/archive/projects/<project-folder>/ and
+// reference it here with a public path such as /archive/projects/f1/clip.mp4.
+
 export type ProjectWorkstream = {
     title: string;
     status: WorkstreamStatus;
@@ -229,6 +232,33 @@ export const projects: PortfolioProject[] = [
         outcome:
             "The current kernel renders a text console, handles keyboard input and line editing, manages physical pages, exposes heap groundwork, reads an initial filesystem, and runs a simple shell. Filesystem writes and user programs remain planned.",
         github: "https://github.com/Darkeye7778/obsidia-os",
+        workstreams: [
+            {
+                title: "Console & framebuffer",
+                status: "Implemented",
+                description: "Framebuffer rendering supports the kernel's current text-console output.",
+            },
+            {
+                title: "Input & line editing",
+                status: "Implemented",
+                description: "Keyboard handling and line-editing behavior support interactive console input.",
+            },
+            {
+                title: "Memory management",
+                status: "In Development",
+                description: "Physical-page management is working, with heap support still described as groundwork.",
+            },
+            {
+                title: "Initial filesystem",
+                status: "In Development",
+                description: "The kernel reads its initial filesystem; filesystem writes remain planned.",
+            },
+            {
+                title: "Shell environment",
+                status: "Implemented",
+                description: "A simple command shell runs in the current kernel, while user programs remain planned.",
+            },
+        ],
     },
     {
         id: "var-vr-interaction",
@@ -252,7 +282,7 @@ export const projects: PortfolioProject[] = [
             "Spatial transforms",
         ],
         outcome:
-            "The repository contains C++ implementations for eye/hand ray selection, direct selection, grabbing, assembly and docking, world manipulation, dials, and sliders. Deployment and user-test results are not documented.",
+            "Completed as a class project, VAR reached its intended final state as a reusable VR interaction framework demonstrating selection, manipulation, docking, world movement, and simulated physical controls in Unreal Engine.",
         github: "https://github.com/Darkeye7778/VAR",
         workstreams: [
             {
@@ -274,6 +304,102 @@ export const projects: PortfolioProject[] = [
                 title: "Physical controls",
                 status: "Implemented",
                 description: "Reusable dial and slider components model constrained interactive controls.",
+            },
+        ],
+    },
+    {
+        id: "moog-motion-platform",
+        title: "MOOG 6-DOF Motion Platform Integration",
+        category: "Motion systems · Electromechanical integration",
+        status: "In Development",
+        radarLabel: "6DOF",
+        eyebrow: "Motion systems study // 005",
+        summary:
+            "A focused motion-systems case study within a Full Sail University Formula One simulator final project, documenting collaborative restoration and integration work around an industrial six-degree-of-freedom MOOG motion base.",
+        problem:
+            "Bring real-time simulation output, motion-control software, electromechanical hardware, and simulator infrastructure into a coordinated physical motion system.",
+        approach:
+            "Work collaboratively on the simulator's development and restoration, combine Unreal Engine simulation output with the MOOG motion base, and test communication across the simulation, motion-control, display, and projection systems.",
+        technologies: [
+            "MOOG motion systems",
+            "6-DOF motion platform",
+            "Motion control",
+            "Electromechanical systems",
+            "Unreal Engine",
+            "Hardware / software integration",
+            "System calibration",
+            "System testing",
+        ],
+        outcome:
+            "The supplied resume documents this work as ongoing. Current evidence supports hands-on collaboration in motion-base restoration, integration, calibration, and communication testing without implying sole ownership of the platform or a completed deployment.",
+        workstreams: [
+            {
+                title: "Motion-system setup",
+                status: "In Development",
+                description: "Worked with the six-degree-of-freedom MOOG motion base during simulator development and restoration.",
+            },
+            {
+                title: "Calibration & verification",
+                status: "In Development",
+                description: "Supported calibration and verification work associated with the motion system and simulator hardware.",
+            },
+            {
+                title: "Hardware / software integration",
+                status: "In Development",
+                description: "Combined Unreal Engine simulation output with the motion platform as part of the integrated simulator system.",
+            },
+            {
+                title: "Communication testing",
+                status: "In Development",
+                description: "Tested communication among simulation software, motion control, display hardware, and the projection pipeline.",
+            },
+        ],
+    },
+    {
+        id: "f1-vehicle-simulator-system",
+        title: "Formula One Motion-Base Simulator",
+        category: "Vehicle simulation · Real-time systems",
+        status: "In Development",
+        radarLabel: "F1",
+        eyebrow: "Vehicle simulation study // 006",
+        summary:
+            "An ongoing Full Sail University final project combining Unreal Engine vehicle simulation, a six-degree-of-freedom MOOG motion base, three-projector display hardware, and a projection pipeline.",
+        problem:
+            "Coordinate real-time vehicle physics with physical motion and multi-projector visuals so the simulation, control, display, and hardware layers behave as one simulator.",
+        approach:
+            "Collaborate on development and restoration, connect Unreal Engine simulation output to the motion system, and test communication across the motion-control, display, and projection pipeline.",
+        technologies: [
+            "Unreal Engine",
+            "Real-time vehicle simulation",
+            "Simulator hardware",
+            "MOOG motion base",
+            "Three-projector display",
+            "Projection pipeline",
+            "Hardware / software integration",
+            "System testing",
+        ],
+        outcome:
+            "The supplied resume lists the final project as ongoing. Documented work covers collaborative simulator restoration, real-time simulation-to-motion integration, and cross-system communication testing rather than sole authorship of the complete platform.",
+        workstreams: [
+            {
+                title: "Vehicle simulation output",
+                status: "In Development",
+                description: "Unreal Engine simulation output provides the real-time vehicle-physics data used by the integrated simulator.",
+            },
+            {
+                title: "Motion synchronization",
+                status: "In Development",
+                description: "Simulation output is combined with the six-degree-of-freedom motion platform during integration work.",
+            },
+            {
+                title: "Display integration",
+                status: "In Development",
+                description: "The system includes three-projector display hardware and a projection pipeline within the simulator configuration.",
+            },
+            {
+                title: "End-to-end testing",
+                status: "In Development",
+                description: "Communication testing spans simulation software, motion control, display hardware, and projection systems.",
             },
         ],
     },
