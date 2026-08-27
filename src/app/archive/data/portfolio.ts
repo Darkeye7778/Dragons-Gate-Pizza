@@ -308,18 +308,18 @@ export const projects: PortfolioProject[] = [
         ],
     },
     {
-        id: "moog-motion-platform",
-        title: "MOOG 6-DOF Motion Platform Integration",
+        id: "6dof-motion-platform",
+        title: "6-DOF Motion Platform Implementation",
         category: "Motion systems · Electromechanical integration",
         status: "In Development",
         radarLabel: "6DOF",
-        eyebrow: "Motion systems study // 005",
+        eyebrow: "Motion systems study // 003",
         summary:
-            "My motion-systems work is part of a Full Sail University Formula One simulator final project. I’m collaborating on the restoration and integration of an industrial six-degree-of-freedom MOOG motion base.",
+            "My 6-DOF motion-platform work began with a custom Stewart-platform design using six servo-driven actuators, then expanded into hands-on integration and testing with an industrial MOOG motion platform as part of a larger Formula One simulator project.",
         problem:
-            "My work focuses on bringing real-time simulation output, motion-control software, electromechanical hardware, and simulator infrastructure into one coordinated physical motion system.",
+            "I wanted to understand how a six-degree-of-freedom motion platform could translate simulated motion into coordinated physical movement across multiple actuators.",
         approach:
-            "I collaborate on the simulator’s development and restoration, help combine Unreal Engine simulation output with the MOOG motion base, and test communication across the simulation, motion-control, display, and projection systems.",
+            "I started with a simpler six-servo Stewart-platform implementation to explore motion-platform geometry, actuator coordination, and control behavior, then applied that experience while working with the larger MOOG platform used in the Formula One simulator.",
         technologies: [
             "MOOG motion systems",
             "6-DOF motion platform",
@@ -334,24 +334,28 @@ export const projects: PortfolioProject[] = [
             "I’m continuing this work through hands-on motion-base restoration, integration, calibration, and communication testing. This is collaborative work rather than a platform I built alone, and it remains in development.",
         workstreams: [
             {
-                title: "Motion-system setup",
-                status: "In Development",
-                description: "I work with the six-degree-of-freedom MOOG motion base during simulator development and restoration.",
+                title: "Stewart-platform design",
+                status: "Implemented",
+                description:
+                    "I developed a six-actuator Stewart-platform implementation as the initial motion-system design.",
             },
             {
-                title: "Calibration & verification",
-                status: "In Development",
-                description: "I support calibration and verification work for the motion system and simulator hardware.",
+                title: "Actuator coordination",
+                status: "Implemented",
+                description:
+                    "I worked with coordinated servo motion to produce controlled platform movement across six degrees of freedom.",
             },
             {
-                title: "Hardware / software integration",
+                title: "Motion calibration",
                 status: "In Development",
-                description: "I help combine Unreal Engine simulation output with the motion platform as part of the integrated simulator.",
+                description:
+                    "I continued applying calibration and verification techniques as the work transitioned to the larger MOOG motion system.",
             },
             {
-                title: "Communication testing",
+                title: "Industrial platform integration",
                 status: "In Development",
-                description: "I test communication among simulation software, motion control, display hardware, and the projection pipeline.",
+                description:
+                    "I applied the earlier Stewart-platform work while integrating and testing the industrial MOOG platform used in the F1 simulator.",
             },
         ],
     },
