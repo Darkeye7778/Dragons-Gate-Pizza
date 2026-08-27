@@ -321,11 +321,13 @@ export const projects: PortfolioProject[] = [
         approach:
             "I started with a simpler six-servo Stewart-platform implementation to explore motion-platform geometry, actuator coordination, and control behavior, then applied that experience while working with the larger MOOG platform used in the Formula One simulator.",
         technologies: [
-            "MOOG motion systems",
-            "6-DOF motion platform",
+            "Stewart platform",
+            "Servo actuators",
+            "6-DOF motion systems",
             "Motion control",
             "Electromechanical systems",
-            "Unreal Engine",
+            "Actuator coordination",
+            "MOOG motion systems",
             "Hardware / software integration",
             "System calibration",
             "System testing",
@@ -334,7 +336,7 @@ export const projects: PortfolioProject[] = [
             "I’m continuing this work through hands-on motion-base restoration, integration, calibration, and communication testing. This is collaborative work rather than a platform I built alone, and it remains in development.",
         workstreams: [
             {
-                title: "Stewart-platform design",
+                title: "Stewart-platform design & Integration",
                 status: "Implemented",
                 description:
                     "I developed a six-actuator Stewart-platform implementation as the initial motion-system design.",
@@ -414,7 +416,7 @@ export const projects: PortfolioProject[] = [
                 description: "I test communication across the simulation software, motion control, display hardware, and projection systems.",
             },
             {
-                title: "Fabrications & Layup",
+                title: "Fabrication & Composite Layups",
                 status: "In Development",
                 description: "I helped fabricate, paint, and apply carbon fiber and fiberglass to the structure of the F1 Car.",
             },
