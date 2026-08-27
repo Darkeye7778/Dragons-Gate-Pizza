@@ -23,6 +23,7 @@ export type ProjectMedia = {
     type: "image" | "video";
     src: string;
     alt: string;
+    description?: string;
 };
 
 // Store future evidence under public/archive/projects/<project-folder>/ and

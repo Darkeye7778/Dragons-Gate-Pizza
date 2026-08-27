@@ -1,5 +1,5 @@
+import Link from "next/link";
 import type { PortfolioProject, ProjectMaturity, WorkstreamStatus, } from "../data/portfolio";
-import { ProjectMedia } from "./ProjectMedia";
 
 type BadgeStatus = ProjectMaturity | WorkstreamStatus;
 
@@ -30,6 +30,18 @@ function ProjectLinks({ project }: { project: PortfolioProject }) {
                 </a>
             ))}
         </div>
+    );
+}
+
+function ProjectMediaButton({ project }: { project: PortfolioProject }) {
+    if (!project.media?.length) return null;
+
+    return (
+        <Link className="project-media-button" href={`/archive/projects/${project.id}`}>
+            <span>Open media archive</span>
+            <small>{String(project.media.length).padStart(2, "0")} files</small>
+            <span aria-hidden="true">↗</span>
+        </Link>
     );
 }
 
@@ -81,8 +93,6 @@ export function ProjectCard({ project, featured = false }: { project: PortfolioP
                 </div>
             )}
 
-            <ProjectMedia media={project.media} />
-
             {project.workstreams && project.workstreams.length > 0 && (
                 <div className="workstream-block">
                     <div className="workstream-heading">
@@ -118,6 +128,7 @@ export function ProjectCard({ project, featured = false }: { project: PortfolioP
                 )}
             </footer>
 
+            <ProjectMediaButton project={project} />
             <ProjectLinks project={project} />
         </article>
     );

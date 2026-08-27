@@ -8,10 +8,16 @@ const navigation = [
     { href: "#contact", label: "Contact" },
 ];
 
-export function ArchiveHeader() {
+export function ArchiveHeader({ rooted = false }: { rooted?: boolean }) {
+    const brandHref = rooted ? "/archive" : "#top";
+
     return (
         <header className="archive-header">
-            <Link className="archive-brand" href="#top" aria-label="Engineering archive, back to top">
+            <Link
+                className="archive-brand"
+                href={brandHref}
+                aria-label={rooted ? "Engineering archive, back to portfolio" : "Engineering archive, back to top"}
+            >
                 <span className="archive-brand-mark" aria-hidden="true">DE</span>
                 <span>
                     <strong>Engineering Archive</strong>
@@ -21,7 +27,7 @@ export function ArchiveHeader() {
 
             <nav className="archive-nav" aria-label="Portfolio navigation">
                 {navigation.map((item) => (
-                    <Link key={item.href} href={item.href}>
+                    <Link key={item.href} href={rooted ? `/archive${item.href}` : item.href}>
                         {item.label}
                     </Link>
                 ))}
