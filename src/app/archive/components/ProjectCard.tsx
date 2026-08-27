@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { PortfolioProject, ProjectStatus } from "../data/portfolio";
 
 function StatusBadge({ status }: { status: ProjectStatus }) {
@@ -8,7 +7,7 @@ function StatusBadge({ status }: { status: ProjectStatus }) {
 
 function ProjectLinks({ project }: { project: PortfolioProject }) {
     const links = [
-        project.github && { href: project.github, label: "GitHub" },
+        project.github && { href: project.github, label: "View on GitHub" },
         project.demo && { href: project.demo, label: "Open prototype" },
         project.caseStudy && { href: project.caseStudy, label: "Full case study" },
     ].filter((link): link is { href: string; label: string } => Boolean(link));
@@ -18,9 +17,14 @@ function ProjectLinks({ project }: { project: PortfolioProject }) {
     return (
         <div className="project-links">
             {links.map((link) => (
-                <Link key={link.label} href={link.href}>
+                <a
+                    key={link.label}
+                    href={link.href}
+                    target={link.href.startsWith("http") ? "_blank" : undefined}
+                    rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                >
                     {link.label} <span aria-hidden="true">↗</span>
-                </Link>
+                </a>
             ))}
         </div>
     );

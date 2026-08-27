@@ -20,7 +20,12 @@ export function ContactSection() {
             {links.length > 0 ? (
                 <div className="contact-links">
                     {links.map((link) => (
-                        <a key={link.label} href={link.href}>
+                        <a
+                            key={link.label}
+                            href={link.href}
+                            target={link.href.startsWith("http") ? "_blank" : undefined}
+                            rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                        >
                             <span>{link.label}</span><span aria-hidden="true">↗</span>
                         </a>
                     ))}

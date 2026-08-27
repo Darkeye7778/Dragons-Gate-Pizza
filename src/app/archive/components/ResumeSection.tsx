@@ -13,7 +13,7 @@ export function ResumeSection() {
             </div>
             {resumeUrl ? (
                 <Link className="archive-button archive-button--primary" href={resumeUrl} download>
-                    Download resume <span aria-hidden="true">↓</span>
+                    Download resume PDF <span aria-hidden="true">↓</span>
                 </Link>
             ) : (
                 <span className="archive-button archive-button--disabled" aria-disabled="true">

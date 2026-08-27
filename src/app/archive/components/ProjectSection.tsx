@@ -1,9 +1,10 @@
 import { projects } from "../data/portfolio";
 import { ProjectCard } from "./ProjectCard";
+import { PublicRepositoryIndex } from "./PublicRepositoryIndex";
 import { SectionHeading } from "./SectionHeading";
 
 export function ProjectSection() {
-    const [featuredProject, ...projectSlots] = projects;
+    const [featuredProject, ...selectedProjects] = projects;
 
     return (
         <section className="archive-section projects-section" id="projects" aria-labelledby="projects-title">
@@ -15,9 +16,10 @@ export function ProjectSection() {
             />
             <span id="projects-title" className="visually-hidden">Featured projects</span>
             <ProjectCard project={featuredProject} featured />
-            <div className="project-slot-grid">
-                {projectSlots.map((project) => <ProjectCard project={project} key={project.id} />)}
+            <div className="project-case-study-list">
+                {selectedProjects.map((project) => <ProjectCard project={project} key={project.id} />)}
             </div>
+            <PublicRepositoryIndex />
         </section>
     );
 }

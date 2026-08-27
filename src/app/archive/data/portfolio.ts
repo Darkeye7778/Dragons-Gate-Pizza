@@ -54,6 +54,13 @@ export type ContactDetails = {
     otherLinks: ProjectLink[];
 };
 
+export type PublicRepository = {
+    name: string;
+    description: string;
+    technology: string;
+    href: string;
+};
+
 export const profile = {
     name: "Finnagain Larose",
     title: "Simulation Engineer · Robotics · Interactive Systems",
@@ -84,12 +91,13 @@ export const projects: PortfolioProject[] = [
             "Systems architecture",
         ],
         outcome:
-            "Current output includes a working web prototype with menu, pricing, cart, checkout-validation, and customer-interface foundations. No venue-scale concept below is presented as operational.",
+            "Current development includes menu, pricing, cart-state, validation, and customer-interface foundations, while portions of the end-to-end ordering experience remain in development. No venue-scale concept below is presented as operational.",
+        github: "https://github.com/Darkeye7778/Dragons-Gate-Pizza",
         workstreams: [
             {
                 title: "Customer web experience",
                 status: "Prototype",
-                description: "Responsive menu, ordering, and customer-facing interface foundation.",
+                description: "Responsive menu and customer-interface foundations; the full ordering journey remains in development.",
             },
             {
                 title: "Menu & pricing software",
@@ -119,28 +127,146 @@ export const projects: PortfolioProject[] = [
         ],
     },
     {
-        id: "robotics-project",
-        title: "Robotics & Motion Systems",
-        category: "Future case study slot",
-        summary: "Project description coming soon.",
-        technologies: [],
-        placeholder: true,
+        id: "just-in-time-training",
+        title: "JustInTime Training",
+        category: "XR training · Applied AI",
+        status: "Prototype",
+        eyebrow: "Integrated system study // 002",
+        summary:
+            "An Unreal Engine 5.6 nursing-training prototype that connects an interactive IV-pump simulation to locally hosted speech, language-model, text-to-speech, and contextual-media services.",
+        problem:
+            "Support hands-on equipment training with an assistant that can accept spoken questions and return useful answers, audio, and related training media inside an XR experience.",
+        approach:
+            "Combine Unreal C++ interaction and audio components with an HTTP/JSON client and a Python FastAPI service for local model inference, speech output, and video search.",
+        technologies: [
+            "Unreal Engine 5.6",
+            "C++",
+            "Python",
+            "FastAPI",
+            "HTTP / JSON",
+            "Speech recognition",
+            "Text-to-speech",
+            "LoRA",
+        ],
+        outcome:
+            "The repository establishes an integrated prototype path from an Unreal client to local AI and audio services. Retrieval grounding, full simulation-state awareness, and packaging remain in development.",
+        github: "https://github.com/Darkeye7778/JustInTimeTraining",
+        workstreams: [
+            {
+                title: "XR interaction layer",
+                status: "Prototype",
+                description: "Unreal C++ selectors, grabbers, controls, menus, and object-manipulation components.",
+            },
+            {
+                title: "Voice input pipeline",
+                status: "Prototype",
+                description: "Runtime microphone capture and speech-recognition integration for Unreal.",
+            },
+            {
+                title: "Local AI & speech service",
+                status: "Prototype",
+                description: "FastAPI endpoints connect local model inference, speech synthesis, and WAV delivery.",
+            },
+            {
+                title: "Knowledge retrieval",
+                status: "In Development",
+                description: "Curated training data exists; the repository identifies database retrieval as incomplete.",
+            },
+            {
+                title: "Contextual training media",
+                status: "In Development",
+                description: "Video transcription and search components exist, with end-to-end XR wiring still evolving.",
+            },
+        ],
     },
     {
-        id: "embedded-project",
-        title: "Embedded Interaction",
-        category: "Future case study slot",
-        summary: "Project description coming soon.",
-        technologies: [],
-        placeholder: true,
+        id: "obsidia-os",
+        title: "Obsidia OS",
+        category: "Operating systems · Low-level software",
+        status: "In Development",
+        eyebrow: "Systems study // 003",
+        summary:
+            "A freestanding x86 hobby operating-system kernel built in C to explore boot architecture, memory management, device input, graphics, storage, and shell design below the application layer.",
+        problem:
+            "Build a minimal computing environment without a standard library while making low-level hardware and memory behavior observable and testable.",
+        approach:
+            "Use Limine for the boot boundary, then develop modular framebuffer, console, keyboard, line-editor, memory, heap, initrd, and shell subsystems for QEMU-based iteration.",
+        technologies: [
+            "C",
+            "x86",
+            "Limine",
+            "QEMU",
+            "Make",
+            "Framebuffer graphics",
+            "Physical memory management",
+            "Initramfs",
+        ],
+        outcome:
+            "The current kernel renders a text console, handles keyboard input and line editing, manages physical pages, exposes heap groundwork, reads an initial filesystem, and runs a simple shell. Filesystem writes and user programs remain planned.",
+        github: "https://github.com/Darkeye7778/obsidia-os",
     },
     {
-        id: "simulation-project",
-        title: "Real-Time Simulation",
-        category: "Future case study slot",
-        summary: "Project description coming soon.",
-        technologies: [],
-        placeholder: true,
+        id: "var-vr-interaction",
+        title: "VAR — VR Interaction Framework",
+        category: "Real-time interaction · Unreal Engine",
+        status: "Prototype",
+        eyebrow: "Interaction study // 004",
+        summary:
+            "A component-driven Unreal Engine C++ framework for manipulating and assembling objects in VR through direct selection, ray-based pointing, grabbing, docking, world movement, and simulated physical controls.",
+        problem:
+            "Provide a reusable interaction layer for precise selection, object manipulation, assembly tasks, and instrument-like controls inside a real-time VR environment.",
+        approach:
+            "Separate selectors, grabbers, interactable objects, assembly behavior, and controls into focused components that communicate through transforms, collision, and snap-state logic.",
+        technologies: [
+            "Unreal Engine",
+            "C++",
+            "OpenXR",
+            "VR interaction",
+            "Component architecture",
+            "Spatial transforms",
+        ],
+        outcome:
+            "The repository contains C++ implementations for eye/hand ray selection, direct selection, grabbing, assembly and docking, world manipulation, dials, and sliders. Deployment and user-test results are not documented.",
+        github: "https://github.com/Darkeye7778/VAR",
+        workstreams: [
+            {
+                title: "Selection systems",
+                status: "Prototype",
+                description: "Direct, ray-based, and eye/hand selector components share a common interaction model.",
+            },
+            {
+                title: "Manipulation",
+                status: "Prototype",
+                description: "Grabber and world-grabber components manage object and environment transforms.",
+            },
+            {
+                title: "Assembly & docking",
+                status: "Prototype",
+                description: "Snap, detach, and unsnap-distance logic supports component assembly tasks.",
+            },
+            {
+                title: "Physical controls",
+                status: "Prototype",
+                description: "Reusable dial and slider components model constrained interactive controls.",
+            },
+        ],
+    },
+];
+
+export const additionalRepositories: PublicRepository[] = [
+    {
+        name: "Aether Gates",
+        description:
+            "Java/Fabric portal-system prototype with frame discovery, custom portal shapes, tier and color matching, and early same- and cross-dimension link logic.",
+        technology: "Java · Fabric",
+        href: "https://github.com/Darkeye7778/Aether_Gates",
+    },
+    {
+        name: "TheGameP1",
+        description:
+            "Team Unity project featuring procedural level generation, weighted room dressing, level-state management, and custom editor tooling.",
+        technology: "C# · Unity",
+        href: "https://github.com/Darkeye7778/TheGameP1",
     },
 ];
 
@@ -149,27 +275,27 @@ export const skillGroups: SkillGroup[] = [
     {
         title: "Software",
         index: "01",
-        skills: ["TypeScript", "JavaScript", "C++", "Python", "Next.js", "React"],
+        skills: ["C++", "C", "C#", "Python", "Java", "TypeScript", "JavaScript", "Bash", "SQL", "x86 Assembly"],
     },
     {
-        title: "Simulation / Game Technology",
+        title: "Simulation / Real-Time",
         index: "02",
-        skills: ["Unreal Engine", "Real-time simulation", "VR / XR"],
+        skills: ["Unreal Engine 5", "Unity", "Real-time simulation", "VR / XR", "Meta Quest 3"],
     },
     {
         title: "Hardware / Embedded",
         index: "03",
-        skills: ["Microcontrollers", "Sensors", "Electronics", "Embedded systems"],
+        skills: ["Embedded systems", "FreeRTOS", "ESP32", "Raspberry Pi", "GPIO", "I²C"],
     },
     {
         title: "Robotics / Physical Systems",
         index: "04",
-        skills: ["Robotics", "Motion systems", "Navigation", "Human-machine interaction"],
+        skills: ["MOOG motion systems", "Motion control", "Electromechanical systems", "System calibration", "Hardware / software integration", "Human-machine interaction"],
     },
     {
-        title: "Engineering",
+        title: "Engineering / Systems",
         index: "05",
-        skills: ["Systems design", "Prototyping", "Testing", "Integration"],
+        skills: ["Systems design", "Client / server architecture", "REST · MQTT · TCP/IP", "Prototyping", "System testing", "Git"],
     },
 ];
 
@@ -177,22 +303,22 @@ export const about = {
     label: "Working philosophy",
     heading: "Build the whole system, not just the visible layer.",
     paragraphs: [
-        "My work centers on the boundary between digital logic and physical experience: where simulation informs behavior, software coordinates hardware, and an interface becomes part of a larger operating system.",
-        "I’m interested in multidisciplinary engineering problems across robotics, real-time simulation, themed entertainment, and interactive physical systems—especially work that benefits from rapid prototyping, careful integration, and clear communication between disciplines.",
+        "I work across real-time software, XR training, embedded platforms, low-level systems, and electromechanical simulation hardware. The common thread is integration: making software, interfaces, networks, and physical systems behave as one understandable whole.",
+        "I’m drawn to multidisciplinary engineering problems in simulation, robotics, themed entertainment, and interactive physical systems—especially work that benefits from rapid prototyping, methodical testing, and clear communication between disciplines.",
     ],
     focusAreas: [
-        "Simulation engineering",
-        "Robotics & physical computing",
-        "Interactive experience systems",
-        "Multidisciplinary prototyping",
+        "Real-time simulation & XR",
+        "Embedded & low-level systems",
+        "Interactive physical systems",
+        "Systems integration & testing",
     ],
 };
 
-export const resumeUrl: string | null = null;
+export const resumeUrl: string | null = "/Finnagain-LaRose-Resume.pdf";
 
 export const contact: ContactDetails = {
-    email: null,
-    github: null,
-    linkedin: null,
+    email: "finnagainlarose@gmail.com",
+    github: "https://github.com/darkeye7778",
+    linkedin: "https://www.linkedin.com/in/gideon-larose-59284b229/",
     otherLinks: [],
 };
