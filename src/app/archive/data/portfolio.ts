@@ -91,11 +91,11 @@ export const projects: PortfolioProject[] = [
         radarLabel: "DGP",
         eyebrow: "Featured system study // 001",
         summary:
-            "An evolving restaurant and entertainment concept approached as an integrated systems-design challenge—not simply a hospitality brand. The current software is a prototype foundation; venue-scale physical systems remain explicitly labeled as concepts or research.",
+            "I’m developing Dragon’s Gate Pizza as an integrated restaurant and entertainment system—not simply a hospitality brand. I’ve built the current software as a prototype foundation while keeping venue-scale physical systems explicitly labeled as concepts or research.",
         problem:
-            "Bring ordering, operations, navigation, entertainment, and themed physical interactions into one coherent guest and operator experience.",
+            "I’m working to bring ordering, operations, navigation, entertainment, and themed physical interactions into one coherent guest and operator experience.",
         approach:
-            "Develop the digital foundation as modular systems, then evaluate higher-risk venue technologies as distinct prototypes and research tracks before operational deployment.",
+            "I’m building the digital foundation as modular systems, then evaluating higher-risk venue technologies as distinct prototypes and research tracks before any operational deployment.",
         technologies: [
             "Next.js",
             "React",
@@ -105,38 +105,38 @@ export const projects: PortfolioProject[] = [
             "Systems architecture",
         ],
         outcome:
-            "Current development includes menu, pricing, cart-state, validation, and customer-interface foundations, while portions of the end-to-end ordering experience remain in development. No venue-scale concept below is presented as operational.",
+            "I’ve implemented menu data, pricing rules, cart state, validation, and customer-interface foundations. I’m still developing parts of the end-to-end ordering experience, and I do not present any venue-scale concept below as operational.",
         github: "https://github.com/Darkeye7778/Dragons-Gate-Pizza",
         workstreams: [
             {
                 title: "Customer web experience",
                 status: "In Development",
-                description: "Responsive menu and customer-interface foundations; the full ordering journey remains in development.",
+                description: "I’ve built responsive menu and customer-interface foundations and am continuing the full ordering journey.",
             },
             {
                 title: "Menu & pricing software",
                 status: "Implemented",
-                description: "Typed catalog, pricing rules, cart totals, and checkout validation.",
+                description: "I implemented the typed catalog, pricing rules, cart totals, and checkout validation.",
             },
             {
                 title: "Ordering / POS architecture",
                 status: "In Development",
-                description: "System boundaries and workflows for the future operating environment.",
+                description: "I’m defining system boundaries and workflows for the future operating environment.",
             },
             {
                 title: "BLE runner navigation",
                 status: "Planned",
-                description: "Indoor-positioning and route-optimization concepts for order delivery.",
+                description: "I plan to explore indoor positioning and route optimization for order delivery.",
             },
             {
                 title: "Building-wide navigation",
                 status: "Research",
-                description: "Camera-assisted navigation and spatial-system integration exploration.",
+                description: "I’m researching camera-assisted navigation and spatial-system integration.",
             },
             {
                 title: "Interactive venue systems",
                 status: "Planned",
-                description: "Arcade, tabletop, robotics, and animatronic integration concepts.",
+                description: "I’m planning arcade, tabletop, robotics, and animatronic integration concepts.",
             },
         ],
     },
@@ -149,13 +149,13 @@ export const projects: PortfolioProject[] = [
         eyebrow: "Integrated system study // 002",
 
         summary:
-            "A pitch-ready Unreal Engine 5.6 nursing-training prototype that connects an interactive IV-pump simulation to locally hosted speech recognition, language-model, text-to-speech, and contextual-media systems.",
+            "I built a pitch-ready Unreal Engine 5.6 nursing-training prototype that connects an interactive IV-pump simulation to locally hosted speech recognition, language-model, text-to-speech, and contextual-media systems.",
 
         problem:
-            "Support hands-on equipment training with an assistant that can accept spoken questions and return useful answers, audio, and related training media inside an XR experience.",
+            "I set out to support hands-on equipment training with an assistant that accepts spoken questions and returns useful answers, audio, and related training media inside an XR experience.",
 
         approach:
-            "Combine Unreal C++ interaction and audio components with an HTTP/JSON client and a Python FastAPI service for local model inference, speech output, and contextual media.",
+            "I combined Unreal C++ interaction and audio components with an HTTP/JSON client and a Python FastAPI service for local model inference, speech output, and contextual media.",
 
         technologies: [
             "Unreal Engine 5.6",
@@ -169,7 +169,7 @@ export const projects: PortfolioProject[] = [
         ],
     
         outcome:
-            "The project reached its intended final state as a pitch-ready prototype. Core XR interaction, voice, AI, speech, knowledge, and contextual-media systems were completed and integrated to the level required for the final demonstration and pitch. It was developed as a proof-of-concept rather than a production deployment.",
+            "I completed the project as a pitch-ready prototype, integrating its XR interaction, voice, AI, speech, knowledge, and contextual-media systems for the final demonstration and pitch. I built it as a proof of concept rather than a production deployment.",
 
         github: "https://github.com/Darkeye7778/JustInTimeTraining",
 
@@ -178,31 +178,31 @@ export const projects: PortfolioProject[] = [
                 title: "XR interaction layer",
                 status: "Pitch-Ready",
                 description:
-                    "Unreal C++ selectors, grabbers, controls, menus, and object-manipulation systems completed for the pitched prototype.",
+                    "I completed the Unreal C++ selectors, grabbers, controls, menus, and object-manipulation systems used in the pitched prototype.",
             },
             {
                 title: "Voice input pipeline",
                 status: "Pitch-Ready",
                 description:
-                    "Runtime microphone capture and speech-recognition integration completed for the final prototype.",
+                    "I implemented runtime microphone capture and speech-recognition integration for the final prototype.",
             },
             {
                 title: "Local AI & speech service",
                 status: "Pitch-Ready",
                 description:
-                    "FastAPI services connected local model inference, speech synthesis, and audio delivery for the pitched system.",
+                    "I connected local model inference, speech synthesis, and audio delivery through FastAPI services.",
             },
             {
                 title: "Knowledge retrieval",
                 status: "Pitch-Ready",
                 description:
-                    "Training knowledge and response systems were integrated to the level required for the final prototype and pitch.",
+                    "I integrated the training-knowledge and response systems required for the final prototype and pitch.",
             },
             {
                 title: "Contextual training media",
                 status: "Pitch-Ready",
                 description:
-                    "Contextual media retrieval and supporting systems were integrated into the completed pitch prototype.",
+                    "I integrated contextual-media retrieval and its supporting systems into the completed pitch prototype.",
             },
         ],
     },
@@ -214,11 +214,11 @@ export const projects: PortfolioProject[] = [
         radarLabel: "OBSIDIA",
         eyebrow: "Systems study // 003",
         summary:
-            "A freestanding x86 hobby operating-system kernel built in C to explore boot architecture, memory management, device input, graphics, storage, and shell design below the application layer.",
+            "I’m building a freestanding x86 hobby operating-system kernel in C to explore boot architecture, memory management, device input, graphics, storage, and shell design below the application layer.",
         problem:
-            "Build a minimal computing environment without a standard library while making low-level hardware and memory behavior observable and testable.",
+            "I set out to build a minimal computing environment without a standard library while keeping low-level hardware and memory behavior observable and testable.",
         approach:
-            "Use Limine for the boot boundary, then develop modular framebuffer, console, keyboard, line-editor, memory, heap, initrd, and shell subsystems for QEMU-based iteration.",
+            "I use Limine for the boot boundary, then develop modular framebuffer, console, keyboard, line-editor, memory, heap, initrd, and shell subsystems through QEMU-based iteration.",
         technologies: [
             "C",
             "x86",
@@ -230,33 +230,33 @@ export const projects: PortfolioProject[] = [
             "Initramfs",
         ],
         outcome:
-            "The current kernel renders a text console, handles keyboard input and line editing, manages physical pages, exposes heap groundwork, reads an initial filesystem, and runs a simple shell. Filesystem writes and user programs remain planned.",
+            "I’ve implemented a text console, keyboard input, line editing, physical-page management, heap groundwork, initial-filesystem reads, and a simple shell. Filesystem writes and user programs remain planned.",
         github: "https://github.com/Darkeye7778/obsidia-os",
         workstreams: [
             {
                 title: "Console & framebuffer",
                 status: "Implemented",
-                description: "Framebuffer rendering supports the kernel's current text-console output.",
+                description: "I implemented framebuffer rendering for the kernel’s current text-console output.",
             },
             {
                 title: "Input & line editing",
                 status: "Implemented",
-                description: "Keyboard handling and line-editing behavior support interactive console input.",
+                description: "I implemented keyboard handling and line editing for interactive console input.",
             },
             {
                 title: "Memory management",
                 status: "In Development",
-                description: "Physical-page management is working, with heap support still described as groundwork.",
+                description: "I have physical-page management working and am continuing to build out heap support.",
             },
             {
                 title: "Initial filesystem",
                 status: "In Development",
-                description: "The kernel reads its initial filesystem; filesystem writes remain planned.",
+                description: "I implemented reads from the initial filesystem; filesystem writes remain planned.",
             },
             {
                 title: "Shell environment",
                 status: "Implemented",
-                description: "A simple command shell runs in the current kernel, while user programs remain planned.",
+                description: "I built a simple command shell for the current kernel, while user programs remain planned.",
             },
         ],
     },
@@ -268,11 +268,11 @@ export const projects: PortfolioProject[] = [
         radarLabel: "VAR",
         eyebrow: "Interaction study // 004",
         summary:
-            "A component-driven Unreal Engine C++ framework for manipulating and assembling objects in VR through direct selection, ray-based pointing, grabbing, docking, world movement, and simulated physical controls.",
+            "I built a component-driven Unreal Engine C++ framework for manipulating and assembling objects in VR through direct selection, ray-based pointing, grabbing, docking, world movement, and simulated physical controls.",
         problem:
-            "Provide a reusable interaction layer for precise selection, object manipulation, assembly tasks, and instrument-like controls inside a real-time VR environment.",
+            "I wanted a reusable interaction layer for precise selection, object manipulation, assembly tasks, and instrument-like controls inside a real-time VR environment.",
         approach:
-            "Separate selectors, grabbers, interactable objects, assembly behavior, and controls into focused components that communicate through transforms, collision, and snap-state logic.",
+            "I separated selectors, grabbers, interactable objects, assembly behavior, and controls into focused components that communicate through transforms, collision, and snap-state logic.",
         technologies: [
             "Unreal Engine",
             "C++",
@@ -282,28 +282,28 @@ export const projects: PortfolioProject[] = [
             "Spatial transforms",
         ],
         outcome:
-            "Completed as a class project, VAR reached its intended final state as a reusable VR interaction framework demonstrating selection, manipulation, docking, world movement, and simulated physical controls in Unreal Engine.",
+            "I completed VAR as a class project and brought it to its intended final state: a reusable VR interaction framework demonstrating selection, manipulation, docking, world movement, and simulated physical controls in Unreal Engine.",
         github: "https://github.com/Darkeye7778/VAR",
         workstreams: [
             {
                 title: "Selection systems",
                 status: "Implemented",
-                description: "Direct, ray-based, and eye/hand selector components share a common interaction model.",
+                description: "I implemented direct, ray-based, and eye/hand selector components around a common interaction model.",
             },
             {
                 title: "Manipulation",
                 status: "Implemented",
-                description: "Grabber and world-grabber components manage object and environment transforms.",
+                description: "I built grabber and world-grabber components to manage object and environment transforms.",
             },
             {
                 title: "Assembly & docking",
                 status: "Implemented",
-                description: "Snap, detach, and unsnap-distance logic supports component assembly tasks.",
+                description: "I implemented snap, detach, and unsnap-distance logic for component assembly tasks.",
             },
             {
                 title: "Physical controls",
                 status: "Implemented",
-                description: "Reusable dial and slider components model constrained interactive controls.",
+                description: "I built reusable dial and slider components for constrained interactive controls.",
             },
         ],
     },
@@ -315,11 +315,11 @@ export const projects: PortfolioProject[] = [
         radarLabel: "6DOF",
         eyebrow: "Motion systems study // 005",
         summary:
-            "A focused motion-systems case study within a Full Sail University Formula One simulator final project, documenting collaborative restoration and integration work around an industrial six-degree-of-freedom MOOG motion base.",
+            "My motion-systems work is part of a Full Sail University Formula One simulator final project. I’m collaborating on the restoration and integration of an industrial six-degree-of-freedom MOOG motion base.",
         problem:
-            "Bring real-time simulation output, motion-control software, electromechanical hardware, and simulator infrastructure into a coordinated physical motion system.",
+            "My work focuses on bringing real-time simulation output, motion-control software, electromechanical hardware, and simulator infrastructure into one coordinated physical motion system.",
         approach:
-            "Work collaboratively on the simulator's development and restoration, combine Unreal Engine simulation output with the MOOG motion base, and test communication across the simulation, motion-control, display, and projection systems.",
+            "I collaborate on the simulator’s development and restoration, help combine Unreal Engine simulation output with the MOOG motion base, and test communication across the simulation, motion-control, display, and projection systems.",
         technologies: [
             "MOOG motion systems",
             "6-DOF motion platform",
@@ -331,27 +331,27 @@ export const projects: PortfolioProject[] = [
             "System testing",
         ],
         outcome:
-            "The supplied resume documents this work as ongoing. Current evidence supports hands-on collaboration in motion-base restoration, integration, calibration, and communication testing without implying sole ownership of the platform or a completed deployment.",
+            "I’m continuing this work through hands-on motion-base restoration, integration, calibration, and communication testing. This is collaborative work rather than a platform I built alone, and it remains in development.",
         workstreams: [
             {
                 title: "Motion-system setup",
                 status: "In Development",
-                description: "Worked with the six-degree-of-freedom MOOG motion base during simulator development and restoration.",
+                description: "I work with the six-degree-of-freedom MOOG motion base during simulator development and restoration.",
             },
             {
                 title: "Calibration & verification",
                 status: "In Development",
-                description: "Supported calibration and verification work associated with the motion system and simulator hardware.",
+                description: "I support calibration and verification work for the motion system and simulator hardware.",
             },
             {
                 title: "Hardware / software integration",
                 status: "In Development",
-                description: "Combined Unreal Engine simulation output with the motion platform as part of the integrated simulator system.",
+                description: "I help combine Unreal Engine simulation output with the motion platform as part of the integrated simulator.",
             },
             {
                 title: "Communication testing",
                 status: "In Development",
-                description: "Tested communication among simulation software, motion control, display hardware, and the projection pipeline.",
+                description: "I test communication among simulation software, motion control, display hardware, and the projection pipeline.",
             },
         ],
     },
@@ -363,11 +363,11 @@ export const projects: PortfolioProject[] = [
         radarLabel: "F1",
         eyebrow: "Vehicle simulation study // 006",
         summary:
-            "An ongoing Full Sail University final project combining Unreal Engine vehicle simulation, a six-degree-of-freedom MOOG motion base, three-projector display hardware, and a projection pipeline.",
+            "I’m collaborating on a Full Sail University final project that combines Unreal Engine vehicle simulation, a six-degree-of-freedom MOOG motion base, three-projector display hardware, and a projection pipeline.",
         problem:
-            "Coordinate real-time vehicle physics with physical motion and multi-projector visuals so the simulation, control, display, and hardware layers behave as one simulator.",
+            "I’m helping coordinate real-time vehicle physics with physical motion and multi-projector visuals so the simulation, control, display, and hardware layers behave as one simulator.",
         approach:
-            "Collaborate on development and restoration, connect Unreal Engine simulation output to the motion system, and test communication across the motion-control, display, and projection pipeline.",
+            "I work on development and restoration, help connect Unreal Engine simulation output to the motion system, and test communication across the motion-control, display, and projection pipeline.",
         technologies: [
             "Unreal Engine",
             "Real-time vehicle simulation",
@@ -379,27 +379,27 @@ export const projects: PortfolioProject[] = [
             "System testing",
         ],
         outcome:
-            "The supplied resume lists the final project as ongoing. Documented work covers collaborative simulator restoration, real-time simulation-to-motion integration, and cross-system communication testing rather than sole authorship of the complete platform.",
+            "My work so far includes collaborative simulator restoration, real-time simulation-to-motion integration, and cross-system communication testing. It remains an ongoing team project, not a complete platform I claim as my own.",
         workstreams: [
             {
                 title: "Vehicle simulation output",
                 status: "In Development",
-                description: "Unreal Engine simulation output provides the real-time vehicle-physics data used by the integrated simulator.",
+                description: "I work with Unreal Engine output that provides real-time vehicle-physics data to the integrated simulator.",
             },
             {
                 title: "Motion synchronization",
                 status: "In Development",
-                description: "Simulation output is combined with the six-degree-of-freedom motion platform during integration work.",
+                description: "I help synchronize simulation output with the six-degree-of-freedom motion platform during integration.",
             },
             {
                 title: "Display integration",
                 status: "In Development",
-                description: "The system includes three-projector display hardware and a projection pipeline within the simulator configuration.",
+                description: "I work with the three-projector display hardware and projection pipeline in the simulator configuration.",
             },
             {
                 title: "End-to-end testing",
                 status: "In Development",
-                description: "Communication testing spans simulation software, motion control, display hardware, and projection systems.",
+                description: "I test communication across the simulation software, motion control, display hardware, and projection systems.",
             },
         ],
     },
