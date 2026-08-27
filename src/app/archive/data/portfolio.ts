@@ -36,6 +36,7 @@ export type PortfolioProject = {
     title: string;
     category: string;
     status?: ProjectMaturity;
+    radarLabel?: string;
     eyebrow?: string;
     summary: string;
     problem?: string;
@@ -84,6 +85,7 @@ export const projects: PortfolioProject[] = [
         title: "Dragon’s Gate Pizza",
         category: "Interactive systems · Venture platform",
         status: "In Development",
+        radarLabel: "DGP",
         eyebrow: "Featured system study // 001",
         summary:
             "An evolving restaurant and entertainment concept approached as an integrated systems-design challenge—not simply a hospitality brand. The current software is a prototype foundation; venue-scale physical systems remain explicitly labeled as concepts or research.",
@@ -140,6 +142,7 @@ export const projects: PortfolioProject[] = [
         title: "JustInTime Training",
         category: "XR training · Applied AI",
         status: "Pitch Prototype",
+        radarLabel: "JIT",
         eyebrow: "Integrated system study // 002",
 
         summary:
@@ -205,6 +208,7 @@ export const projects: PortfolioProject[] = [
         title: "Obsidia OS",
         category: "Operating systems · Low-level software",
         status: "In Development",
+        radarLabel: "OBSIDIA",
         eyebrow: "Systems study // 003",
         summary:
             "A freestanding x86 hobby operating-system kernel built in C to explore boot architecture, memory management, device input, graphics, storage, and shell design below the application layer.",
@@ -231,6 +235,7 @@ export const projects: PortfolioProject[] = [
         title: "VAR — VR Interaction Framework",
         category: "Real-time interaction · Unreal Engine",
         status: "Built",
+        radarLabel: "VAR",
         eyebrow: "Interaction study // 004",
         summary:
             "A component-driven Unreal Engine C++ framework for manipulating and assembling objects in VR through direct selection, ray-based pointing, grabbing, docking, world movement, and simulated physical controls.",

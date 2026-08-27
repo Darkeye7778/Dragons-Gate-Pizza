@@ -35,7 +35,7 @@ function ProjectLinks({ project }: { project: PortfolioProject }) {
 export function ProjectCard({ project, featured = false }: { project: PortfolioProject; featured?: boolean }) {
     if (project.placeholder) {
         return (
-            <article className="project-card project-card--placeholder">
+            <article id={`project-${project.id}`} className="project-card project-card--placeholder">
                 <div className="placeholder-index" aria-hidden="true">+</div>
                 <p className="project-category">{project.category}</p>
                 <h3>{project.title}</h3>
@@ -46,7 +46,7 @@ export function ProjectCard({ project, featured = false }: { project: PortfolioP
     }
 
     return (
-        <article className={`project-card${featured ? " project-card--featured" : ""}`}>
+        <article id={`project-${project.id}`} className={`project-card${featured ? " project-card--featured" : ""}`}>
             <header className="project-card-header">
                 <div>
                     {project.eyebrow && <p className="project-eyebrow">{project.eyebrow}</p>}

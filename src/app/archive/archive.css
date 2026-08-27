@@ -281,6 +281,7 @@
     width: min(29vw, 350px);
     min-width: 270px;
     aspect-ratio: 1;
+    isolation: isolate;
 }
 
 .instrument-orbit,
@@ -293,31 +294,6 @@
     inset: 0;
     border: 1px solid rgba(121, 214, 195, 0.27);
     border-radius: 50%;
-}
-
-.instrument-orbit--outer::before,
-.instrument-orbit--outer::after {
-    position: absolute;
-    border: 1px solid var(--archive-amber);
-    border-radius: 50%;
-    content: "";
-}
-
-.instrument-orbit--outer::before {
-    top: 14%;
-    right: 5%;
-    width: 9px;
-    height: 9px;
-    background: var(--archive-bg);
-    box-shadow: 0 0 18px rgba(215, 168, 91, 0.6);
-}
-
-.instrument-orbit--outer::after {
-    right: 22%;
-    bottom: 3%;
-    width: 5px;
-    height: 5px;
-    background: var(--archive-amber);
 }
 
 .instrument-orbit--inner {
@@ -353,6 +329,134 @@
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
     font-size: 1rem;
     letter-spacing: 0.18em;
+}
+
+.radar-link-indicator {
+    position: absolute;
+    z-index: 5;
+    top: 10%;
+    right: 1%;
+    display: flex;
+    gap: 0.35rem;
+    align-items: center;
+    color: var(--archive-amber);
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.radar-link-indicator-dot {
+    font-size: 0.8rem;
+    line-height: 1;
+    text-shadow: 0 0 12px rgba(215, 168, 91, 0.52);
+}
+
+.hero-instrument:has(.radar-contact:hover, .radar-contact:focus-visible) .radar-link-indicator-dot {
+    font-size: 0;
+}
+
+.hero-instrument:has(.radar-contact:hover, .radar-contact:focus-visible) .radar-link-indicator-dot::before {
+    font-size: 0.8rem;
+    content: "●";
+}
+
+.archive-shell .radar-contact {
+    position: absolute;
+    z-index: 4;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--archive-cyan);
+    translate: -50% -50%;
+}
+
+.radar-contact-body {
+    position: absolute;
+    inset: 0;
+    animation: radar-contact-float var(--radar-float-duration) ease-in-out var(--radar-float-delay) infinite alternate;
+}
+
+.radar-contact-target {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+}
+
+.radar-contact-dot {
+    width: 7px;
+    height: 7px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    background: var(--archive-bg);
+    box-shadow: 0 0 12px rgba(121, 214, 195, 0.58);
+    transition: background 160ms ease, box-shadow 160ms ease, scale 160ms ease;
+}
+
+.radar-contact-label {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    gap: 0.12rem;
+    min-width: max-content;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    line-height: 1.1;
+    pointer-events: auto;
+    text-transform: uppercase;
+    transform: translateY(-50%);
+}
+
+.radar-contact-label strong {
+    font-size: 0.56rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+}
+
+.radar-contact-label small {
+    color: var(--archive-muted);
+    font-size: 0.43rem;
+    letter-spacing: 0.05em;
+}
+
+.radar-contact--left .radar-contact-label {
+    left: calc(50% + 9px);
+    justify-items: start;
+    text-align: left;
+}
+
+.radar-contact--right .radar-contact-label {
+    right: calc(50% + 9px);
+    justify-items: end;
+    text-align: right;
+}
+
+.radar-contact--top .radar-contact-label {
+    top: calc(50% + 6px);
+    transform: none;
+}
+
+.radar-contact--bottom .radar-contact-label {
+    top: auto;
+    bottom: calc(50% + 6px);
+    transform: none;
+}
+
+.radar-contact:hover .radar-contact-dot,
+.radar-contact:focus-visible .radar-contact-dot {
+    background: var(--archive-cyan);
+    box-shadow: 0 0 18px rgba(121, 214, 195, 0.82);
+    scale: 1.35;
+}
+
+.radar-contact:focus-visible {
+    outline: 1px solid var(--archive-cyan);
+    outline-offset: 2px;
+}
+
+@keyframes radar-contact-float {
+    from { transform: translate(0, 0); }
+    to { transform: translate(var(--radar-float-x), var(--radar-float-y)); }
 }
 
 .instrument-label {
@@ -426,6 +530,7 @@
 }
 
 .project-card {
+    scroll-margin-top: 6rem;
     border: 1px solid var(--archive-line);
     background: linear-gradient(145deg, rgba(19, 25, 27, 0.91), rgba(10, 13, 15, 0.91));
 }
@@ -705,6 +810,9 @@
     .archive-hero { padding-block: 4.5rem 3rem; }
     .archive-hero h1 { font-size: clamp(3.25rem, 18vw, 5rem); }
     .hero-instrument { width: 230px; min-width: 230px; }
+    .radar-contact-label strong { font-size: 0.5rem; }
+    .radar-contact-label small { display: none; }
+    .radar-link-indicator { top: 8%; right: -1%; font-size: 0.46rem; }
     .hero-index { grid-template-columns: 1fr; }
     .hero-index div { border-right: 0; border-bottom: 1px solid var(--archive-line); }
     .hero-index div:nth-child(3) { border-bottom: 1px solid var(--archive-line); }
@@ -732,7 +840,9 @@
 
 @media (prefers-reduced-motion: reduce) {
     .archive-shell { scroll-behavior: auto; }
-    .instrument-orbit--inner { animation: none; }
+    .instrument-orbit--inner,
+    .radar-contact-body { animation: none; }
     .archive-nav a::after,
-    .archive-button { transition: none; }
+    .archive-button,
+    .radar-contact-dot { transition: none; }
 }
