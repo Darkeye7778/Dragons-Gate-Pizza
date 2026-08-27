@@ -149,10 +149,10 @@ export const projects: PortfolioProject[] = [
         eyebrow: "Integrated system study // 002",
 
         summary:
-            "I built a pitch-ready Unreal Engine 5.6 nursing-training prototype that connects an interactive IV-pump simulation to locally hosted speech recognition, language-model, text-to-speech, and contextual-media systems.",
+            "The team and I built a pitch-ready Unreal Engine 5.6 nursing-training prototype that connects an interactive IV-pump simulation to locally hosted speech recognition, language-model, text-to-speech, and contextual-media systems.",
 
         problem:
-            "I set out to support hands-on equipment training with an assistant that accepts spoken questions and returns useful answers, audio, and related training media inside an XR experience.",
+            "We set out to support hands-on equipment training with an assistant that accepts spoken questions and returns useful answers, audio, and related training media inside an XR experience.",
 
         approach:
             "I combined Unreal C++ interaction and audio components with an HTTP/JSON client and a Python FastAPI service for local model inference, speech output, and contextual media.",
@@ -169,7 +169,7 @@ export const projects: PortfolioProject[] = [
         ],
     
         outcome:
-            "I completed the project as a pitch-ready prototype, integrating its XR interaction, voice, AI, speech, knowledge, and contextual-media systems for the final demonstration and pitch. I built it as a proof of concept rather than a production deployment.",
+            "We completed the project as a pitch-ready prototype, integrating its XR interaction, voice, AI, speech, knowledge, and contextual-media systems for the final demonstration and pitch. We built it as a proof of concept rather than a production deployment, meant to show what advent health could do with current technologies.",
 
         github: "https://github.com/Darkeye7778/JustInTimeTraining",
 
@@ -178,7 +178,7 @@ export const projects: PortfolioProject[] = [
                 title: "XR interaction layer",
                 status: "Pitch-Ready",
                 description:
-                    "I completed the Unreal C++ selectors, grabbers, controls, menus, and object-manipulation systems used in the pitched prototype.",
+                    "We completed the Unreal C++ selectors, grabbers, controls, menus, and object-manipulation systems used in the pitched prototype.",
             },
             {
                 title: "Voice input pipeline",
@@ -202,7 +202,7 @@ export const projects: PortfolioProject[] = [
                 title: "Contextual training media",
                 status: "Pitch-Ready",
                 description:
-                    "I integrated contextual-media retrieval and its supporting systems into the completed pitch prototype.",
+                    "I aided in integrating contextual-media retrieval and its supporting systems into the completed pitch prototype.",
             },
         ],
     },
@@ -377,6 +377,14 @@ export const projects: PortfolioProject[] = [
             "Projection pipeline",
             "Hardware / software integration",
             "System testing",
+            "Composite fabrication",
+            "Carbon-fiber layup",
+            "Fiberglass layup",
+            "Surface preparation",
+            "Paint & finishing",
+            "Bodywork fabrication",
+            "Composite tooling",
+            "Mold preparation",
         ],
         outcome:
             "My work so far includes collaborative simulator restoration, real-time simulation-to-motion integration, and cross-system communication testing. It remains an ongoing team project, not a complete platform I claim as my own.",
@@ -400,6 +408,11 @@ export const projects: PortfolioProject[] = [
                 title: "End-to-end testing",
                 status: "In Development",
                 description: "I test communication across the simulation software, motion control, display hardware, and projection systems.",
+            },
+            {
+                title: "Fabrications & Layup",
+                status: "In Development",
+                description: "I helped fabricate, paint, and apply carbon fiber and fiberglass to the structure of the F1 Car.",
             },
         ],
     },
