@@ -1,5 +1,6 @@
 export type ProjectMaturity =
     | "Built"
+    | "Deployed"
     | "Prototype"
     | "Pitch Prototype"
     | "In Development"

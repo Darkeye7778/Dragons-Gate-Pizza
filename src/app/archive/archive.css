@@ -447,6 +447,7 @@
 .status-badge--implemented,
 .status-badge--pitch-ready,
 .status-badge--built,
+.status-badge--deployed,
 .status-badge--prototype,
 .status-badge--pitch-prototype {
     border-color: rgba(121, 214, 195, 0.34);
