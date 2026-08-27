@@ -335,20 +335,20 @@
 .radar-link-indicator {
     position: absolute;
     z-index: 5;
-    top: 10%;
-    right: 1%;
+    top: 7%;
+    right: -8%;
     display: flex;
     gap: 0.35rem;
     align-items: center;
     color: var(--archive-amber);
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-    font-size: 0.52rem;
+    font-size: 0.62rem;
     letter-spacing: 0.09em;
     text-transform: uppercase;
 }
 
 .radar-link-indicator-dot {
-    font-size: 0.8rem;
+    font-size: 0.92rem;
     line-height: 1;
     text-shadow: 0 0 12px rgba(215, 168, 91, 0.52);
 }
@@ -358,7 +358,7 @@
 }
 
 .hero-instrument:has(.radar-contact:hover, .radar-contact:focus-visible) .radar-link-indicator-dot::before {
-    font-size: 0.8rem;
+    font-size: 0.92rem;
     content: "●";
 }
 
@@ -473,7 +473,6 @@
 }
 
 .instrument-label--top { top: 8%; left: -2%; }
-.instrument-label--bottom { right: -3%; bottom: 8%; }
 
 .hero-index {
     display: grid;
@@ -817,7 +816,7 @@
     .hero-instrument { width: 230px; min-width: 230px; }
     .radar-contact-label strong { font-size: 0.5rem; }
     .radar-contact-label small { display: none; }
-    .radar-link-indicator { top: 8%; right: -1%; font-size: 0.46rem; }
+    .radar-link-indicator { top: 6%; right: -10%; font-size: 0.52rem; }
     .hero-index { grid-template-columns: 1fr; }
     .hero-index div { border-right: 0; border-bottom: 1px solid var(--archive-line); }
     .hero-index div:nth-child(3) { border-bottom: 1px solid var(--archive-line); }

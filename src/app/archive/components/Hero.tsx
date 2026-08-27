@@ -103,8 +103,7 @@ export function Hero() {
                 <div className="instrument-axis instrument-axis--x" aria-hidden="true" />
                 <div className="instrument-axis instrument-axis--y" aria-hidden="true" />
                 <div className="instrument-core" aria-hidden="true">FL</div>
-                <span className="instrument-label instrument-label--top" aria-hidden="true">SYS.ARCHIVE</span>
-                <span className="instrument-label instrument-label--bottom" aria-hidden="true">
+                <span className="instrument-label instrument-label--top" aria-hidden="true">
                     SYS.ARCHIVE / {String(radarProjects.length).padStart(2, "0")}
                 </span>
                 <div className="radar-link-indicator" aria-hidden="true">
