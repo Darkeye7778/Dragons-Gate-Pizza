@@ -313,7 +313,7 @@ export const projects: PortfolioProject[] = [
         category: "Motion systems · Electromechanical integration",
         status: "In Development",
         radarLabel: "6DOF",
-        eyebrow: "Motion systems study // 003",
+        eyebrow: "Motion systems study // 005",
         summary:
             "My 6-DOF motion-platform work began with a custom Stewart-platform design using six servo-driven actuators, then expanded into hands-on integration and testing with an industrial MOOG motion platform as part of a larger Formula One simulator project.",
         problem:
