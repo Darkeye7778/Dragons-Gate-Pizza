@@ -1,6 +1,10 @@
-import type { PortfolioProject, ProjectStatus } from "../data/portfolio";
+import type {
+    PortfolioProject,
+    ProjectMaturity,
+    WorkstreamStatus,
+} from "../data/portfolio";
 
-function StatusBadge({ status }: { status: ProjectStatus }) {
+function StatusBadge({ status }: { status: ProjectMaturity | WorkstreamStatus }) {
     const className = `status-badge status-badge--${status.toLowerCase().replaceAll(" ", "-")}`;
     return <span className={className}>{status}</span>;
 }
@@ -51,7 +55,12 @@ export function ProjectCard({ project, featured = false }: { project: PortfolioP
                     <p className="project-category">{project.category}</p>
                     <h3>{project.title}</h3>
                 </div>
-                {project.status && <StatusBadge status={project.status} />}
+                {project.status && (
+                    <div className="project-maturity">
+                        <span>Project maturity</span>
+                        <StatusBadge status={project.status} />
+                    </div>
+                )}
             </header>
 
             <p className="project-summary">{project.summary}</p>
@@ -77,7 +86,7 @@ export function ProjectCard({ project, featured = false }: { project: PortfolioP
                 <div className="workstream-block">
                     <div className="workstream-heading">
                         <h4>System workstreams</h4>
-                        <span>Maturity at a glance</span>
+                        <span>Completion at a glance</span>
                     </div>
                     <div className="workstream-grid">
                         {project.workstreams.map((workstream) => (
