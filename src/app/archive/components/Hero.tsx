@@ -44,12 +44,6 @@ function seededUnit(projectId: string, channel: string) {
     return hashProjectId(`${projectId}:${channel}`) / 0xffffffff;
 }
 
-function signedMagnitude(projectId: string, channel: string) {
-    const magnitude = 3 + seededUnit(projectId, `${channel}-magnitude`) * 5;
-    const direction = seededUnit(projectId, `${channel}-direction`) > 0.5 ? 1 : -1;
-    return magnitude * direction;
-}
-
 function getRadarPlacement(project: RadarProject) {
     const rawAngle = seededUnit(project.id, "angle") * 360;
     const nearestAxis = Math.round(rawAngle / 90) * 90;
@@ -62,6 +56,8 @@ function getRadarPlacement(project: RadarProject) {
     const radians = (angle * Math.PI) / 180;
     const x = 50 + Math.cos(radians) * radius;
     const y = 50 + Math.sin(radians) * radius;
+    const horizontalDrift = (seededUnit(project.id, "float-x") - 0.5) * 3;
+    const upwardFloat = -(3 + seededUnit(project.id, "float-y") * 2.5);
 
     return {
         labelSide: x >= 50 ? "right" : "left",
@@ -69,8 +65,8 @@ function getRadarPlacement(project: RadarProject) {
         style: {
             left: `${x.toFixed(3)}%`,
             top: `${y.toFixed(3)}%`,
-            "--radar-float-x": `${signedMagnitude(project.id, "float-x").toFixed(2)}px`,
-            "--radar-float-y": `${signedMagnitude(project.id, "float-y").toFixed(2)}px`,
+            "--radar-float-x": `${horizontalDrift.toFixed(2)}px`,
+            "--radar-float-y": `${upwardFloat.toFixed(2)}px`,
             "--radar-float-duration": `${(5 + seededUnit(project.id, "duration") * 4).toFixed(2)}s`,
             "--radar-float-delay": `-${(seededUnit(project.id, "delay") * 9).toFixed(2)}s`,
         } satisfies RadarContactStyle,
