@@ -390,7 +390,7 @@
     border: 1px solid currentColor;
     border-radius: 50%;
     background: var(--archive-bg);
-    box-shadow: 0 0 12px rgba(121, 214, 195, 0.58);
+    box-shadow: 0 0 12px rgba(125, 204, 80)
     transform: translateY(0) scale(1);
     transition:
         background 180ms ease,
@@ -449,7 +449,7 @@
 .radar-contact:hover .radar-contact-dot,
 .radar-contact:focus-visible .radar-contact-dot {
     background: var(--archive-cyan);
-    box-shadow: 0 0 18px rgba(121, 214, 195, 0.82);
+    box-shadow: 0 0 18px rgba(125, 204, 80)
     transform: translateY(-4px) scale(1.65);
 }
 
