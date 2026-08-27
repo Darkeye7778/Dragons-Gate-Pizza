@@ -56,8 +56,8 @@ export function ProjectCard({ project, featured = false }: { project: PortfolioP
                     <h3>{project.title}</h3>
                 </div>
                 {project.status && (
-                    <div className="project-maturity">
-                        <span>Project maturity</span>
+                    <div>
+                        <p className="project-category">Project maturity</p>
                         <StatusBadge status={project.status} />
                     </div>
                 )}
