@@ -11,7 +11,7 @@ const navLinks = [
     { href: "/dev", label: "Home" },
     { href: "/dev/order", label: "Order Ahead" },
     { href: "/dev/menu", label: "Menu" },
-    { href: "/dev/franchise", label: "Franchise" },
+    { href: "/dev/expansion", label: "Expansion" },
     { href: "/dev/careers", label: "Join Our Team" },
     { href: "/dev/about", label: "About Us" },
     { href: "/dev/contact", label: "Contact Us" },
@@ -63,7 +63,7 @@ export default function DevLayout({
         <div className="dev-root">
             <header className="dev-header">
                 <div className="dev-logo">Dragon&apos;s Gate Pizza</div>
-                <nav className="dev-nav">
+                <nav className="dev-nav" aria-label="Development site navigation">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
@@ -85,7 +85,7 @@ export default function DevLayout({
             <main className="dev-main">{children}</main>
 
             <footer className="dev-footer">
-                <p>(c) 2025 Dragon&apos;s Gate Pizza. Internal build.</p>
+                <p>Dragon&apos;s Gate Pizza · Development build</p>
             </footer>
         </div>
     );

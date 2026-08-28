@@ -29,14 +29,14 @@ export default function DevDashboardPage() {
                     <p>Hiring content, job listings, application structure.</p>
                 </Link>
 
-                <Link className="dev-card" href="/dev/franchise">
-                    <h2>Franchise</h2>
-                    <p>Requirements, fees, and application forms.</p>
+                <Link className="dev-card" href="/dev/expansion">
+                    <h2>Expansion</h2>
+                    <p>Future markets, operator model, and location strategy.</p>
                 </Link>
 
                 <Link className="dev-card" href="/dev/about">
                     <h2>About</h2>
-                    <p>The story, world, and animatronics behind DGP.</p>
+                    <p>The purpose, third-place philosophy, world, and technology vision behind DGP.</p>
                 </Link>
 
                 <Link className="dev-card" href="/dev/contact">
