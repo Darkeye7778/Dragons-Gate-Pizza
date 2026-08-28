@@ -7,7 +7,7 @@ const marketSignals = [
 
 export default function ExpansionPage() {
     return (
-        <div className="dev-content-page">
+        <div className="dev-content-page dev-expansion-page">
             <header className="dev-content-hero">
                 <span className="dev-section-kicker">Expansion &amp; operators</span>
                 <h1 className="dev-section-title">Bring the Gate to Your City</h1>

@@ -10,7 +10,7 @@ const roleFamilies = [
 
 export default function JoinOurTeamPage() {
     return (
-        <div className="dev-content-page">
+        <div className="dev-content-page dev-careers-page">
             <header className="dev-content-hero">
                 <span className="dev-section-kicker">Careers</span>
                 <h1 className="dev-section-title">Join the Party</h1>

@@ -30,7 +30,7 @@ export default function DevHomePage() {
                 </div>
             </section>
 
-            <section className="dev-section section-warm">
+            <section className="dev-section section-warm dev-pizza-section">
                 <span className="dev-section-kicker">Hand stretched. Never pressed.</span>
                 <h2 className="dev-section-title">Our Pizza</h2>
                 <p className="dev-section-intro">
@@ -38,7 +38,7 @@ export default function DevHomePage() {
                     high-heat hearth-style baking, flexible builds, and prices meant to keep a
                     shared meal within reach.
                 </p>
-                <div className="dev-feature-grid">
+                <div className="dev-feature-grid dev-pizza-grid">
                     <div className="dev-feature-card"><h3>Signature Pies</h3><p>Distinct recipes with fantasy names and combinations that still make sense at the table.</p></div>
                     <div className="dev-feature-card"><h3>Build Your Own</h3><p>Choose a size, crust, sauce, cheese, toppings, and finishing drizzle in the current ordering prototype.</p></div>
                     <div className="dev-feature-card"><h3>Pizza Pockets</h3><p>A compact, portable part of the developing food lineup.</p></div>
@@ -46,7 +46,7 @@ export default function DevHomePage() {
                 </div>
             </section>
 
-            <section className="dev-section section-neon">
+            <section className="dev-section section-neon dev-arcade-section">
                 <span className="dev-section-kicker">Planned venue experience</span>
                 <h2 className="dev-section-title">Arcades &amp; Games</h2>
                 <p className="dev-section-intro">
@@ -65,12 +65,11 @@ export default function DevHomePage() {
                     </div>
                     <div className="dev-split-visual">
                         <div className="dev-adventure-directory" aria-label="Planned entertainment categories">
-                            <div className="dev-directory-heading"><span>Adventure directory</span><small>Systems in development</small></div>
+                            <div className="dev-directory-heading"><span>Choose your adventure</span><small>Planned experiences for the future full venue</small></div>
                             {entertainmentSystems.map((system) => (
                                 <div className="dev-directory-row" key={system.code}>
                                     <span className="dev-directory-code">{system.code}</span>
                                     <div><strong>{system.title}</strong><p>{system.description}</p></div>
-                                    <span className="dev-directory-status">Planned</span>
                                 </div>
                             ))}
                         </div>
@@ -78,7 +77,7 @@ export default function DevHomePage() {
                 </div>
             </section>
 
-            <section className="dev-section section-warm">
+            <section className="dev-section dev-third-place-section">
                 <span className="dev-section-kicker">A place for every party</span>
                 <h2 className="dev-section-title">Your table. Your game. Your place.</h2>
                 <p className="dev-section-intro">
@@ -86,7 +85,7 @@ export default function DevHomePage() {
                     home, work, or school where people can meet, eat, play, study when the setting
                     allows, run a campaign, or simply spend time together.
                 </p>
-                <div className="dev-feature-grid">
+                <div className="dev-feature-grid dev-third-place-points">
                     <div className="dev-feature-card"><h3>Meet Your People</h3><p>Bring friends, family, a study partner, or an entire adventuring party.</p></div>
                     <div className="dev-feature-card"><h3>Stay for More Than a Meal</h3><p>The goal is a welcoming place to spend time—not a room designed to rush every table back out the door.</p></div>
                     <div className="dev-feature-card"><h3>Choose Your Pace</h3><p>Play a cabinet, start a tabletop session, share pizza, or just catch up.</p></div>
@@ -94,7 +93,7 @@ export default function DevHomePage() {
                 </div>
             </section>
 
-            <section className="dev-section section-warm">
+            <section className="dev-section dev-lore-section">
                 <span className="dev-section-kicker">The world around the restaurant</span>
                 <h2 className="dev-section-title">Welcome to the Gate</h2>
                 <p className="dev-section-intro">
@@ -110,7 +109,7 @@ export default function DevHomePage() {
                 </div>
             </section>
 
-            <section className="dev-section section-warm">
+            <section className="dev-section dev-building-section">
                 <span className="dev-section-kicker">Building the first Gate</span>
                 <h2 className="dev-section-title">From Prototype to Place</h2>
                 <p className="dev-section-intro">
@@ -118,7 +117,7 @@ export default function DevHomePage() {
                     full physical location remains in the planning stage. No opening date or site
                     has been announced.
                 </p>
-                <div className="dev-visit-grid">
+                <div className="dev-visit-grid dev-gate-facts">
                     <div className="visit-card"><h3>First Market</h3><p>Central Florida is currently a target market for the first full venue.</p></div>
                     <div className="visit-card"><h3>Venue Format</h3><p>Pizza, arcade and tabletop play, themed entertainment, and social seating.</p></div>
                     <div className="visit-card"><h3>Current Status</h3><p>Business concept, menu, ordering software, and venue systems development.</p></div>
@@ -126,8 +125,8 @@ export default function DevHomePage() {
                 <Link href="/dev/about" className="dev-visit-btn">Learn why DGP is being built</Link>
             </section>
 
-            <section className="dev-section section-neon">
-                <div className="dev-section-arcade-layout">
+            <section className="dev-section dev-closing-section">
+                <div className="dev-section-arcade-layout dev-closing-paths">
                     <div className="dev-split-text">
                         <h3 className="dev-subheading">Grow With the Gate</h3>
                         <p>Future teams will span hospitality, kitchens, attractions, tabletop experiences, operations, and interactive technology. There are no public venue openings yet, but the working principles are already taking shape.</p>

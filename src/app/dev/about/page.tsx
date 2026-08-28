@@ -1,6 +1,6 @@
 export default function AboutPage() {
     return (
-        <div className="dev-content-page">
+        <div className="dev-content-page dev-about-page">
             <header className="dev-content-hero">
                 <span className="dev-section-kicker">About Dragon&apos;s Gate Pizza</span>
                 <h1 className="dev-section-title">More than a pizza restaurant.</h1>

@@ -8,7 +8,7 @@ const inquiryCategories = [
 
 export default function ContactPage() {
     return (
-        <div className="dev-content-page">
+        <div className="dev-content-page dev-contact-page">
             <header className="dev-content-hero">
                 <span className="dev-section-kicker">Contact</span>
                 <h1 className="dev-section-title">Contact the Gate</h1>
