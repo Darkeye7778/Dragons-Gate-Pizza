@@ -10,6 +10,7 @@ const PORTFOLIO_PREVIEW_COOKIE = "dgp_portfolio_preview";
 const navLinks = [
     { href: "/dev", label: "Home" },
     { href: "/dev/order", label: "Order Ahead" },
+    { href: "/dev/cart", label: "Cart" },
     { href: "/dev/menu", label: "Menu" },
     { href: "/dev/expansion", label: "Expansion" },
     { href: "/dev/careers", label: "Join Our Team" },
@@ -70,7 +71,11 @@ export default function DevLayout({
                             href={link.href}
                             className={
                                 "dev-nav-link" +
-                                (pathname === link.href ? " dev-nav-link--active" : "")
+                                ((link.href === "/dev"
+                                    ? pathname === link.href
+                                    : pathname.startsWith(link.href))
+                                    ? " dev-nav-link--active"
+                                    : "")
                             }
                         >
                             {link.label}

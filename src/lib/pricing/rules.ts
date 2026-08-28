@@ -15,7 +15,7 @@ export function getDerivedCrustPrice(
             return null;
         }
 
-        return roundMoney(regularPrice + 1);
+        return roundMoney(regularPrice);
     }
 
     return null;

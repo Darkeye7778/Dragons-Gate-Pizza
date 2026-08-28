@@ -10,6 +10,7 @@ export const PIZZA_SIZES: PizzaSize[] = [
 
 export const DEFAULT_PIZZA_SIZE_ID = "medium_16";
 
+/** Cheese-only prices from the final menu table. */
 export const BASE_PRICE: BasePriceTable = {
     kids_9: {
         regular: 4.25,
@@ -52,3 +53,9 @@ export const BASE_PRICE: BasePriceTable = {
         keto: 20.75,
     },
 };
+
+export const STANDARD_TOPPING_UNIT_LIMIT = 5;
+export const STANDARD_TOPPING_UNIT_PRICE = 0.5;
+/** Menu BYO tier: toppings four and five share the $2.00 BYO charge. */
+export const BUILD_YOUR_OWN_TOPPING_CHARGE = 2.0;
+export const ADDITIONAL_TOPPING_UNIT_PRICE = 0.75;

@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 export const fulfillmentTypeSchema = z.enum(["pickup", "delivery", "dine_in"]);
 
@@ -17,16 +17,54 @@ export const deliveryAddressSchema = z.object({
     postalCode: z.string().trim().min(5, "Postal code is required."),
 });
 
-export const cartItemSchema = z.object({
+const pizzaPricingSchema = z.object({
+    mode: z.enum(["custom", "signature"]),
+    tier: z.enum(["cheese", "one_top", "two_top", "three_top", "byo", "signature"]),
+    tierLabel: z.string(),
+    toppingUnits: z.number().int().min(0),
+    standardToppingUnits: z.number().int().min(0),
+    additionalToppingUnits: z.number().int().min(0),
+    signatureIncludedUnitLimit: z.number().int().min(0).nullable(),
+    cheeseBasePrice: z.number().min(0),
+    standardToppingCharge: z.number().min(0),
+    additionalToppingCharge: z.number().min(0),
+    toppingCharge: z.number().min(0),
+    unitPrice: z.number().min(0),
+    usesFallbackTierPrice: z.boolean(),
+    priceSource: z.enum(["base-cheese-table", "signature-current-price"]),
+    tuPolicyId: z.literal("distinct-selection-v1"),
+});
+
+const pizzaCartItemSchema = z.object({
+    kind: z.literal("pizza").optional(),
     id: z.string().min(1),
     pizzaId: z.string().min(1),
     sizeId: z.string().min(1),
     crustId: z.string().min(1),
     preBakeIngredientIds: z.array(z.string()),
     postBakeIngredientIds: z.array(z.string()),
+    toppingPlacements: z.record(z.string(), z.enum(["whole", "left", "right"])).optional(),
+    quantity: z.number().int().min(1),
+    unitBasePrice: z.number().min(0),
+    pricing: pizzaPricingSchema.optional(),
+});
+
+const potionCartItemSchema = z.object({
+    kind: z.literal("potion"),
+    id: z.string().min(1),
+    potionId: z.string().min(1),
+    baseId: z.string().optional(),
+    flavorIds: z.array(z.string()).max(2),
+    enhancementIds: z.array(z.string()),
+    shimmerIds: z.array(z.string()).max(2),
+    energyBrandId: z.string().optional(),
+    energyVariantId: z.string().optional(),
+    energyAddInId: z.string().optional(),
     quantity: z.number().int().min(1),
     unitBasePrice: z.number().min(0),
 });
+
+export const cartItemSchema = z.union([pizzaCartItemSchema, potionCartItemSchema]);
 
 export const checkoutFormSchema = z
     .object({

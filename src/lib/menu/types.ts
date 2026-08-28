@@ -1,11 +1,32 @@
 ﻿export type FulfillmentType = "pickup" | "delivery" | "dine_in";
 
+export type MajorAllergen = "milk" | "egg" | "wheat" | "soy" | "sesame" | "peanut" | "tree-nut" | "fish" | "shellfish";
+
+export type IngredientCategory =
+    | "crust"
+    | "sauce"
+    | "cheese"
+    | "vegan-cheese"
+    | "meat"
+    | "vegan-meat"
+    | "vegetable"
+    | "seasonal-vegetable"
+    | "fruit"
+    | "herb-garnish"
+    | "specialty-sauce"
+    | "drizzle";
+
 export type Ingredient = {
     id: string;
     name: string;
     buildOrder: number;
     isCrustOption: boolean;
     isActive: boolean;
+    category: IngredientCategory;
+    isVegan?: boolean;
+    isGlutenFreeIngredient?: boolean;
+    allergens?: MajorAllergen[];
+    recipeFamily?: "regular-butter-dough" | "gluten-free-dough" | "vegan-dough" | "cauliflower" | "keto";
 };
 
 export type PizzaPreset = {
@@ -24,9 +45,21 @@ export type MenuPizza = {
 export type Potion = {
     id: string;
     name: string;
-    description: string;
+    description?: string;
     basePrice: number;
-    hasShimmer: boolean;
+    defaultShimmerId: string;
+};
+
+export type DrinkOption = { id: string; name: string };
+
+export type PotionEnhancement = DrinkOption & {
+    priceDelta: number;
+    isVegan?: boolean;
+    allergens?: MajorAllergen[];
+};
+
+export type EnergyBrand = DrinkOption & {
+    variants: DrinkOption[];
 };
 
 export type EnergyAddIn = {
@@ -38,16 +71,24 @@ export type EnergyAddIn = {
 export type Combo = {
     id: string;
     name: string;
-    pizzaId: string;
-    potionOptions: string[];
+    pizzaName: string;
+    pizzaId?: string;
+    potionId: string;
+    shimmerId: string;
 };
 
 export type MenuCatalog = {
     ingredients: Ingredient[];
     pizzas: MenuPizza[];
     potions: Potion[];
-    energyOptions: string[];
+    drinkBases: DrinkOption[];
+    potionFlavors: DrinkOption[];
+    potionEnhancements: PotionEnhancement[];
+    shimmers: DrinkOption[];
+    energyBrands: EnergyBrand[];
     energyAddIns: EnergyAddIn[];
+    buildYourOwnPotionPrice: number;
+    straightEnergyDrinkPrice: number;
     combos: Combo[];
 };
 
@@ -63,3 +104,5 @@ export type LocationIngredientAvailability = {
     isAvailable: boolean;
     updatedAtISO?: string;
 };
+
+export type ToppingPlacement = "whole" | "left" | "right";

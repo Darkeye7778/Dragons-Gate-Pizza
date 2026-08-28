@@ -16,6 +16,8 @@ export type CrustId =
 
 export type Money = number;
 
+export type PizzaPriceTier = "cheese" | "one_top" | "two_top" | "three_top" | "byo";
+
 export type PizzaSize = {
     id: PizzaSizeId;
     label: string;

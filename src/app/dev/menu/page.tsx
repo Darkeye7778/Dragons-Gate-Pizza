@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { MENU } from "@/data/menu";
-import { getGroupedPizzas, getNonCrustIngredients, getCrustOptions } from "@/lib/menu/catalog";
+import { getCheeseOptions, getCrustOptions, getFinishOptions, getGroupedPizzas, getSauceOptions, getToppingOptions } from "@/lib/menu/catalog";
 
 export default function DevMenuPage() {
     const groupedPizzas = getGroupedPizzas();
     const crustOptions = getCrustOptions();
-    const nonCrustIngredients = getNonCrustIngredients();
-    const sauces = nonCrustIngredients.filter((item) => item.buildOrder === 20);
-    const cheeses = nonCrustIngredients.filter((item) => item.buildOrder === 30);
-    const toppings = nonCrustIngredients.filter((item) => item.buildOrder >= 40 && item.buildOrder < 90);
-    const finishes = nonCrustIngredients.filter((item) => item.buildOrder >= 90);
+    const sauces = getSauceOptions();
+    const cheeses = getCheeseOptions();
+    const toppings = getToppingOptions();
+    const finishes = getFinishOptions();
     const ingredientGroups = [
         ["Crusts", crustOptions],
         ["Sauces", sauces],
@@ -35,7 +34,7 @@ export default function DevMenuPage() {
                 <div>
                     <span>Forge your own</span>
                     <h2>Build Your Own Pizza</h2>
-                    <p>Choose your size, crust, pre-bake ingredients, and finishes after the bake line.</p>
+                    <p>Choose your size, crust, pre-bake ingredients, and finishes after the bake line. The operating plan calls for every crust to be prepared in-house rather than purchased ready-made.</p>
                 </div>
                 <Link href="/dev/order/custom">Build Your Own</Link>
             </section>
@@ -88,15 +87,29 @@ export default function DevMenuPage() {
                     <span>Arcane refreshments</span>
                     <h2>Signature Potions</h2>
                     <p>Base price: <strong>$3.99</strong></p>
-                    <p>Energy add-ins available: <strong>Half can +$1.50</strong>, <strong>Full can +$2.50</strong> — Red Bull or Monster.</p>
+                    <p>Or build your own for <strong>$3.49</strong> with one base, up to two flavors, and up to two shimmers included.</p>
+                    <Link href="/dev/order/potion/custom">Build Your Own Potion</Link>
                 </header>
                 <div className="dev-catalog-tile-grid">
                     {MENU.potions.map((potion) => (
                         <article className="dev-catalog-tile" key={potion.id}>
                             <h3>{potion.name}</h3>
-                            <p>{potion.description}</p>
+                            <p>{potion.description ?? "Signature recipe"}</p>
+                            <p>Shimmer: <strong>{MENU.shimmers.find((item) => item.id === potion.defaultShimmerId)?.name}</strong></p>
+                            <Link href={`/dev/order/potion/${potion.id}`}>Order This Potion</Link>
                         </article>
                     ))}
+                </div>
+            </section>
+
+            <section className="dev-catalog-section dev-drink-workshop">
+                <header className="dev-catalog-section-heading"><span>Mix your own magic</span><h2>Potion Workshop</h2><p>Enhancements are $0.50 each. Energy upgrades are available by the half or full can.</p></header>
+                <div className="dev-drink-directory">
+                    <section><h3>Bases</h3><ul>{MENU.drinkBases.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
+                    <section><h3>Flavor Infusions</h3><ul>{MENU.potionFlavors.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
+                    <section><h3>Enhancements · +$0.50 each</h3><ul>{MENU.potionEnhancements.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
+                    <section><h3>Shimmers · up to two included</h3><ul>{MENU.shimmers.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
+                    <section><h3>Energy</h3>{MENU.energyBrands.map((brand) => <p key={brand.id}><strong>{brand.name}</strong>: {brand.variants.map((item) => item.name).join(", ")}</p>)}<p>Half can +$1.50 · Full can +$2.50 · Straight can $3.99</p></section>
                 </div>
             </section>
 
@@ -104,13 +117,14 @@ export default function DevMenuPage() {
                 <header className="dev-catalog-section-heading"><span>Pair the party</span><h2>Adventure Combos</h2></header>
                 <div className="dev-combo-grid">
                     {MENU.combos.map((combo) => {
-                        const pizza = MENU.pizzas.find((item) => item.id === combo.pizzaId);
+                        const potion = MENU.potions.find((item) => item.id === combo.potionId);
+                        const shimmer = MENU.shimmers.find((item) => item.id === combo.shimmerId);
                         return (
                             <article className="dev-combo-item" key={combo.id}>
                                 <h3>{combo.name}</h3>
-                                <p>Pizza: <strong>{pizza?.name ?? combo.pizzaId}</strong></p>
-                                <p>Potion options: {combo.potionOptions.map((id) => MENU.potions.find((item) => item.id === id)?.name ?? id).join(", ")}</p>
-                                <Link href={`/dev/order/${combo.pizzaId}`}>Order This Combo&apos;s Pizza</Link>
+                                <p>Pizza: <strong>{combo.pizzaName}</strong></p>
+                                <p>Potion: <strong>{potion?.name ?? combo.potionId}</strong> · {shimmer?.name ?? combo.shimmerId} shimmer</p>
+                                {combo.pizzaId ? <Link href={`/dev/order/${combo.pizzaId}?pair=${combo.potionId}`}>Build This Pairing</Link> : <p className="dev-data-note">Pairing recorded. Its pizza recipe is not yet present in the current site data.</p>}
                             </article>
                         );
                     })}
@@ -123,7 +137,7 @@ export default function DevMenuPage() {
                     {ingredientGroups.map(([title, items]) => (
                         <section className="dev-ingredient-column" key={title}>
                             <h3>{title}</h3>
-                            <ul>{items.map((item) => <li key={item.id}>{item.name}</li>)}</ul>
+                            <ul>{items.map((item) => <li key={item.id}>{item.name}{item.isCrustOption ? <small>{item.isVegan ? "Vegan" : item.id === "gluten-free" ? "Gluten-free" : "Contains milk"}</small> : null}</li>)}</ul>
                         </section>
                     ))}
                 </div>

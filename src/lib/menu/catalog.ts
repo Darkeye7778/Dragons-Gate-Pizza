@@ -114,3 +114,23 @@ export function getGroupedPizzas(): Array<{
         pizzas,
     }));
 }
+
+export function getSauceOptions(): Ingredient[] {
+    return getNonCrustIngredients().filter((ingredient) => ingredient.category === "sauce");
+}
+
+export function getCheeseOptions(): Ingredient[] {
+    return getNonCrustIngredients().filter(
+        (ingredient) => ingredient.category === "cheese" || ingredient.category === "vegan-cheese",
+    );
+}
+
+export function getToppingOptions(): Ingredient[] {
+    return getNonCrustIngredients().filter(
+        (ingredient) => !["sauce", "cheese", "vegan-cheese", "drizzle"].includes(ingredient.category),
+    );
+}
+
+export function getFinishOptions(): Ingredient[] {
+    return getNonCrustIngredients().filter((ingredient) => ingredient.category === "drizzle");
+}

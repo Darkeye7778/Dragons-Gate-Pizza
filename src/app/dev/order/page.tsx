@@ -5,7 +5,7 @@ import { getGroupedPizzas } from "@/lib/menu/catalog";
 const orderPaths = [
     ["Build Your Own Pizza", "Start from scratch with your preferred size, crust, toppings, and finishes.", "/dev/order/custom", "Start Build"],
     ["Signature Pizzas", "Start with one of the house builds, then customize it how you want.", "#signature-pizzas", "Jump to Signatures"],
-    ["Drinks & Potions", "Potions and drink add-ons will plug into cart ordering next.", "/dev/menu", "Browse Drinks"],
+    ["Drinks & Potions", "Mix a fountain potion with flavors, shimmer, enhancements, and an optional energy upgrade.", "/dev/order/potion/custom", "Build a Potion"],
     ["View Cart", "Already picked some stuff? Go straight to the cart.", "/dev/cart", "Open Cart"],
 ];
 
@@ -56,8 +56,9 @@ export default function DevOrderPage() {
                     {MENU.potions.map((potion) => (
                         <article className="dev-catalog-tile" key={potion.id}>
                             <h3>{potion.name}</h3>
-                            <p>{potion.description}</p>
+                            <p>{potion.description ?? `Signature potion with ${MENU.shimmers.find((item) => item.id === potion.defaultShimmerId)?.name ?? "paired"} shimmer.`}</p>
                             <strong>$3.99</strong>
+                            <Link href={`/dev/order/potion/${potion.id}`}>Customize &amp; Add</Link>
                         </article>
                     ))}
                 </div>
