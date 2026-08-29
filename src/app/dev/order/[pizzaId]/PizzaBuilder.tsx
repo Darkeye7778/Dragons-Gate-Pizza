@@ -33,11 +33,6 @@ const CHEESES = getCheeseOptions();
 const TOPPINGS = getToppingOptions();
 const FINISHES = getFinishOptions();
 
-const MARKER_POSITIONS = [
-    [22, 28], [38, 18], [55, 24], [73, 31], [29, 46], [47, 42],
-    [66, 49], [80, 56], [20, 66], [40, 70], [58, 66], [72, 76],
-] as const;
-
 function formatMoney(value: number): string {
     return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 }
@@ -57,20 +52,65 @@ function initialPlacements(pizza: MenuPizza | null): Record<string, ToppingPlace
 }
 
 function toppingVisualClass(id: string): string {
-    if (id === "pepperoni") return "pepperoni";
-    if (id.includes("sausage") || id === "chorizo") return "sausage";
-    if (id === "bacon") return "bacon";
-    if (id === "ham") return "ham";
+    if (id.includes("pepperoni")) return "pepperoni";
+    if (id === "salami") return "salami";
+    if (id.includes("sausage") || id.includes("chorizo") || id.includes("meatball") || id === "ground-beef") return "sausage";
+    if (id.includes("bacon") || id === "pork-belly-cubes" || id === "steak-strips" || id === "prosciutto") return "bacon";
+    if (id === "ham" || id === "canadian-bacon") return "ham";
     if (id.includes("chicken")) return "chicken";
     if (id.includes("mushroom")) return "mushroom";
+    if (id === "green-olives") return "green-olive";
     if (id.includes("olive")) return "olive";
     if (id.includes("onion")) return "onion";
-    if (id === "spinach" || id === "basil") return "leaf";
-    if (id === "pineapple" || id === "roasted-corn") return "gold";
-    if (id.includes("pepper") || id === "jalapenos") return "pepper";
+    if (["spinach", "basil", "parsley", "oregano"].includes(id)) return "leaf";
+    if (id === "broccoli") return "broccoli";
+    if (["pineapple", "roasted-corn", "sweet-potato-slices"].includes(id)) return "gold";
+    if (id === "red-peppers") return "red-pepper";
+    if (id === "banana-peppers") return "banana-pepper";
+    if (id.includes("pepper") || id.includes("jalapeno")) return "pepper";
     if (id.includes("tomato")) return "tomato";
     if (id.includes("garlic")) return "garlic";
+    if (id.includes("artichoke")) return "artichoke";
+    if (id === "zucchini") return "zucchini";
+    if (id === "eggplant") return "eggplant";
+    if (id === "red-cabbage") return "cabbage";
+    if (["salt", "cracked-pepper", "chili-flake"].includes(id)) return "seasoning";
+    if (id.includes("paste") || id.includes("puree") || id.includes("spread")) return "paste";
     return "vegetable";
+}
+
+function ingredientSeed(id: string): number {
+    return [...id].reduce((seed, character) => ((seed * 31) + character.charCodeAt(0)) % 997, 17);
+}
+
+function getToppingMarkers(id: string, placement: ToppingPlacement) {
+    const seed = ingredientSeed(id);
+    const count = placement === "whole" ? 7 : 5;
+
+    return Array.from({ length: count }, (_, markerIndex) => {
+        const angle = ((seed * 17 + markerIndex * 137.508) % 360) * (Math.PI / 180);
+        let left: number;
+        let top: number;
+
+        if (placement === "whole") {
+            const radius = 11 + ((seed + markerIndex * 19) % 28);
+            left = 50 + Math.cos(angle) * radius;
+            top = 50 + Math.sin(angle) * radius;
+        } else {
+            const center = placement === "left" ? 29 : 71;
+            const horizontalRadius = 9 + ((seed + markerIndex * 7) % 9);
+            const verticalRadius = 16 + ((seed + markerIndex * 13) % 19);
+            left = center + Math.cos(angle) * horizontalRadius;
+            top = 50 + Math.sin(angle) * verticalRadius;
+        }
+
+        return {
+            left: Math.max(12, Math.min(88, left)),
+            top: Math.max(12, Math.min(88, top)),
+            rotation: (seed + markerIndex * 47) % 180,
+            scale: 0.76 + ((seed + markerIndex * 11) % 28) / 100,
+        };
+    });
 }
 
 function IngredientPrice({ children = "Included · +$0.00" }: { children?: React.ReactNode }) {
@@ -96,7 +136,7 @@ function ChoiceTile({ ingredient, selected, onChange, type = "checkbox", name }:
 
 export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPizza | null; pairedPotionId?: string }) {
     const router = useRouter();
-    const originalPreBake = pizza?.preset.defaultPreBakeIngredientIds ?? ["red-sauce", "mozzarella"];
+    const originalPreBake = pizza?.preset.defaultPreBakeIngredientIds ?? [];
     const originalPostBake = pizza?.preset.defaultPostBakeIngredientIds ?? [];
     const [sizeId, setSizeId] = useState<PizzaSizeId>(DEFAULT_PIZZA_SIZE_ID);
     const [crustId, setCrustId] = useState<CrustId>("regular");
@@ -200,26 +240,26 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                     <div className="dev-preview-heading">
                         <div><span>Live build</span><h2>Your Pizza</h2></div>
                         <div className="dev-preview-status">
-                            <strong>{pricing.toppingUnits} TU · {pricing.tierLabel}</strong>
+                            <strong>{selectedCount === 0 ? "Blank slate" : `${pricing.toppingUnits} TU · ${pricing.tierLabel}`}</strong>
                             <div className="dev-half-key"><span>Left</span><span>Right</span></div>
                         </div>
                     </div>
                     <div className="dev-pizza-stage">
-                        <div className="dev-pizza-disc" style={{ "--pizza-diameter": `${pizzaDiameter}%` } as CSSProperties}>
+                        <div className="dev-pizza-disc" data-crust={crustId} style={{ "--pizza-diameter": `${pizzaDiameter}%` } as CSSProperties}>
                             <div className="dev-pizza-sauce" data-sauce={sauceId} />
-                            <div className="dev-pizza-cheese" data-cheese={selectedCheeses.length > 0} />
+                            <div className="dev-pizza-cheese" data-cheese={selectedCheeses.length > 0} data-cheese-count={selectedCheeses.length} />
                             <div className="dev-pizza-half-line" aria-hidden="true" />
-                            {selectedToppings.flatMap((ingredient, ingredientIndex) => {
+                            {selectedToppings.flatMap((ingredient) => {
                                 const placement = toppingPlacements[ingredient.id] ?? "whole";
-                                const positions = MARKER_POSITIONS.filter(([left]) => placement === "whole" || (placement === "left" && left < 50) || (placement === "right" && left > 50));
-                                return positions.slice(0, placement === "whole" ? 7 : 5).map(([left, top], markerIndex) => (
+                                return getToppingMarkers(ingredient.id, placement).map((marker, markerIndex) => (
                                     <span
                                         className={`dev-pizza-topping topping-${toppingVisualClass(ingredient.id)}`}
                                         key={`${ingredient.id}-${markerIndex}`}
                                         title={`${ingredient.name} · ${placement}`}
                                         style={{
-                                            left: `${left}%`, top: `${16 + ((top + ingredientIndex * 9) % 68)}%`,
-                                            "--topping-rotation": `${(ingredientIndex * 29 + markerIndex * 37) % 180}deg`,
+                                            left: `${marker.left}%`, top: `${marker.top}%`,
+                                            "--topping-rotation": `${marker.rotation}deg`,
+                                            "--topping-scale": marker.scale,
                                             "--topping-delay": `${markerIndex * 24}ms`,
                                         } as CSSProperties}
                                     />

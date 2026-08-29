@@ -48,6 +48,8 @@ export type Potion = {
     description?: string;
     basePrice: number;
     defaultShimmerId: string;
+    defaultBaseId?: string;
+    defaultFlavorIds?: string[];
 };
 
 export type DrinkOption = { id: string; name: string };

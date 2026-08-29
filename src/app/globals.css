@@ -620,62 +620,93 @@ body {
         inset 0 0 20px rgba(255, 226, 154, 0.35);
     transition: width 320ms cubic-bezier(0.2, 0.8, 0.2, 1), border-width 320ms ease;
 }
+.dev-pizza-disc[data-crust="thin"] { border-width: clamp(9px, 1.4vw, 15px); }
+.dev-pizza-disc[data-crust="high-rise"] { border-width: clamp(22px, 3vw, 31px); box-shadow: 0 0 0 6px rgba(70, 27, 10, 0.46), 0 24px 48px rgba(0,0,0,0.52), inset 0 0 26px rgba(255,226,154,0.42); }
+.dev-pizza-disc[data-crust="gluten-free"] { border-color: #b8793a; background: radial-gradient(circle at 28% 24%, #e8b868 0 1.2%, transparent 1.6%), radial-gradient(circle, #ddb068 0 64%, #b87534 82%, #75401f 100%); }
+.dev-pizza-disc[data-crust="cauliflower"] { border-color: #c8aa66; background: radial-gradient(circle at 31% 25%, #856e3b 0 0.8%, transparent 1.2%) 0 0 / 18px 20px, radial-gradient(circle, #e1cc8e 0 62%, #b99652 82%, #71542e 100%); }
+.dev-pizza-disc[data-crust="keto"] { border-color: #9b7139; background: radial-gradient(circle at 40% 30%, #6b4b29 0 0.8%, transparent 1.1%) 0 0 / 15px 17px, radial-gradient(circle, #c39a58 0 62%, #8f632f 82%, #50341d 100%); }
+.dev-pizza-disc[data-crust="vegan"] { border-color: #ca873d; background: radial-gradient(circle at 30% 27%, #f7cf83 0 1.1%, transparent 1.5%), radial-gradient(circle, #e7ad59 0 62%, #bf7531 82%, #733b1d 100%); }
 .dev-pizza-sauce,
 .dev-pizza-cheese { position: absolute; border-radius: 50%; pointer-events: none; }
 .dev-pizza-sauce {
+    --sauce-bright: #d34a35;
+    --sauce-main: #a52c24;
+    --sauce-dark: #6d1715;
     z-index: 1;
-    inset: 3.5%;
-    background: radial-gradient(circle at 40% 34%, #d34a35, #a52c24 72%, #6d1715);
-    box-shadow: inset 0 0 18px rgba(78, 4, 4, 0.42);
+    inset: 4.5%;
+    background:
+        radial-gradient(circle at 27% 34%, color-mix(in srgb, var(--sauce-bright) 70%, white 8%) 0 1.4%, transparent 1.8%),
+        radial-gradient(circle at 68% 63%, var(--sauce-dark) 0 1.1%, transparent 1.6%),
+        radial-gradient(circle at 40% 34%, var(--sauce-bright), var(--sauce-main) 72%, var(--sauce-dark));
+    box-shadow: inset 0 0 18px color-mix(in srgb, var(--sauce-dark) 70%, transparent), 0 0 0 2px color-mix(in srgb, var(--sauce-dark) 66%, transparent);
     transition: opacity 180ms ease, background 220ms ease;
 }
 .dev-pizza-sauce[data-sauce="none"] { opacity: 0; }
 .dev-pizza-sauce[data-sauce="white-garlic-sauce"],
-.dev-pizza-sauce[data-sauce="white-sauce"] { background: radial-gradient(circle, #f4e6be, #d6c28d 72%, #a98858); }
-.dev-pizza-sauce[data-sauce="pesto"] { background: radial-gradient(circle, #718b36, #405b23 72%, #263919); }
-.dev-pizza-sauce[data-sauce="bbq-sauce"] { background: radial-gradient(circle, #994527, #572417 72%, #32120e); }
-.dev-pizza-sauce[data-sauce="spicy-red-sauce"] { background: radial-gradient(circle, #e14c2a, #a6261c 67%, #71140e); }
+.dev-pizza-sauce[data-sauce="white-sauce"],
+.dev-pizza-sauce[data-sauce="vegan-white-sauce"] { --sauce-bright: #f7edcf; --sauce-main: #d8c38d; --sauce-dark: #9d7d50; }
+.dev-pizza-sauce[data-sauce="pesto"] { --sauce-bright: #829b43; --sauce-main: #456127; --sauce-dark: #263919; }
+.dev-pizza-sauce[data-sauce="olive-oil-garlic"] { --sauce-bright: #f4d77a; --sauce-main: #c49339; --sauce-dark: #8a6427; opacity: 0.72; }
+.dev-pizza-sauce[data-sauce="spicy-red-sauce"] { --sauce-bright: #ed6136; --sauce-main: #ae291e; --sauce-dark: #71140e; }
 .dev-pizza-cheese {
     z-index: 2;
-    inset: 6%;
+    inset: 8%;
     opacity: 0;
+    clip-path: polygon(50% 0, 64% 3%, 77% 9%, 88% 19%, 96% 32%, 99% 47%, 96% 62%, 89% 75%, 78% 87%, 64% 96%, 49% 99%, 35% 96%, 21% 88%, 11% 77%, 4% 63%, 1% 48%, 5% 33%, 14% 19%, 28% 8%, 42% 2%);
     background:
-        radial-gradient(circle at 25% 32%, #fff2a8 0 1.4%, transparent 1.8%),
-        radial-gradient(circle at 63% 70%, #d98f22 0 1.4%, transparent 1.8%),
-        radial-gradient(circle, rgba(255, 220, 111, 0.92), rgba(230, 166, 54, 0.88));
+        radial-gradient(ellipse at 24% 31%, #fff4ad 0 2.6%, transparent 3.2%),
+        radial-gradient(ellipse at 68% 27%, #fff0a1 0 3.2%, transparent 3.8%),
+        radial-gradient(ellipse at 41% 72%, #d9891f 0 2.5%, transparent 3.1%),
+        radial-gradient(ellipse at 76% 68%, #e8a42e 0 3%, transparent 3.6%),
+        radial-gradient(circle at 52% 48%, rgba(255, 221, 112, 0.95), rgba(228, 161, 48, 0.91));
     box-shadow: inset 0 0 20px rgba(144, 74, 8, 0.28);
     transition: opacity 220ms ease;
 }
 .dev-pizza-cheese[data-cheese="true"] { opacity: 0.93; }
+.dev-pizza-cheese[data-cheese-count="2"],
+.dev-pizza-cheese[data-cheese-count="3"],
+.dev-pizza-cheese[data-cheese-count="4"] { filter: saturate(1.08) brightness(1.04); }
 .dev-pizza-half-line { position: absolute; z-index: 9; top: 7%; bottom: 7%; left: 50%; width: 1px; background: linear-gradient(transparent, rgba(75, 34, 11, 0.38), transparent); }
 
 .dev-pizza-topping {
+    --topping-scale: 1;
     position: absolute;
     z-index: 5;
     display: block;
     width: 8.2%;
     aspect-ratio: 1;
-    transform: translate(-50%, -50%) rotate(var(--topping-rotation));
+    transform: translate(-50%, -50%) rotate(var(--topping-rotation)) scale(var(--topping-scale));
     animation: dev-topping-arrive 260ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
     animation-delay: var(--topping-delay);
 }
 @keyframes dev-topping-arrive {
     from { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(var(--topping-rotation)); }
-    to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--topping-rotation)); }
+    to { opacity: 1; transform: translate(-50%, -50%) rotate(var(--topping-rotation)) scale(var(--topping-scale)); }
 }
 .topping-pepperoni { border: 2px solid #8f211c; border-radius: 50%; background: radial-gradient(circle at 35% 34%, #f47455 0 7%, transparent 8%), #bb342a; box-shadow: 0 2px 4px #7a1d17; }
+.topping-salami { border: 2px solid #81302c; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #f3b0a2 0 5%, transparent 6%), radial-gradient(circle at 68% 58%, #f3b0a2 0 5%, transparent 6%), #9e4139; box-shadow: 0 2px 4px #5f211e; }
 .topping-sausage { border-radius: 42% 58% 36% 64%; background: #704021; box-shadow: inset 2px 2px #9b6035, 0 2px 3px #431d10; }
 .topping-bacon { width: 8%; aspect-ratio: 2.4; border-radius: 3px; background: repeating-linear-gradient(90deg, #a73428 0 24%, #e78363 25% 42%, #88271f 43% 65%); }
 .topping-ham { border-radius: 24%; background: #d97a7d; box-shadow: inset 0 0 0 2px #a84f58; }
 .topping-chicken { border-radius: 42% 58% 50% 38%; background: #c78b4e; box-shadow: inset 2px 2px #edbd79; }
 .topping-mushroom { width: 9%; aspect-ratio: 1.4; border-radius: 50% 50% 30% 30%; background: linear-gradient(#d7bd91 0 52%, #9a774c 54% 70%, transparent 71%); }
 .topping-olive { border: 4px solid #25201f; border-radius: 50%; background: transparent; }
+.topping-green-olive { border: 4px solid #687337; border-radius: 50%; background: transparent; box-shadow: 0 1px 2px #35401d; }
 .topping-onion { border: 3px solid rgba(170, 79, 159, 0.88); border-radius: 50%; background: transparent; }
 .topping-leaf { width: 7%; border-radius: 90% 10% 80% 20%; background: linear-gradient(135deg, #7ba747, #285a2d); box-shadow: inset 1px 0 #a7d06e; }
 .topping-gold { border-radius: 26%; background: #e6ad2e; box-shadow: inset 2px 2px #ffd86b; }
 .topping-pepper { width: 9%; aspect-ratio: 1.8; border: 4px solid #3c8c3c; border-top-color: transparent; border-radius: 50%; background: transparent; }
+.topping-red-pepper { width: 9%; aspect-ratio: 1.8; border: 4px solid #bd3e31; border-top-color: transparent; border-radius: 50%; background: transparent; }
+.topping-banana-pepper { width: 8%; aspect-ratio: 1.8; border: 4px solid #d5c43a; border-top-color: transparent; border-radius: 50%; background: transparent; }
 .topping-tomato { border-radius: 50%; background: #c94133; box-shadow: inset 0 0 0 2px #ef7f68; }
 .topping-garlic { border-radius: 70% 30% 65% 35%; background: #efe1ac; box-shadow: inset 1px 1px #fff6d0; }
+.topping-broccoli { border-radius: 50% 55% 42% 60%; background: radial-gradient(circle at 30% 35%, #76a94d 0 24%, transparent 26%), radial-gradient(circle at 70% 35%, #6a9b42 0 24%, transparent 26%), linear-gradient(90deg, transparent 42%, #477132 43% 58%, transparent 59%); }
+.topping-artichoke { border-radius: 65% 35% 62% 38%; background: repeating-linear-gradient(35deg, #8f9b5b 0 3px, #c0bd79 4px 7px); box-shadow: inset 0 0 0 1px #68733e; }
+.topping-zucchini { border: 3px solid #477b38; border-radius: 50%; background: radial-gradient(circle, #d6d58b 0 58%, #77a64d 60%); }
+.topping-eggplant { border-radius: 60% 40% 55% 45%; background: #5a326b; box-shadow: inset 2px 1px #86568e; }
+.topping-cabbage { width: 7%; border-radius: 70% 30% 60% 40%; background: linear-gradient(135deg, #ad5899, #66376f); }
+.topping-seasoning { width: 2.8%; border-radius: 50%; background: #533522; box-shadow: 5px 3px 0 #755031, -4px 2px 0 #3e2c20; }
+.topping-paste { width: 5%; border-radius: 44% 56% 51% 49%; background: #6f3825; box-shadow: inset 1px 1px rgba(255,255,255,0.18); }
 .topping-vegetable { border-radius: 30%; background: #b74936; box-shadow: inset 2px 2px rgba(255, 255, 255, 0.2); }
 
 .dev-pizza-drizzle {
@@ -1459,13 +1490,16 @@ input:focus-visible + .dev-choice-mark { outline: 2px solid #a9baff; outline-off
 }
 
 .dev-potion-preview {
-    --potion-hue: 270;
+    --potion-primary: #6f321d;
+    --potion-secondary: #27100d;
+    --potion-glow: rgba(147, 68, 32, 0.36);
+    --potion-label: #e5b28f;
     position: sticky;
     top: 96px;
     padding: 28px;
-    border: 1px solid hsla(var(--potion-hue), 75%, 68%, 0.34);
+    border: 1px solid color-mix(in srgb, var(--potion-primary) 46%, transparent);
     background:
-        radial-gradient(circle at 50% 32%, hsla(var(--potion-hue), 80%, 54%, 0.22), transparent 50%),
+        radial-gradient(circle at 50% 32%, var(--potion-glow), transparent 50%),
         linear-gradient(150deg, rgba(28, 12, 54, 0.96), rgba(9, 5, 20, 0.98));
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35), inset 0 1px rgba(255, 255, 255, 0.04);
 }
@@ -1480,41 +1514,97 @@ input:focus-visible + .dev-choice-mark { outline: 2px solid #a9baff; outline-off
 .dev-potion-vessel::before,
 .dev-potion-vessel::after {
     position: absolute;
-    border: 1px solid hsla(var(--potion-hue), 72%, 65%, 0.2);
+    border: 1px solid color-mix(in srgb, var(--potion-primary) 28%, transparent);
     border-radius: 50%;
     content: "";
 }
 .dev-potion-vessel::before { width: 86%; aspect-ratio: 1; }
 .dev-potion-vessel::after { width: 64%; aspect-ratio: 1; border-style: dashed; }
 
-.dev-potion-liquid {
+.dev-potion-bottle {
+    --bottle-width: min(60%, 238px);
+    --bottle-ratio: 0.74;
+    --bottle-shape: polygon(36% 0, 64% 0, 65% 13%, 79% 22%, 88% 100%, 12% 100%, 21% 22%, 35% 13%);
     position: relative;
     z-index: 1;
-    width: min(62%, 250px);
-    aspect-ratio: 0.78;
-    overflow: hidden;
-    border: 8px solid rgba(214, 227, 255, 0.22);
-    border-top-width: 4px;
-    border-radius: 12% 12% 42% 42% / 7% 7% 22% 22%;
-    background:
-        radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.45), transparent 6%),
-        linear-gradient(145deg, hsla(var(--potion-hue), 88%, 70%, 0.92), hsla(calc(var(--potion-hue) + 36), 86%, 41%, 0.96));
-    box-shadow: inset 14px 0 rgba(255, 255, 255, 0.08), 0 0 55px hsla(var(--potion-hue), 88%, 55%, 0.28);
+    width: var(--bottle-width);
+    aspect-ratio: var(--bottle-ratio);
+    filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.34)) drop-shadow(0 0 34px var(--potion-glow));
 }
-.dev-potion-liquid::before { position: absolute; inset: 0; background: repeating-linear-gradient(112deg, transparent 0 25px, rgba(255,255,255,0.12) 26px 28px, transparent 29px 52px); content: ""; animation: dev-potion-glint 4.5s linear infinite; }
-.dev-potion-liquid span { position: absolute; bottom: -10%; width: 14px; aspect-ratio: 1; border: 1px solid rgba(255,255,255,0.48); border-radius: 50%; animation: dev-potion-bubble 3.4s ease-in infinite; }
-.dev-potion-liquid span:nth-child(1) { left: 22%; }
-.dev-potion-liquid span:nth-child(2) { left: 52%; width: 9px; animation-delay: 1.1s; }
-.dev-potion-liquid span:nth-child(3) { left: 74%; width: 18px; animation-delay: 2s; }
+.dev-potion-bottle::before {
+    position: absolute;
+    inset: -6px;
+    clip-path: var(--bottle-shape);
+    background: linear-gradient(110deg, rgba(232, 242, 255, 0.4), rgba(147, 169, 201, 0.14) 42%, rgba(238, 246, 255, 0.3));
+    content: "";
+}
+.dev-potion-bottle[data-base="root-beer"] { --bottle-width: min(66%, 260px); --bottle-ratio: 0.86; --bottle-shape: polygon(31% 0, 69% 0, 70% 15%, 88% 26%, 94% 100%, 6% 100%, 12% 26%, 30% 15%); }
+.dev-potion-bottle[data-base="cream-soda"] { --bottle-width: min(64%, 250px); --bottle-ratio: 0.84; --bottle-shape: polygon(39% 0, 61% 0, 63% 17%, 78% 25%, 94% 46%, 86% 100%, 14% 100%, 6% 46%, 22% 25%, 37% 17%); }
+.dev-potion-bottle[data-base="lemon-lime"] { --bottle-ratio: 0.78; --bottle-shape: polygon(38% 0, 62% 0, 64% 14%, 82% 24%, 93% 88%, 80% 100%, 20% 100%, 7% 88%, 18% 24%, 36% 14%); }
+.dev-potion-bottle[data-base="mountain-dew"] { --bottle-ratio: 0.8; --bottle-shape: polygon(35% 0, 65% 0, 67% 13%, 88% 30%, 82% 100%, 18% 100%, 12% 30%, 33% 13%); }
+.dev-potion-bottle[data-base="lemonade"] { --bottle-width: min(72%, 280px); --bottle-ratio: 1; --bottle-shape: polygon(43% 0, 57% 0, 59% 18%, 75% 27%, 93% 48%, 86% 82%, 70% 100%, 30% 100%, 14% 82%, 7% 48%, 25% 27%, 41% 18%); }
+.dev-potion-bottle[data-base="signature"] { --bottle-width: min(68%, 268px); --bottle-ratio: 0.9; --bottle-shape: polygon(40% 0, 60% 0, 62% 16%, 77% 25%, 92% 45%, 88% 100%, 12% 100%, 8% 45%, 23% 25%, 38% 16%); }
+
+.dev-potion-liquid {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    clip-path: var(--bottle-shape);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 12px 0 rgba(255, 255, 255, 0.08), inset -8px 0 rgba(0, 0, 0, 0.12);
+}
+.dev-potion-base { position: absolute; inset: 0; background: linear-gradient(150deg, var(--potion-primary), var(--potion-secondary)); }
+.dev-flavor-swirl {
+    position: absolute;
+    inset: -30%;
+    border-radius: 44% 56% 48% 52%;
+    background: repeating-radial-gradient(ellipse at 38% 52%, transparent 0 17%, color-mix(in srgb, var(--flavor-color) 72%, white 18%) 19% 23%, transparent 26% 37%);
+    opacity: 0.48;
+    filter: blur(7px);
+    mix-blend-mode: screen;
+    animation: dev-flavor-turn 8s ease-in-out infinite alternate;
+}
+.dev-flavor-swirl-1 { transform: translate(-16%, 6%) rotate(22deg) scale(0.88); }
+.dev-flavor-swirl-2 { transform: translate(16%, -4%) rotate(-38deg) scale(1.08); animation-direction: alternate-reverse; }
+.dev-shimmer-wash {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle, color-mix(in srgb, var(--shimmer-layer) 84%, white 16%) 0 1px, transparent 1.6px) 0 0 / 17px 19px,
+        linear-gradient(118deg, transparent 10%, var(--shimmer-layer) 52%, transparent 86%);
+    opacity: 0.25;
+    mix-blend-mode: screen;
+}
+.dev-shimmer-wash-2 { background-position: 8px 10px, 0 0; transform: scaleX(-1); }
+.dev-potion-glass-shine { position: absolute; inset: 0; background: linear-gradient(110deg, transparent 12%, rgba(255,255,255,0.24) 18%, transparent 25% 68%, rgba(255,255,255,0.1) 75%, transparent 81%); }
+.dev-potion-bubble { position: absolute; bottom: -10%; width: 14px; aspect-ratio: 1; border: 1px solid rgba(255,255,255,0.48); border-radius: 50%; animation: dev-potion-bubble 3.4s ease-in infinite; }
+.dev-potion-bubble-1 { left: 22%; }
+.dev-potion-bubble-2 { left: 52%; width: 9px; animation-delay: 1.1s; }
+.dev-potion-bubble-3 { left: 74%; width: 18px; animation-delay: 2s; }
 @keyframes dev-potion-bubble { to { bottom: 110%; opacity: 0; } }
-@keyframes dev-potion-glint { to { transform: translateX(56px); } }
+@keyframes dev-flavor-turn { to { rotate: 16deg; scale: 1.06; } }
 
 .dev-potion-summary { margin-bottom: 22px; }
 .dev-potion-summary strong { color: #fff4e8; font-size: 1.05rem; }
 .dev-potion-summary p { margin-top: 7px; color: #b8acca; line-height: 1.5; }
-.dev-potion-summary small { display: block; margin-top: 8px; color: hsl(var(--potion-hue), 80%, 76%); }
+.dev-potion-summary small { display: block; margin-top: 8px; color: var(--potion-label); }
 
 .dev-potion-choice-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dev-shimmer-option .dev-choice-mark {
+    border-color: color-mix(in srgb, var(--shimmer-color) 72%, white 12%);
+    border-radius: 50%;
+    background: var(--shimmer-color);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--shimmer-color) 42%, transparent);
+}
+.dev-shimmer-option input:checked + .dev-choice-mark {
+    border-color: color-mix(in srgb, var(--shimmer-color) 74%, white 16%);
+    background: var(--shimmer-color);
+    box-shadow: 0 0 14px color-mix(in srgb, var(--shimmer-color) 55%, transparent);
+}
+.dev-shimmer-option:has(input:checked) {
+    border-color: color-mix(in srgb, var(--shimmer-color) 72%, white 10%);
+    background: linear-gradient(120deg, color-mix(in srgb, var(--shimmer-color) 13%, transparent), rgba(24, 10, 39, 0.82));
+}
 .dev-energy-amount-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .dev-energy-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 24px; }
 .dev-energy-options label { display: grid; gap: 8px; color: #d9cfe6; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
@@ -1538,8 +1628,8 @@ input:focus-visible + .dev-choice-mark { outline: 2px solid #a9baff; outline-off
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .dev-potion-liquid::before,
-    .dev-potion-liquid span { animation: none; }
+    .dev-flavor-swirl,
+    .dev-potion-bubble { animation: none; }
 }
 
 /* ================================================== */
