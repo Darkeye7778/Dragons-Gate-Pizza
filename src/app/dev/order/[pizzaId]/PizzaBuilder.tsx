@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type CSSProperties } from "react";
 import { MENU } from "@/data/menu";
 import { addToCart } from "@/lib/cart/store";
+import { PIZZA_CUT_LABELS, type PizzaCutStyle } from "@/lib/cart/types";
 import {
     getCheeseOptions,
     getCrustOptions,
@@ -26,7 +27,7 @@ import {
     PIZZA_SIZES,
     STANDARD_TOPPING_UNIT_PRICE,
 } from "@/lib/pricing/priceTable";
-import type { CrustId, PizzaSizeId } from "@/lib/pricing/types";
+import type { CrustId, PizzaSizeId, PocketDoughId } from "@/lib/pricing/types";
 
 const CRUST_OPTIONS = getCrustOptions();
 const INGREDIENTS = getNonCrustIngredients();
@@ -34,6 +35,9 @@ const SAUCES = getSauceOptions();
 const CHEESES = getCheeseOptions();
 const TOPPINGS = getToppingOptions();
 const FINISHES = getFinishOptions();
+const STANDARD_CUT_OPTIONS: PizzaCutStyle[] = ["six-slice", "eight-slice", "square"];
+const POCKET_CUT_OPTIONS: PizzaCutStyle[] = ["uncut", "three-slice"];
+const POCKET_DOUGH_OPTIONS: PocketDoughId[] = ["regular", "vegan", "gluten-free"];
 
 function createCartItemId(): string {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -46,6 +50,12 @@ function initialPlacements(pizza: MenuPizza | null): Record<string, ToppingPlace
         (pizza?.preset.defaultPreBakeIngredientIds ?? [])
             .filter((id) => toppingIds.has(id))
             .map((id) => [id, "whole"]),
+    );
+}
+
+function initialFinishPlacements(pizza: MenuPizza | null): Record<string, ToppingPlacement> {
+    return Object.fromEntries(
+        (pizza?.preset.defaultPostBakeIngredientIds ?? []).map((id) => [id, "whole"]),
     );
 }
 
@@ -140,17 +150,25 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
     const originalIngredients = new Set([...originalPreBake, ...originalPostBake]);
     const [sizeId, setSizeId] = useState<PizzaSizeId>(DEFAULT_PIZZA_SIZE_ID);
     const [crustId, setCrustId] = useState<CrustId>("regular");
+    const [pocketDoughId, setPocketDoughId] = useState<PocketDoughId>("regular");
     const [preBakeIngredientIds, setPreBakeIngredientIds] = useState<string[]>(originalPreBake);
     const [postBakeIngredientIds, setPostBakeIngredientIds] = useState<string[]>(originalPostBake);
     const [toppingPlacements, setToppingPlacements] = useState<Record<string, ToppingPlacement>>(() => initialPlacements(pizza));
+    const [finishPlacements, setFinishPlacements] = useState<Record<string, ToppingPlacement>>(() => initialFinishPlacements(pizza));
+    const [cutStyle, setCutStyle] = useState<PizzaCutStyle>("eight-slice");
     const [quantity, setQuantity] = useState(1);
 
     const selectedSize = PIZZA_SIZES.find((size) => size.id === sizeId);
+    const isPizzaPocket = crustId === "pizza-pocket";
     const selectedCrust = MENU.ingredients.find((item) => item.id === crustId);
+    const selectedPocketDough = MENU.ingredients.find((item) => item.id === pocketDoughId);
     const sauceId = SAUCES.find((item) => preBakeIngredientIds.includes(item.id))?.id ?? "none";
     const selectedCheeses = CHEESES.filter((item) => preBakeIngredientIds.includes(item.id));
     const selectedToppings = TOPPINGS.filter((item) => preBakeIngredientIds.includes(item.id));
     const selectedFinishes = FINISHES.filter((item) => postBakeIngredientIds.includes(item.id));
+    const pocketTopCheeses = selectedCheeses.length > 0
+        ? selectedCheeses
+        : CHEESES.filter((item) => item.id === (pocketDoughId === "vegan" ? "vegan-mozzarella" : "mozzarella"));
     const selectedNonVeganIngredients = INGREDIENTS.filter((item) =>
         (preBakeIngredientIds.includes(item.id) || postBakeIngredientIds.includes(item.id))
         && (item.category === "meat" || item.category === "cheese" || item.allergens?.includes("milk") || item.id === "sweet-hot-honey-drizzle"),
@@ -163,6 +181,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
     const pricing = calculatePizzaPricing({
         sizeId,
         crustId,
+        pocketDoughId,
         toppings: toppingSelections,
         signaturePresetToppingUnits,
     });
@@ -195,16 +214,52 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
         });
     }
 
+    function toggleFinish(id: string) {
+        const isSelected = postBakeIngredientIds.includes(id);
+        toggleIngredient(id, true);
+        setFinishPlacements((current) => {
+            const next = { ...current };
+            if (isSelected) delete next[id];
+            else next[id] = "whole";
+            return next;
+        });
+    }
+
     function setPlacement(id: string, placement: ToppingPlacement) {
         setToppingPlacements((current) => ({ ...current, [id]: placement }));
+    }
+
+    function setFinishPlacement(id: string, placement: ToppingPlacement) {
+        setFinishPlacements((current) => ({ ...current, [id]: placement }));
+    }
+
+    function chooseSize(nextSizeId: PizzaSizeId) {
+        setSizeId(nextSizeId);
+        if (!isPizzaPocket && nextSizeId !== "kids_9" && cutStyle === "four-slice") {
+            setCutStyle("eight-slice");
+        }
+    }
+
+    function chooseCrust(nextCrustId: CrustId) {
+        setCrustId(nextCrustId);
+        if (nextCrustId === "pizza-pocket") {
+            setCutStyle("uncut");
+            setToppingPlacements((current) => Object.fromEntries(Object.keys(current).map((id) => [id, "whole"])));
+            setFinishPlacements((current) => Object.fromEntries(Object.keys(current).map((id) => [id, "whole"])));
+        } else if (isPizzaPocket) {
+            setCutStyle("eight-slice");
+        }
     }
 
     function resetBuild() {
         setSizeId(DEFAULT_PIZZA_SIZE_ID);
         setCrustId("regular");
+        setPocketDoughId("regular");
         setPreBakeIngredientIds(originalPreBake);
         setPostBakeIngredientIds(originalPostBake);
         setToppingPlacements(initialPlacements(pizza));
+        setFinishPlacements(initialFinishPlacements(pizza));
+        setCutStyle("eight-slice");
         setQuantity(1);
     }
 
@@ -212,7 +267,13 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
         event.preventDefault();
         addToCart({
             kind: "pizza", id: createCartItemId(), pizzaId: pizza?.id ?? "custom", sizeId, crustId,
-            preBakeIngredientIds, postBakeIngredientIds, toppingPlacements, quantity,
+            pocketDoughId: isPizzaPocket ? pocketDoughId : undefined,
+            preBakeIngredientIds,
+            postBakeIngredientIds,
+            toppingPlacements: isPizzaPocket ? Object.fromEntries(selectedToppings.map((item) => [item.id, "whole"])) : toppingPlacements,
+            finishPlacements: isPizzaPocket ? Object.fromEntries(selectedFinishes.map((item) => [item.id, "whole"])) : finishPlacements,
+            cutStyle,
+            quantity,
             unitBasePrice: unitPrice, pricing,
         });
         router.push(pairedPotionId ? `/dev/order/potion/${pairedPotionId}` : "/dev/cart");
@@ -229,7 +290,9 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                 <h1>{pizza?.name ?? "Build Your Own Pizza"}</h1>
                 <p>{pizza
                     ? `${pizza.description} Start with the house recipe, then make it yours.`
-                    : "Build it in real time. Choose each layer, decide which half gets every topping, and watch the pizza take shape."}
+                    : isPizzaPocket
+                        ? "Build it in real time. Choose each layer, then watch the filled dough fold into a Pizza Pocket."
+                        : "Build it in real time. Choose each layer, decide which half gets every topping, and watch the pizza take shape."}
                 </p>
             </header>
 
@@ -239,16 +302,19 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                         <div><span>Live build</span><h2>Your Pizza</h2></div>
                         <div className="dev-preview-status">
                             <strong>{selectedCount === 0 ? "Blank slate" : `${pricing.toppingUnits} TU · ${pricing.tierLabel}`}</strong>
-                            <div className="dev-half-key"><span>Left</span><span>Right</span></div>
+                            <span className="dev-preview-cut">{PIZZA_CUT_LABELS[cutStyle]}</span>
+                            {isPizzaPocket
+                                ? <div className="dev-pocket-key"><span>Folded pocket</span></div>
+                                : <div className="dev-half-key"><span>Left</span><span>Right</span></div>}
                         </div>
                     </div>
                     <div className="dev-pizza-stage">
-                        <div className="dev-pizza-disc" data-crust={crustId} style={{ "--pizza-diameter": `${pizzaDiameter}%` } as CSSProperties}>
+                        <div className="dev-pizza-disc" data-crust={isPizzaPocket ? pocketDoughId : crustId} data-pocket={isPizzaPocket} style={{ "--pizza-diameter": `${pizzaDiameter}%` } as CSSProperties}>
                             <div className="dev-pizza-sauce" data-sauce={sauceId} />
                             <div className="dev-pizza-cheese" data-cheese={selectedCheeses.length > 0} data-cheese-count={selectedCheeses.length} />
                             <div className="dev-pizza-half-line" aria-hidden="true" />
                             {selectedToppings.flatMap((ingredient) => {
-                                const placement = toppingPlacements[ingredient.id] ?? "whole";
+                                const placement = isPizzaPocket ? "whole" : (toppingPlacements[ingredient.id] ?? "whole");
                                 return getToppingMarkers(ingredient.id, placement).map((marker, markerIndex) => (
                                     <span
                                         className={`dev-pizza-topping topping-${toppingVisualClass(ingredient.id)}`}
@@ -263,24 +329,35 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                                     />
                                 ));
                             })}
-                            {selectedFinishes.map((finish, index) => <span className={`dev-pizza-drizzle drizzle-${index % 3}`} key={finish.id} title={finish.name} />)}
+                            {selectedFinishes.map((finish, index) => {
+                                const placement = isPizzaPocket ? "whole" : (finishPlacements[finish.id] ?? "whole");
+                                return <span className={`dev-pizza-drizzle drizzle-${index % 3}`} data-placement={placement} key={finish.id} title={`${finish.name} · ${placement}`} />;
+                            })}
+                            {isPizzaPocket ? <div className="dev-pocket-fold" title={`Extra ${pocketTopCheeses.map((item) => item.name).join(" + ")} over the folded crust`} /> : null}
+                            <div className="dev-pizza-cut-guide" data-cut-style={cutStyle} aria-hidden="true" />
                         </div>
                     </div>
 
                     <div className="dev-on-pizza" aria-live="polite">
                         <strong>On this pizza</strong>
                         {selectedCount === 0 ? <p>Just dough and crust so far. Start adding layers.</p> : (
-                            <div>{INGREDIENTS.filter((item) => preBakeIngredientIds.includes(item.id) || postBakeIngredientIds.includes(item.id)).map((item) => (
-                                <span key={item.id}>{item.name}{toppingPlacements[item.id] && toppingPlacements[item.id] !== "whole" ? ` · ${toppingPlacements[item.id]}` : ""}</span>
-                            ))}</div>
+                            <div>{INGREDIENTS.filter((item) => preBakeIngredientIds.includes(item.id) || postBakeIngredientIds.includes(item.id)).map((item) => {
+                                const placement = isPizzaPocket ? "whole" : (toppingPlacements[item.id] ?? finishPlacements[item.id]);
+                                return <span key={item.id}>{item.name}{isPizzaPocket ? (postBakeIngredientIds.includes(item.id) ? " · over crust" : " · inside") : placement && placement !== "whole" ? ` · ${placement}` : ""}</span>;
+                            })}</div>
                         )}
                     </div>
-                    {selectedCrust?.isVegan && selectedNonVeganIngredients.length > 0 ? <div className="dev-dietary-warning" role="status">
+                    {isPizzaPocket ? <div className="dev-pocket-prep" role="status">
+                        <strong>Pocket preparation</strong>
+                        <p>Fillings are placed on one side and folded closed. Extra {pocketTopCheeses.map((item) => item.name).join(" + ")} goes over the crust; finishes are applied on top.</p>
+                    </div> : null}
+                    {(isPizzaPocket ? selectedPocketDough?.isVegan : selectedCrust?.isVegan) && selectedNonVeganIngredients.length > 0 ? <div className="dev-dietary-warning" role="status">
                         <strong>Vegan crust, non-vegan build</strong>
                         <p>The crust itself is vegan, but {selectedNonVeganIngredients.map((item) => item.name).join(", ")} {selectedNonVeganIngredients.length === 1 ? "is" : "are"} not.</p>
                     </div> : null}
                     <dl className="dev-live-price">
-                        <div><dt>{pricing.mode === "custom" ? "Cheese base" : "Signature recipe"} · {selectedSize?.label} · {selectedCrust?.name}</dt><dd>{formatMoney(pricing.signatureBasePrice ?? pricing.cheeseBasePrice)}</dd></div>
+                        <div><dt>{pricing.mode === "custom" ? "Cheese base" : "Signature recipe"} · {selectedSize?.label} · {isPizzaPocket ? `${selectedPocketDough?.name} dough` : selectedCrust?.name}</dt><dd>{formatMoney(pricing.signatureBasePrice ?? pricing.cheeseBasePrice)}</dd></div>
+                        {pricing.pizzaPocketCharge > 0 ? <div><dt>Pizza Pocket fold</dt><dd>+{formatMoney(pricing.pizzaPocketCharge)}</dd></div> : null}
                         <div><dt>Topping units</dt><dd>{pricing.toppingUnits} TU</dd></div>
                         {pricing.mode === "custom" ? <>
                             {pricing.standardToppingCharge > 0 ? <div><dt>{pricing.toppingUnits >= 4 ? `BYO tier · up to five toppings` : `Toppings (${pricing.standardToppingUnits} × ${formatMoney(STANDARD_TOPPING_UNIT_PRICE)})`}</dt><dd>+{formatMoney(pricing.standardToppingCharge)}</dd></div> : null}
@@ -299,7 +376,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                     <button className="dev-reset-build" type="button" onClick={resetBuild}>{pizza ? "Restore house recipe" : "Clear this build"}</button>
                     <p className="dev-build-note">{pizza
                         ? `The house recipe includes ${signaturePresetToppingUnits} topping unit${signaturePresetToppingUnits === 1 ? "" : "s"}. Remove or exchange toppings without changing the signature price; selections beyond that recipe add ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)} each.`
-                        : `The listed size/crust price is the cheese base. One, two, and three toppings add ${formatMoney(STANDARD_TOPPING_UNIT_PRICE)} each; the ${formatMoney(BUILD_YOUR_OWN_TOPPING_CHARGE)} BYO tier includes up to five. Toppings 6+ add ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)} each.`} Whole and half placement currently count the same.</p>
+                        : `The listed size/crust price is the cheese base. One, two, and three toppings add ${formatMoney(STANDARD_TOPPING_UNIT_PRICE)} each; the ${formatMoney(BUILD_YOUR_OWN_TOPPING_CHARGE)} BYO tier includes up to five. Toppings 6+ add ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)} each.`} {isPizzaPocket ? "All fillings share one side before folding; the pocket preparation adds $1.00." : "Whole and half placement currently count the same."}</p>
                 </aside>
 
                 <div className="dev-builder-controls">
@@ -308,25 +385,37 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                         <p>Watch the pizza change scale as you choose the foundation.</p>
                         <h3>Pizza size</h3>
                         <div className="dev-choice-grid dev-size-grid">{PIZZA_SIZES.map((size) => {
-                            const basePrice = getBasePizzaPrice(size.id, crustId);
-                            const price = basePrice === null ? null : calculatePizzaPricing({ sizeId: size.id, crustId, toppings: toppingSelections, signaturePresetToppingUnits }).unitPrice;
+                            const basePrice = isPizzaPocket ? getBasePizzaPrice(size.id, pocketDoughId) : getBasePizzaPrice(size.id, crustId);
+                            const price = basePrice === null ? null : calculatePizzaPricing({ sizeId: size.id, crustId, pocketDoughId, toppings: toppingSelections, signaturePresetToppingUnits }).unitPrice;
                             return <label className="dev-choice-card" key={size.id}>
-                                <input type="radio" name="pizza-size" checked={sizeId === size.id} onChange={() => setSizeId(size.id)} />
+                                <input type="radio" name="pizza-size" checked={sizeId === size.id} onChange={() => chooseSize(size.id)} />
                                 <span className="dev-choice-mark" aria-hidden="true" /><strong>{size.label}</strong><small>{price === null ? "Unavailable" : formatMoney(price)}</small>
                             </label>;
                         })}</div>
                         <h3>Crust style</h3>
                         <div className="dev-choice-grid dev-crust-grid">{CRUST_OPTIONS.map((crust) => {
                             const typedId = crust.id as CrustId;
-                            const basePrice = getBasePizzaPrice(sizeId, typedId);
-                            const price = basePrice === null ? null : calculatePizzaPricing({ sizeId, crustId: typedId, toppings: toppingSelections, signaturePresetToppingUnits }).unitPrice;
+                            const basePrice = getBasePizzaPrice(sizeId, typedId === "pizza-pocket" ? pocketDoughId : typedId);
+                            const price = basePrice === null ? null : calculatePizzaPricing({ sizeId, crustId: typedId, pocketDoughId, toppings: toppingSelections, signaturePresetToppingUnits }).unitPrice;
                             return <label className="dev-choice-card" key={crust.id}>
-                                <input type="radio" name="pizza-crust" checked={crustId === crust.id} disabled={price === null} onChange={() => setCrustId(typedId)} />
+                                <input type="radio" name="pizza-crust" checked={crustId === crust.id} disabled={price === null} onChange={() => chooseCrust(typedId)} />
                                 <span className="dev-choice-mark" aria-hidden="true" /><strong>{crust.name}</strong>
                                 <small>{price === null ? "Unavailable" : formatMoney(price)}</small>
-                                <small className="dev-dietary-fact">{crust.isVegan ? "Vegan dough" : crust.id === "gluten-free" ? "Gluten-free dough" : "Butter dough · contains milk"}</small>
+                                <small className="dev-dietary-fact">{crust.id === "pizza-pocket" ? "Folded · +$1.00" : crust.isVegan ? "Vegan dough" : crust.id === "gluten-free" ? "Gluten-free dough" : "Butter dough · contains milk"}</small>
                             </label>;
                         })}</div>
+                        {isPizzaPocket ? <div className="dev-pocket-dough-panel">
+                            <h3>Choose the pocket dough</h3>
+                            <p>Pizza Pockets can be made with Regular, Vegan, or Gluten-Free dough. Thin, High-Rise, Keto, and Cauliflower cannot hold the folded shape.</p>
+                            <div className="dev-choice-grid dev-pocket-dough-grid">{POCKET_DOUGH_OPTIONS.map((doughId) => {
+                                const dough = MENU.ingredients.find((item) => item.id === doughId);
+                                const pocketPrice = calculatePizzaPricing({ sizeId, crustId: "pizza-pocket", pocketDoughId: doughId, toppings: toppingSelections, signaturePresetToppingUnits }).unitPrice;
+                                return dough ? <label className="dev-choice-card" key={doughId}>
+                                    <input type="radio" name="pocket-dough" checked={pocketDoughId === doughId} onChange={() => setPocketDoughId(doughId)} />
+                                    <span className="dev-choice-mark" aria-hidden="true" /><strong>{dough.name}</strong><small>{formatMoney(pocketPrice)}</small>
+                                </label> : null;
+                            })}</div>
+                        </div> : null}
                         <p className="dev-crust-method-note">The operating plan calls for in-house crusts. Regular, thin, and high-rise use different weights of the same butter dough and are not vegan. Vegan and gluten-free use separate stretchable doughs; cauliflower and keto are vegan mixes portioned and parbaked by size.</p>
                     </fieldset>
 
@@ -344,13 +433,14 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                     </fieldset>
 
                     <fieldset className="dev-builder-step dev-toppings-step">
-                        <legend><span>04</span> Toppings</legend><p>Select a topping, then choose the whole pizza, left half, or right half.</p>
+                        <legend><span>04</span> Toppings</legend><p>{isPizzaPocket ? "Choose the fillings for your pocket. Every topping is placed together on the filling side before the crust is folded." : "Select a topping, then choose the whole pizza, left half, or right half."}</p>
                         <div className="dev-topping-list">{TOPPINGS.map((item) => {
                             const selected = preBakeIngredientIds.includes(item.id);
                             const placement = toppingPlacements[item.id] ?? "whole";
                             const nextToppingPrice = selected ? 0 : Math.max(0, calculatePizzaPricing({
                                 sizeId,
                                 crustId,
+                                pocketDoughId,
                                 toppings: [...toppingSelections, { ingredientId: item.id, placement: "whole" }],
                                 signaturePresetToppingUnits,
                             }).unitPrice - pricing.unitPrice);
@@ -358,14 +448,14 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                                 <button type="button" className="dev-topping-toggle" aria-pressed={selected} onClick={() => toggleTopping(item.id)}>
                                     <span className={`dev-topping-swatch topping-${toppingVisualClass(item.id)}`} aria-hidden="true" />
                                     <span><strong>{item.name}</strong><IngredientPrice>{selected
-                                        ? `${originalIngredients.has(item.id) ? "Included in house recipe · " : "1 TU · "}${placement === "whole" ? "whole" : `${placement} half`}`
+                                        ? `${originalIngredients.has(item.id) ? "Included in house recipe · " : "1 TU · "}${isPizzaPocket ? "inside pocket" : placement === "whole" ? "whole" : `${placement} half`}`
                                         : nextToppingPrice > 0
                                             ? `${pricing.mode === "signature" ? "Additional topping" : "Adds 1 TU"} · +${formatMoney(nextToppingPrice)}`
                                             : pricing.mode === "signature"
                                                 ? originalIngredients.has(item.id) ? "Included in house recipe" : "Replacement slot included"
                                                 : "Included in current tier"}</IngredientPrice></span><span className="dev-topping-add">{selected ? "Remove" : "Add"}</span>
                                 </button>
-                                {selected ? <div className="dev-placement-control" role="group" aria-label={`${item.name} placement`}>
+                                {selected && !isPizzaPocket ? <div className="dev-placement-control" role="group" aria-label={`${item.name} placement`}>
                                     {(["whole", "left", "right"] as const).map((option) => <button key={option} type="button" aria-pressed={placement === option} onClick={() => setPlacement(item.id, option)}>
                                         <span className={`dev-placement-icon placement-${option}`} aria-hidden="true" />{option === "whole" ? "Whole" : `${option[0].toUpperCase()}${option.slice(1)} half`}
                                     </button>)}
@@ -375,13 +465,39 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                     </fieldset>
 
                     <fieldset className="dev-builder-step">
-                        <legend><span>05</span> Finishing Drizzle</legend><p>Add the final layer after the pizza leaves the hearth.</p>
-                        <div className="dev-ingredient-tile-grid">{FINISHES.map((item) => <ChoiceTile key={item.id} ingredient={item} selected={postBakeIngredientIds.includes(item.id)} onChange={() => toggleIngredient(item.id, true)} priceLabel={originalIngredients.has(item.id) ? "Included in house recipe" : "Included"} />)}</div>
+                        <legend><span>05</span> Finishing Drizzle</legend><p>{isPizzaPocket ? "Finishes are applied over the top of the folded, cheese-finished crust." : "Add the final layer after the pizza leaves the hearth."}</p>
+                        <div className="dev-topping-list">{FINISHES.map((item) => {
+                            const selected = postBakeIngredientIds.includes(item.id);
+                            const placement = finishPlacements[item.id] ?? "whole";
+                            return <article className={`dev-topping-row dev-finish-row${selected ? " is-selected" : ""}`} key={item.id}>
+                                <button type="button" className="dev-topping-toggle" aria-pressed={selected} onClick={() => toggleFinish(item.id)}>
+                                    <span className="dev-finish-swatch" aria-hidden="true" />
+                                    <span><strong>{item.name}</strong><IngredientPrice>{selected
+                                        ? `${originalIngredients.has(item.id) ? "Included in house recipe · " : "Included · "}${isPizzaPocket ? "over folded crust" : placement === "whole" ? "whole" : `${placement} half`}`
+                                        : originalIngredients.has(item.id) ? "Included in house recipe" : "Included"}</IngredientPrice></span>
+                                    <span className="dev-topping-add">{selected ? "Remove" : "Add"}</span>
+                                </button>
+                                {selected && !isPizzaPocket ? <div className="dev-placement-control" role="group" aria-label={`${item.name} placement`}>
+                                    {(["whole", "left", "right"] as const).map((option) => <button key={option} type="button" aria-pressed={placement === option} onClick={() => setFinishPlacement(item.id, option)}>
+                                        <span className={`dev-placement-icon placement-${option}`} aria-hidden="true" />{option === "whole" ? "Whole" : `${option[0].toUpperCase()}${option.slice(1)} half`}
+                                    </button>)}
+                                </div> : null}
+                            </article>;
+                        })}</div>
+                    </fieldset>
+
+                    <fieldset className="dev-builder-step">
+                        <legend><span>06</span> Cut Style</legend><p>{isPizzaPocket ? "Keep the folded pocket whole or have it divided into three easy-to-hold pieces." : "Choose how you want the finished pizza sliced. Kids pizzas can also be cut into four larger slices."}</p>
+                        <div className="dev-choice-grid dev-cut-grid">{(isPizzaPocket ? POCKET_CUT_OPTIONS : sizeId === "kids_9" ? ["four-slice", ...STANDARD_CUT_OPTIONS] as PizzaCutStyle[] : STANDARD_CUT_OPTIONS).map((option) => <label className="dev-choice-card" key={option}>
+                            <input type="radio" name="pizza-cut" checked={cutStyle === option} onChange={() => setCutStyle(option)} />
+                            <span className="dev-choice-mark" aria-hidden="true" /><strong>{PIZZA_CUT_LABELS[option]}</strong>
+                            <small>{option === "uncut" ? "One folded pocket" : option === "three-slice" ? "Three pocket pieces" : option === "square" ? "Grid-style pieces" : "Traditional wedges"}</small>
+                        </label>)}</div>
                     </fieldset>
 
                     <section className="dev-builder-review">
-                        <span>06 · Review the build</span><h2>Ready for the hearth?</h2>
-                        <p>{selectedCount} ingredient selection{selectedCount === 1 ? "" : "s"}, {pricing.toppingUnits} topping unit{pricing.toppingUnits === 1 ? "" : "s"} on the {pricing.tierLabel} path, and a current total of <strong>{formatMoney(totalPrice)}</strong>.</p>
+                        <span>07 · Review the build</span><h2>Ready for the hearth?</h2>
+                        <p>{selectedCount} ingredient selection{selectedCount === 1 ? "" : "s"}, {pricing.toppingUnits} topping unit{pricing.toppingUnits === 1 ? "" : "s"} on the {pricing.tierLabel} path, {isPizzaPocket ? `${selectedPocketDough?.name} Pizza Pocket, ` : ""}{PIZZA_CUT_LABELS[cutStyle].toLowerCase()}, and a current total of <strong>{formatMoney(totalPrice)}</strong>.</p>
                         <button className="dev-add-cart-button" type="submit">{pairedPotionId ? "Add Pizza & Choose Paired Potion" : "Add Finished Pizza to Cart"}</button>
                     </section>
                 </div>

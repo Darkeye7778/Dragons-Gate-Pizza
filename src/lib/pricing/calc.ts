@@ -16,7 +16,7 @@ export function roundMoney(amount: number): Money {
 
 export function getDirectBasePizzaPrice(
     sizeId: PizzaSizeId,
-    crustId: Exclude<CrustId, "vegan"> | "regular",
+    crustId: Exclude<CrustId, "vegan" | "pizza-pocket"> | "regular",
 ): Money | null {
     const sizeRow = BASE_PRICE[sizeId];
     const directPrice = sizeRow?.[crustId];

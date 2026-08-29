@@ -3,11 +3,12 @@ import { getBasePizzaPrice, roundMoney } from "@/lib/pricing/calc";
 import {
     ADDITIONAL_TOPPING_UNIT_PRICE,
     BUILD_YOUR_OWN_TOPPING_CHARGE,
+    PIZZA_POCKET_UPCHARGE,
     SIGNATURE_PERSONAL_REGULAR_PRICE,
     STANDARD_TOPPING_UNIT_LIMIT,
     STANDARD_TOPPING_UNIT_PRICE,
 } from "@/lib/pricing/priceTable";
-import type { CrustId, Money, PizzaPriceTier, PizzaSizeId } from "@/lib/pricing/types";
+import type { CrustId, Money, PizzaPriceTier, PizzaSizeId, PocketDoughId } from "@/lib/pricing/types";
 
 export type ToppingSelectionForPricing = {
     ingredientId: string;
@@ -59,6 +60,8 @@ export type PizzaPricingSnapshot = {
     signatureIncludedToppingUnits: number | null;
     cheeseBasePrice: Money;
     signatureBasePrice: Money | null;
+    pocketDoughId: PocketDoughId | null;
+    pizzaPocketCharge: Money;
     standardToppingCharge: Money;
     additionalToppingCharge: Money;
     toppingCharge: Money;
@@ -70,6 +73,7 @@ export type PizzaPricingSnapshot = {
 type PizzaPricingInput = {
     sizeId: PizzaSizeId;
     crustId: CrustId;
+    pocketDoughId?: PocketDoughId;
     toppings: ToppingSelectionForPricing[];
     signaturePresetToppingUnits?: number;
     toppingUnitCalculator?: ToppingUnitCalculator;
@@ -83,28 +87,38 @@ function requireBaseCheesePrice(sizeId: PizzaSizeId, crustId: CrustId): Money {
     return price;
 }
 
-export function getSignaturePizzaPrice(sizeId: PizzaSizeId, crustId: CrustId): Money {
-    const selectedCheeseBase = requireBaseCheesePrice(sizeId, crustId);
+export function getSignaturePizzaPrice(sizeId: PizzaSizeId, crustId: CrustId, pocketDoughId: PocketDoughId = "regular"): Money {
+    const pricedCrustId = crustId === "pizza-pocket" ? pocketDoughId : crustId;
+    const selectedCheeseBase = requireBaseCheesePrice(sizeId, pricedCrustId);
     const anchorCheeseBase = requireBaseCheesePrice("personal_12", "regular");
 
-    return roundMoney(SIGNATURE_PERSONAL_REGULAR_PRICE + selectedCheeseBase - anchorCheeseBase);
+    return roundMoney(
+        SIGNATURE_PERSONAL_REGULAR_PRICE
+        + selectedCheeseBase
+        - anchorCheeseBase
+        + (crustId === "pizza-pocket" ? PIZZA_POCKET_UPCHARGE : 0),
+    );
 }
 
 export function calculatePizzaPricing({
     sizeId,
     crustId,
+    pocketDoughId,
     toppings,
     signaturePresetToppingUnits,
     toppingUnitCalculator,
 }: PizzaPricingInput): PizzaPricingSnapshot {
+    const selectedPocketDough = crustId === "pizza-pocket" ? (pocketDoughId ?? "regular") : null;
+    const pricedCrustId = selectedPocketDough ?? crustId;
+    const pizzaPocketCharge = selectedPocketDough ? PIZZA_POCKET_UPCHARGE : 0;
     const toppingUnits = calculateToppingUnits(toppings, toppingUnitCalculator);
-    const cheeseBasePrice = requireBaseCheesePrice(sizeId, crustId);
+    const cheeseBasePrice = requireBaseCheesePrice(sizeId, pricedCrustId);
 
     if (typeof signaturePresetToppingUnits === "number") {
         const signatureIncludedToppingUnits = Math.max(0, Math.floor(signaturePresetToppingUnits));
         const additionalToppingUnits = Math.max(0, toppingUnits - signatureIncludedToppingUnits);
         const additionalToppingCharge = roundMoney(additionalToppingUnits * ADDITIONAL_TOPPING_UNIT_PRICE);
-        const signatureBasePrice = getSignaturePizzaPrice(sizeId, crustId);
+        const signatureBasePrice = getSignaturePizzaPrice(sizeId, pricedCrustId);
 
         return {
             mode: "signature",
@@ -116,10 +130,12 @@ export function calculatePizzaPricing({
             signatureIncludedToppingUnits,
             cheeseBasePrice,
             signatureBasePrice,
+            pocketDoughId: selectedPocketDough,
+            pizzaPocketCharge,
             standardToppingCharge: 0,
             additionalToppingCharge,
             toppingCharge: additionalToppingCharge,
-            unitPrice: roundMoney(signatureBasePrice + additionalToppingCharge),
+            unitPrice: roundMoney(signatureBasePrice + additionalToppingCharge + pizzaPocketCharge),
             priceSource: "signature-anchor",
             tuPolicyId: CURRENT_TU_POLICY_ID,
         };
@@ -144,10 +160,12 @@ export function calculatePizzaPricing({
         signatureIncludedToppingUnits: null,
         cheeseBasePrice,
         signatureBasePrice: null,
+        pocketDoughId: selectedPocketDough,
+        pizzaPocketCharge,
         standardToppingCharge,
         additionalToppingCharge,
         toppingCharge,
-        unitPrice: roundMoney(cheeseBasePrice + toppingCharge),
+        unitPrice: roundMoney(cheeseBasePrice + toppingCharge + pizzaPocketCharge),
         priceSource: "base-cheese-table",
         tuPolicyId: CURRENT_TU_POLICY_ID,
     };

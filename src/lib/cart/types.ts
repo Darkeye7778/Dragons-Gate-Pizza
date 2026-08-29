@@ -2,8 +2,26 @@
 
 import type { ToppingPlacement } from "@/lib/menu/types";
 import type { PizzaPricingSnapshot } from "@/lib/pricing/pizzaPricing";
+import type { PocketDoughId } from "@/lib/pricing/types";
 
 export type { ToppingPlacement } from "@/lib/menu/types";
+
+export type PizzaCutStyle =
+    | "uncut"
+    | "three-slice"
+    | "four-slice"
+    | "six-slice"
+    | "eight-slice"
+    | "square";
+
+export const PIZZA_CUT_LABELS: Record<PizzaCutStyle, string> = {
+    uncut: "Uncut",
+    "three-slice": "3 slices",
+    "four-slice": "4 slices",
+    "six-slice": "6 slices",
+    "eight-slice": "8 slices",
+    square: "Square cut",
+};
 
 export type PizzaCartItem = {
     kind?: "pizza";
@@ -12,10 +30,13 @@ export type PizzaCartItem = {
 
     sizeId: PizzaSizeId;
     crustId: CrustId;
+    pocketDoughId?: PocketDoughId;
 
     preBakeIngredientIds: string[];
     postBakeIngredientIds: string[];
     toppingPlacements?: Record<string, ToppingPlacement>;
+    finishPlacements?: Record<string, ToppingPlacement>;
+    cutStyle?: PizzaCutStyle;
 
     quantity: number;
 

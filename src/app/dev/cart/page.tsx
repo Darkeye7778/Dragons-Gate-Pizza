@@ -11,7 +11,7 @@ import {
     writeCart,
 } from "@/lib/cart/store";
 import { calcCartTotals } from "@/lib/cart/totals";
-import { isPotionCartItem, type CartItem, type PizzaCartItem, type PotionCartItem } from "@/lib/cart/types";
+import { isPotionCartItem, PIZZA_CUT_LABELS, type CartItem, type PizzaCartItem, type PotionCartItem } from "@/lib/cart/types";
 import { getSignatureToppingUnits, getToppingOptions } from "@/lib/menu/catalog";
 import { calculatePizzaPricing, type PizzaPricingSnapshot } from "@/lib/pricing/pizzaPricing";
 import { formatMoney } from "@/lib/pricing/format";
@@ -29,14 +29,14 @@ function getPizzaName(pizzaId: string): string {
 }
 
 function getIngredientSummary(item: PizzaCartItem): string {
-    const ids = [...item.preBakeIngredientIds, ...item.postBakeIngredientIds];
+    const ids = item.preBakeIngredientIds;
     if (ids.length === 0) {
-        return "No sauce, cheese, toppings, or finish selected.";
+        return "No sauce, cheese, or pre-bake toppings selected.";
     }
 
     const names = ids.map((id) => {
         const name = MENU.ingredients.find((ingredient) => ingredient.id === id)?.name ?? id;
-        const placement = item.toppingPlacements?.[id];
+        const placement = item.crustId === "pizza-pocket" ? "whole" : item.toppingPlacements?.[id] ?? item.finishPlacements?.[id];
 
         return placement && placement !== "whole"
             ? `${name} (${placement} half)`
@@ -48,6 +48,18 @@ function getIngredientSummary(item: PizzaCartItem): string {
     return remainder > 0
         ? `${visibleNames.join(", ")} +${remainder} more`
         : visibleNames.join(", ");
+}
+
+function getFinishSummary(item: PizzaCartItem): string | null {
+    if (item.postBakeIngredientIds.length === 0) return null;
+
+    const finishes = item.postBakeIngredientIds.map((id) => {
+        const name = MENU.ingredients.find((ingredient) => ingredient.id === id)?.name ?? id;
+        const placement = item.finishPlacements?.[id] ?? "whole";
+        return `${name} (${item.crustId === "pizza-pocket" ? "over folded crust" : placement === "whole" ? "whole pizza" : `${placement} half`})`;
+    });
+
+    return `Finish: ${finishes.join(", ")}`;
 }
 
 function getItemPricing(item: PizzaCartItem): PizzaPricingSnapshot {
@@ -63,6 +75,7 @@ function getItemPricing(item: PizzaCartItem): PizzaPricingSnapshot {
     return calculatePizzaPricing({
         sizeId: item.sizeId,
         crustId: item.crustId,
+        pocketDoughId: item.pocketDoughId,
         toppings,
         signaturePresetToppingUnits,
     });
@@ -74,8 +87,31 @@ function repriceCartItem(item: CartItem): CartItem {
         return { ...item, unitBasePrice: pricing.unitPrice };
     }
 
-    const pricing = getItemPricing(item);
-    return { ...item, unitBasePrice: pricing.unitPrice, pricing };
+    const isPizzaPocket = item.crustId === "pizza-pocket";
+    const pocketDoughId = isPizzaPocket && ["regular", "vegan", "gluten-free"].includes(item.pocketDoughId ?? "")
+        ? item.pocketDoughId
+        : isPizzaPocket ? "regular" : undefined;
+    const normalizedItem = { ...item, pocketDoughId };
+    const pricing = getItemPricing(normalizedItem);
+    const savedFinishPlacements = item.finishPlacements ?? Object.fromEntries(
+        item.postBakeIngredientIds.map((id) => [id, "whole" as const]),
+    );
+    const finishPlacements = isPizzaPocket
+        ? Object.fromEntries(item.postBakeIngredientIds.map((id) => [id, "whole" as const]))
+        : savedFinishPlacements;
+    const toppingPlacements = isPizzaPocket
+        ? Object.fromEntries(item.preBakeIngredientIds.filter((id) => TOPPING_IDS.has(id)).map((id) => [id, "whole" as const]))
+        : item.toppingPlacements;
+    const pocketCut = item.cutStyle === "three-slice" ? "three-slice" : "uncut";
+    return {
+        ...item,
+        pocketDoughId,
+        toppingPlacements,
+        finishPlacements,
+        cutStyle: isPizzaPocket ? pocketCut : item.cutStyle ?? "eight-slice",
+        unitBasePrice: pricing.unitPrice,
+        pricing,
+    };
 }
 
 function getPotionName(item: PotionCartItem): string {
@@ -201,17 +237,31 @@ export default function DevCartPage() {
 
                             const size = PIZZA_SIZES.find((option) => option.id === item.sizeId);
                             const crust = MENU.ingredients.find((ingredient) => ingredient.id === item.crustId);
+                            const pocketDough = item.crustId === "pizza-pocket"
+                                ? MENU.ingredients.find((ingredient) => ingredient.id === (item.pocketDoughId ?? "regular"))
+                                : null;
                             const pricing = getItemPricing(item);
+                            const finishSummary = getFinishSummary(item);
+                            const selectedCheeses = item.preBakeIngredientIds
+                                .map((id) => MENU.ingredients.find((ingredient) => ingredient.id === id))
+                                .filter((ingredient) => ingredient?.category === "cheese" || ingredient?.category === "vegan-cheese");
+                            const pocketTopCheese = selectedCheeses.length > 0
+                                ? selectedCheeses.map((ingredient) => ingredient?.name).join(" + ")
+                                : item.pocketDoughId === "vegan" ? "Vegan Mozzarella" : "Whole-Milk Mozzarella";
                             return (
                                 <article className="dev-cart-item" key={item.id}>
                                     <span className="dev-cart-item-number">{String(index + 1).padStart(2, "0")}</span>
                                     <div className="dev-cart-item-copy">
                                         <h2>{getPizzaName(item.pizzaId)}</h2>
-                                        <p>{size?.label ?? item.sizeId} · {crust?.name ?? item.crustId} crust</p>
+                                        <p>{size?.label ?? item.sizeId} · {item.crustId === "pizza-pocket" ? `Pizza Pocket · ${pocketDough?.name ?? "Regular"} dough` : `${crust?.name ?? item.crustId} crust`} · {PIZZA_CUT_LABELS[item.cutStyle ?? "eight-slice"]}</p>
                                         <small>{getIngredientSummary(item)}</small>
+                                        {item.crustId === "pizza-pocket" ? <small>Preparation: fillings folded into one side · Extra {pocketTopCheese} over the crust</small> : null}
+                                        {finishSummary ? <small>{finishSummary}</small> : null}
                                         <dl className="dev-cart-price-breakdown">
                                             <div><dt>{pricing.mode === "custom" ? "Cheese base" : "Signature recipe"}</dt><dd>{formatMoney(pricing.signatureBasePrice ?? pricing.cheeseBasePrice)}</dd></div>
+                                            {pricing.pizzaPocketCharge > 0 ? <div><dt>Pizza Pocket fold</dt><dd>+{formatMoney(pricing.pizzaPocketCharge)}</dd></div> : null}
                                             <div><dt>Topping units</dt><dd>{pricing.toppingUnits} TU</dd></div>
+                                            <div><dt>Cut</dt><dd>{PIZZA_CUT_LABELS[item.cutStyle ?? "eight-slice"]}</dd></div>
                                             {pricing.mode === "custom" ? <>
                                                 {pricing.standardToppingCharge > 0 ? <div><dt>{pricing.toppingUnits >= 4 ? "BYO tier · up to five toppings" : "Toppings"}</dt><dd>+{formatMoney(pricing.standardToppingCharge)}</dd></div> : null}
                                                 {pricing.additionalToppingCharge > 0 ? <div><dt>Toppings 6+</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}

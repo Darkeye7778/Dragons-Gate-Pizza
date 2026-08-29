@@ -59,6 +59,7 @@ export const STANDARD_TOPPING_UNIT_PRICE = 0.5;
 /** Menu BYO tier: toppings four and five share the $2.00 BYO charge. */
 export const BUILD_YOUR_OWN_TOPPING_CHARGE = 2.0;
 export const ADDITIONAL_TOPPING_UNIT_PRICE = 0.75;
+export const PIZZA_POCKET_UPCHARGE = 1;
 
 /**
  * Published anchor for every house signature recipe on a Personal (12\")

@@ -12,7 +12,10 @@ export type CrustId =
     | "gluten-free"
     | "cauliflower"
     | "keto"
-    | "vegan";
+    | "vegan"
+    | "pizza-pocket";
+
+export type PocketDoughId = "regular" | "vegan" | "gluten-free";
 
 export type Money = number;
 

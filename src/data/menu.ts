@@ -25,6 +25,7 @@ export const MENU: MenuCatalog = {
         ingredient("cauliflower", "Cauliflower", 10, "crust", { recipeFamily: "cauliflower", isVegan: true }),
         ingredient("keto", "Keto", 10, "crust", { recipeFamily: "keto", isVegan: true }),
         ingredient("vegan", "Vegan", 10, "crust", { recipeFamily: "vegan-dough", isVegan: true }),
+        ingredient("pizza-pocket", "Pizza Pocket", 10, "crust"),
 
         ingredient("red-sauce", "Classic Red", 20, "sauce"),
         ingredient("spicy-red-sauce", "Spicy Red", 20, "sauce"),
