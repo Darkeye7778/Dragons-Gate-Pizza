@@ -61,7 +61,8 @@ export default function DevMenuPage() {
                                             <ul>
                                                 {pizza.preset.defaultPreBakeIngredientIds.map((id) => {
                                                     const ingredient = MENU.ingredients.find((item) => item.id === id);
-                                                    return <li key={id}>{ingredient?.name ?? id}</li>;
+                                                    const amount = pizza.preset.defaultToppingAmounts?.[id];
+                                                    return <li key={id}>{ingredient?.name ?? id}{amount && amount !== "normal" ? ` · ${amount[0].toUpperCase()}${amount.slice(1)}` : ""}</li>;
                                                 })}
                                             </ul>
                                         </div>
@@ -90,7 +91,7 @@ export default function DevMenuPage() {
                     <span>Arcane refreshments</span>
                     <h2>Signature Potions</h2>
                     <p>Signature potions start at <strong>{formatMoney(Math.min(...MENU.potions.map((potion) => potion.basePrice)))}</strong>.</p>
-                    <p>Or build your own for <strong>{formatMoney(MENU.buildYourOwnPotionPrice)}</strong> with one base, up to two flavors, and up to two shimmers included.</p>
+                    <p>Or build your own for <strong>{formatMoney(MENU.buildYourOwnPotionPrice)}</strong> with one base, two included flavors, and up to two shimmers. Additional flavor pricing is still TBD.</p>
                     <Link href="/dev/order/potion/custom">Build Your Own Potion</Link>
                 </header>
                 <div className="dev-catalog-tile-grid">
@@ -98,7 +99,8 @@ export default function DevMenuPage() {
                         <article className="dev-catalog-tile" key={potion.id}>
                             <h3>{potion.name}</h3>
                             <p>{potion.description ?? "Signature recipe"}</p>
-                            <p>Shimmer: <strong>{MENU.shimmers.find((item) => item.id === potion.defaultShimmerId)?.name}</strong></p>
+                            {potion.isWorkingName ? <p className="dev-data-note">Working name</p> : null}
+                            <p>Shimmer: <strong>{potion.defaultShimmerIds.map((id) => MENU.shimmers.find((item) => item.id === id)?.name ?? id).join(" + ")}</strong></p>
                             <p><strong>{formatMoney(potion.basePrice)}</strong></p>
                             <Link href={`/dev/order/potion/${potion.id}`}>Order This Potion</Link>
                         </article>
@@ -122,17 +124,26 @@ export default function DevMenuPage() {
                 <div className="dev-combo-grid">
                     {MENU.combos.map((combo) => {
                         const potion = MENU.potions.find((item) => item.id === combo.potionId);
-                        const shimmer = MENU.shimmers.find((item) => item.id === combo.shimmerId);
                         return (
                             <article className="dev-combo-item" key={combo.id}>
                                 <h3>{combo.name}</h3>
-                                <p>Pizza: <strong>{combo.pizzaName}</strong></p>
-                                <p>Potion: <strong>{potion?.name ?? combo.potionId}</strong> · {shimmer?.name ?? combo.shimmerId} shimmer</p>
-                                {combo.pizzaId ? <Link href={`/dev/order/${combo.pizzaId}?pair=${combo.potionId}`}>Build This Pairing</Link> : <p className="dev-data-note">Pairing recorded. Its pizza recipe is not yet present in the current site data.</p>}
+                                <p>Pizza: <strong>{MENU.pizzas.find((item) => item.id === combo.pizzaId)?.name}</strong></p>
+                                <p>Potion: <strong>{potion?.name ?? combo.potionId}</strong> · {combo.shimmerIds.map((id) => MENU.shimmers.find((item) => item.id === id)?.name ?? id).join(" + ")} shimmer</p>
+                                <Link href={`/dev/order/${combo.pizzaId}?pair=${combo.potionId}&combo=${combo.id}`}>Build This Pairing</Link>
                             </article>
                         );
                     })}
                 </div>
+            </section>
+
+            <section className="dev-menu-build">
+                <div><span>Choose both sides</span><h2>Build Your Own Adventure Combo</h2><p>Pair any pizza build with any orderable drink. Combo pricing is coming soon; no discount or restriction has been invented.</p></div>
+                <Link href="/dev/order/combo">Build a BYO Combo</Link>
+            </section>
+
+            <section className="dev-menu-build">
+                <div><span>Drinks without the potion workshop</span><h2>Standalone Drinks</h2><p>Order a fountain drink with pricing marked TBD, or a straight Red Bull or Monster can for {formatMoney(MENU.straightEnergyDrinkPrice)}.</p></div>
+                <Link href="/dev/order/drinks">Order Drinks</Link>
             </section>
 
             <section className="dev-catalog-section">
@@ -141,7 +152,7 @@ export default function DevMenuPage() {
                     {ingredientGroups.map(([title, items]) => (
                         <section className="dev-ingredient-column" key={title}>
                             <h3>{title}</h3>
-                            <ul>{items.map((item) => <li key={item.id}>{item.name}{item.isCrustOption ? <small>{item.isVegan ? "Vegan" : item.id === "gluten-free" ? "Gluten-free" : "Contains milk"}</small> : null}</li>)}</ul>
+                            <ul>{items.map((item) => <li key={item.id}>{item.name}{item.isCrustOption ? <small>{item.id === "pizza-pocket" ? "Regular, Vegan, or Gluten-Free dough" : item.isVegan ? "Vegan" : item.id === "gluten-free" ? "Gluten-free" : "Contains milk"}</small> : null}</li>)}</ul>
                         </section>
                     ))}
                 </div>

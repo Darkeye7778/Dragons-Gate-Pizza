@@ -11,7 +11,7 @@ import {
     writeCart,
 } from "@/lib/cart/store";
 import { calcCartTotals } from "@/lib/cart/totals";
-import { isPotionCartItem, PIZZA_CUT_LABELS, type CartItem, type PizzaCartItem, type PotionCartItem } from "@/lib/cart/types";
+import { isDrinkCartItem, isPotionCartItem, PIZZA_CUT_LABELS, type CartItem, type DrinkCartItem, type PizzaCartItem, type PotionCartItem } from "@/lib/cart/types";
 import { getSignatureToppingUnits, getToppingOptions } from "@/lib/menu/catalog";
 import { calculatePizzaPricing, type PizzaPricingSnapshot } from "@/lib/pricing/pizzaPricing";
 import { formatMoney } from "@/lib/pricing/format";
@@ -37,10 +37,10 @@ function getIngredientSummary(item: PizzaCartItem): string {
     const names = ids.map((id) => {
         const name = MENU.ingredients.find((ingredient) => ingredient.id === id)?.name ?? id;
         const placement = item.crustId === "pizza-pocket" ? "whole" : item.toppingPlacements?.[id] ?? item.finishPlacements?.[id];
+        const amount = item.toppingAmounts?.[id];
 
-        return placement && placement !== "whole"
-            ? `${name} (${placement} half)`
-            : name;
+        const details = [amount && amount !== "normal" ? amount : null, placement && placement !== "whole" ? `${placement} half` : null].filter(Boolean);
+        return details.length > 0 ? `${name} (${details.join(" · ")})` : name;
     });
     const visibleNames = names.slice(0, 5);
     const remainder = names.length - visibleNames.length;
@@ -70,6 +70,7 @@ function getItemPricing(item: PizzaCartItem): PizzaPricingSnapshot {
         .map((ingredientId) => ({
             ingredientId,
             placement: item.toppingPlacements?.[ingredientId] ?? "whole" as const,
+            amount: item.toppingAmounts?.[ingredientId] ?? "normal" as const,
         }));
 
     return calculatePizzaPricing({
@@ -82,6 +83,11 @@ function getItemPricing(item: PizzaCartItem): PizzaPricingSnapshot {
 }
 
 function repriceCartItem(item: CartItem): CartItem {
+    if (isDrinkCartItem(item)) {
+        return item.drinkType === "energy"
+            ? { ...item, pricingState: "priced" as const, unitBasePrice: MENU.straightEnergyDrinkPrice }
+            : { ...item, pricingState: "tbd" as const, unitBasePrice: 0 };
+    }
     if (isPotionCartItem(item)) {
         const pricing = calculatePotionPricing(item);
         return { ...item, unitBasePrice: pricing.unitPrice };
@@ -102,11 +108,15 @@ function repriceCartItem(item: CartItem): CartItem {
     const toppingPlacements = isPizzaPocket
         ? Object.fromEntries(item.preBakeIngredientIds.filter((id) => TOPPING_IDS.has(id)).map((id) => [id, "whole" as const]))
         : item.toppingPlacements;
+    const toppingAmounts = Object.fromEntries(
+        item.preBakeIngredientIds.filter((id) => TOPPING_IDS.has(id)).map((id) => [id, item.toppingAmounts?.[id] ?? "normal"]),
+    );
     const pocketCut = item.cutStyle === "three-slice" ? "three-slice" : "uncut";
     return {
         ...item,
         pocketDoughId,
         toppingPlacements,
+        toppingAmounts,
         finishPlacements,
         cutStyle: isPizzaPocket ? pocketCut : item.cutStyle ?? "eight-slice",
         unitBasePrice: pricing.unitPrice,
@@ -121,7 +131,15 @@ function getPotionName(item: PotionCartItem): string {
 }
 
 function getCartItemName(item: CartItem): string {
+    if (isDrinkCartItem(item)) return item.drinkType === "fountain" ? "Fountain Drink" : "Energy Drink";
     return isPotionCartItem(item) ? getPotionName(item) : getPizzaName(item.pizzaId);
+}
+
+function getDrinkSummary(item: DrinkCartItem): string {
+    if (item.drinkType === "fountain") return MENU.drinkBases.find((base) => base.id === item.baseId)?.name ?? "Fountain base";
+    const brand = MENU.energyBrands.find((option) => option.id === item.energyBrandId);
+    const variant = brand?.variants.find((option) => option.id === item.energyVariantId);
+    return `${brand?.name ?? "Energy drink"}${variant ? ` · ${variant.name}` : ""}`;
 }
 
 function getPotionSelectionSummary(item: PotionCartItem): string {
@@ -205,6 +223,16 @@ export default function DevCartPage() {
                         </div>
 
                         {items.map((item, index) => {
+                            if (isDrinkCartItem(item)) {
+                                return <article className="dev-cart-item" key={item.id}>
+                                    <span className="dev-cart-item-number">{String(index + 1).padStart(2, "0")}</span>
+                                    <div className="dev-cart-item-copy"><h2>{item.drinkType === "fountain" ? "Fountain Drink" : "Straight Energy Drink"}</h2>
+                                        {item.comboGroupId ? <p className="dev-data-note">Build Your Own Adventure Combo · pricing coming soon</p> : null}
+                                        <p>{getDrinkSummary(item)}</p><dl className="dev-cart-price-breakdown"><div><dt>Each drink</dt><dd>{item.pricingState === "tbd" ? "Price TBD" : formatMoney(item.unitBasePrice)}</dd></div></dl><Link href="/dev/order/drinks">Order another drink</Link>
+                                    </div>
+                                    <div className="dev-cart-item-actions"><strong>{item.pricingState === "tbd" ? "TBD" : formatMoney(item.unitBasePrice * item.quantity)}</strong><div className="dev-quantity-control"><div><button type="button" onClick={() => changeQuantity(item.id, Math.max(1, item.quantity - 1))} disabled={item.quantity === 1}>−</button><output>{item.quantity}</output><button type="button" onClick={() => changeQuantity(item.id, item.quantity + 1)}>+</button></div></div><button className="dev-cart-remove" type="button" onClick={() => removeItem(item.id)}>Remove</button></div>
+                                </article>;
+                            }
                             if (isPotionCartItem(item)) {
                                 const pricing = calculatePotionPricing(item);
                                 return (
@@ -212,10 +240,12 @@ export default function DevCartPage() {
                                         <span className="dev-cart-item-number">{String(index + 1).padStart(2, "0")}</span>
                                         <div className="dev-cart-item-copy">
                                             <h2>{getPotionName(item)}</h2>
+                                            {item.comboGroupId ? <p className="dev-data-note">{item.comboType === "curated" ? "Curated Adventure Combo" : "Build Your Own Adventure Combo · pricing coming soon"}</p> : null}
                                             <p>Arcane refreshment</p>
                                             <small>{getPotionSelectionSummary(item)}</small>
                                             <dl className="dev-cart-price-breakdown">
                                                 <div><dt>Potion base</dt><dd>{formatMoney(pricing.basePrice)}</dd></div>
+                                                {pricing.additionalFlavorCount > 0 ? <div><dt>Additional flavors</dt><dd>{pricing.additionalFlavorCharge === null ? "Price TBD" : `+${formatMoney(pricing.additionalFlavorCharge)}`}</dd></div> : null}
                                                 {pricing.enhancementCharge > 0 ? <div><dt>Enhancements</dt><dd>+{formatMoney(pricing.enhancementCharge)}</dd></div> : null}
                                                 {pricing.energyCharge > 0 ? <div><dt>Energy upgrade</dt><dd>+{formatMoney(pricing.energyCharge)}</dd></div> : null}
                                                 <div><dt>Each potion</dt><dd>{formatMoney(pricing.unitPrice)}</dd></div>
@@ -253,6 +283,7 @@ export default function DevCartPage() {
                                     <span className="dev-cart-item-number">{String(index + 1).padStart(2, "0")}</span>
                                     <div className="dev-cart-item-copy">
                                         <h2>{getPizzaName(item.pizzaId)}</h2>
+                                        {item.comboGroupId ? <p className="dev-data-note">{item.comboType === "curated" ? "Curated Adventure Combo" : "Build Your Own Adventure Combo · pricing coming soon"}</p> : null}
                                         <p>{size?.label ?? item.sizeId} · {item.crustId === "pizza-pocket" ? `Pizza Pocket · ${pocketDough?.name ?? "Regular"} dough` : `${crust?.name ?? item.crustId} crust`} · {PIZZA_CUT_LABELS[item.cutStyle ?? "eight-slice"]}</p>
                                         <small>{getIngredientSummary(item)}</small>
                                         {item.crustId === "pizza-pocket" ? <small>Preparation: fillings folded into one side · Extra {pocketTopCheese} over the crust</small> : null}
@@ -303,14 +334,14 @@ export default function DevCartPage() {
                     <aside className="dev-cart-summary">
                         <span className="dev-section-kicker">Order summary</span>
                         <dl>
-                            <div><dt>Order subtotal</dt><dd>{formatMoney(totals.subtotal)}</dd></div>
+                            <div><dt>{totals.hasUnresolvedPrice ? "Known-price subtotal" : "Order subtotal"}</dt><dd>{formatMoney(totals.subtotal)}</dd></div>
                             <div><dt>Estimated tax</dt><dd>Calculated later</dd></div>
                         </dl>
                         <div className="dev-cart-total">
-                            <span>Prototype total</span>
-                            <strong>{formatMoney(totals.subtotal)}</strong>
+                            <span>{totals.hasUnresolvedPrice ? "Known-price total" : "Prototype total"}</span>
+                            <strong>{formatMoney(totals.subtotal)}{totals.hasUnresolvedPrice ? " + TBD items" : ""}</strong>
                         </div>
-                        <button type="button" disabled>Checkout not live yet</button>
+                        <Link className="dev-add-cart-button" href="/dev/checkout">Prototype Checkout</Link>
                         <p>
                             This development build stores selections locally. It does not accept payment or submit an order to a restaurant.
                         </p>

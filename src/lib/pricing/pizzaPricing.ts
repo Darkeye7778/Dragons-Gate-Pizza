@@ -1,4 +1,4 @@
-import type { ToppingPlacement } from "@/lib/menu/types";
+import type { ToppingAmount, ToppingPlacement } from "@/lib/menu/types";
 import { getBasePizzaPrice, roundMoney } from "@/lib/pricing/calc";
 import {
     ADDITIONAL_TOPPING_UNIT_PRICE,
@@ -13,6 +13,7 @@ import type { CrustId, Money, PizzaPriceTier, PizzaSizeId, PocketDoughId } from 
 export type ToppingSelectionForPricing = {
     ingredientId: string;
     placement: ToppingPlacement;
+    amount?: ToppingAmount;
 };
 
 export type ToppingUnitCalculator = (selections: ToppingSelectionForPricing[]) => number;
@@ -24,8 +25,16 @@ export type ToppingUnitCalculator = (selections: ToppingSelectionForPricing[]) =
  */
 export const CURRENT_TU_POLICY_ID = "distinct-selection-v1";
 
+export function getToppingUnitWeight(amount: ToppingAmount): number {
+    // Quantity-to-TU weights are intentionally unresolved. Every selected
+    // ingredient remains one TU under distinct-selection-v1.
+    void amount;
+    return 1;
+}
+
 export const calculateDistinctSelectionToppingUnits: ToppingUnitCalculator = (selections) =>
-    new Set(selections.map((selection) => selection.ingredientId)).size;
+    [...new Map(selections.map((selection) => [selection.ingredientId, selection])).values()]
+        .reduce((total, selection) => total + getToppingUnitWeight(selection.amount ?? "normal"), 0);
 
 export function calculateToppingUnits(
     selections: ToppingSelectionForPricing[],

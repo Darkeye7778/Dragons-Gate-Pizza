@@ -40,7 +40,7 @@ export default function DevHomePage() {
                 </p>
                 <div className="dev-feature-grid dev-pizza-grid">
                     <div className="dev-feature-card"><h3>Signature Pies</h3><p>Distinct recipes with fantasy names and combinations that still make sense at the table.</p></div>
-                    <div className="dev-feature-card"><h3>Build Your Own</h3><p>Choose a size, crust, sauce, cheese, toppings, and finishing drizzle in the current ordering prototype.</p></div>
+                    <div className="dev-feature-card"><h3>Build Your Own</h3><p>Choose a size, crust, sauce, cheese, toppings, and post-bake finishes in the current ordering prototype.</p></div>
                     <div className="dev-feature-card"><h3>Pizza Pockets</h3><p>A compact, portable part of the developing food lineup.</p></div>
                     <div className="dev-feature-card"><h3>Different Paths</h3><p>The menu prototype includes gluten-free, cauliflower, keto, and vegan crust selections. Final venue availability is still being developed.</p></div>
                 </div>

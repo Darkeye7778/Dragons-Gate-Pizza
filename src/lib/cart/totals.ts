@@ -1,5 +1,7 @@
 ﻿import type { CartItem } from "@/lib/cart/types";
 import type { Money } from "@/lib/pricing/types";
+import { isDrinkCartItem, isPotionCartItem } from "@/lib/cart/types";
+import { calculatePotionPricing } from "@/lib/pricing/potionPricing";
 import { calcTax, multiplyMoney, roundMoney } from "@/lib/pricing/calc";
 
 export type CartTotals = {
@@ -7,6 +9,7 @@ export type CartTotals = {
     tax: Money;
     deliveryFee: Money;
     total: Money;
+    hasUnresolvedPrice: boolean;
 };
 
 export function calcCartSubtotal(items: CartItem[]): Money {
@@ -36,5 +39,10 @@ export function calcCartTotals(
         tax,
         deliveryFee,
         total,
+        hasUnresolvedPrice: items.some((item) =>
+            item.comboType === "byo"
+            || (isDrinkCartItem(item) && item.pricingState === "tbd")
+            || (isPotionCartItem(item) && calculatePotionPricing(item).hasUnresolvedAdditionalFlavorPrice),
+        ),
     };
 }

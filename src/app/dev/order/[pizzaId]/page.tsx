@@ -14,10 +14,10 @@ export default async function PizzaBuilderPage({
     searchParams,
 }: {
     params: Promise<{ pizzaId: string }>;
-    searchParams: Promise<{ pair?: string }>;
+    searchParams: Promise<{ pair?: string; combo?: string; drink?: string }>;
 }) {
     const { pizzaId } = await params;
-    const { pair } = await searchParams;
+    const { pair, combo, drink } = await searchParams;
     const pizza = pizzaId === "custom"
         ? null
         : MENU.pizzas.find((item) => item.id === pizzaId);
@@ -26,7 +26,8 @@ export default async function PizzaBuilderPage({
         notFound();
     }
 
-    const pairedPotionId = pair && MENU.potions.some((item) => item.id === pair) ? pair : undefined;
+    const pairedPotionId = pair === "custom" || (pair && MENU.potions.some((item) => item.id === pair)) ? pair : undefined;
+    const comboId = combo === "byo-adventure" || MENU.combos.some((item) => item.id === combo) ? combo : undefined;
 
-    return <PizzaBuilder pizza={pizza ?? null} pairedPotionId={pairedPotionId} />;
+    return <PizzaBuilder pizza={pizza ?? null} pairedPotionId={pairedPotionId} pairedDrinkPath={drink === "standalone" ? "/dev/order/drinks" : undefined} comboId={comboId} />;
 }

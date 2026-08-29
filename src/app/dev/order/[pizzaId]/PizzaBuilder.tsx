@@ -16,7 +16,7 @@ import {
     getToppingOptions,
     sortIngredientIds,
 } from "@/lib/menu/catalog";
-import type { Ingredient, MenuPizza, ToppingPlacement } from "@/lib/menu/types";
+import type { Ingredient, MenuPizza, ToppingAmount, ToppingPlacement } from "@/lib/menu/types";
 import { getBasePizzaPrice, multiplyMoney } from "@/lib/pricing/calc";
 import { formatMoney } from "@/lib/pricing/format";
 import { calculatePizzaPricing } from "@/lib/pricing/pizzaPricing";
@@ -38,6 +38,7 @@ const FINISHES = getFinishOptions();
 const STANDARD_CUT_OPTIONS: PizzaCutStyle[] = ["six-slice", "eight-slice", "square"];
 const POCKET_CUT_OPTIONS: PizzaCutStyle[] = ["uncut", "three-slice"];
 const POCKET_DOUGH_OPTIONS: PocketDoughId[] = ["regular", "vegan", "gluten-free"];
+const TOPPING_AMOUNTS: ToppingAmount[] = ["light", "normal", "extra", "double", "triple"];
 
 function createCartItemId(): string {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -56,6 +57,15 @@ function initialPlacements(pizza: MenuPizza | null): Record<string, ToppingPlace
 function initialFinishPlacements(pizza: MenuPizza | null): Record<string, ToppingPlacement> {
     return Object.fromEntries(
         (pizza?.preset.defaultPostBakeIngredientIds ?? []).map((id) => [id, "whole"]),
+    );
+}
+
+function initialToppingAmounts(pizza: MenuPizza | null): Record<string, ToppingAmount> {
+    const toppingIds = new Set(TOPPINGS.map((item) => item.id));
+    return Object.fromEntries(
+        (pizza?.preset.defaultPreBakeIngredientIds ?? [])
+            .filter((id) => toppingIds.has(id))
+            .map((id) => [id, pizza?.preset.defaultToppingAmounts?.[id] ?? "normal"]),
     );
 }
 
@@ -91,9 +101,10 @@ function ingredientSeed(id: string): number {
     return [...id].reduce((seed, character) => ((seed * 31) + character.charCodeAt(0)) % 997, 17);
 }
 
-function getToppingMarkers(id: string, placement: ToppingPlacement) {
+function getToppingMarkers(id: string, placement: ToppingPlacement, amount: ToppingAmount = "normal") {
     const seed = ingredientSeed(id);
-    const count = placement === "whole" ? 7 : 5;
+    const wholeCounts: Record<ToppingAmount, number> = { light: 4, normal: 7, extra: 10, double: 13, triple: 16 };
+    const count = placement === "whole" ? wholeCounts[amount] : Math.max(3, Math.ceil(wholeCounts[amount] * 0.68));
 
     return Array.from({ length: count }, (_, markerIndex) => {
         const angle = ((seed * 17 + markerIndex * 137.508) % 360) * (Math.PI / 180);
@@ -143,7 +154,7 @@ function ChoiceTile({ ingredient, selected, onChange, type = "checkbox", name, p
     );
 }
 
-export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPizza | null; pairedPotionId?: string }) {
+export default function PizzaBuilder({ pizza, pairedPotionId, pairedDrinkPath, comboId }: { pizza: MenuPizza | null; pairedPotionId?: string; pairedDrinkPath?: string; comboId?: string }) {
     const router = useRouter();
     const originalPreBake = pizza?.preset.defaultPreBakeIngredientIds ?? [];
     const originalPostBake = pizza?.preset.defaultPostBakeIngredientIds ?? [];
@@ -154,6 +165,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
     const [preBakeIngredientIds, setPreBakeIngredientIds] = useState<string[]>(originalPreBake);
     const [postBakeIngredientIds, setPostBakeIngredientIds] = useState<string[]>(originalPostBake);
     const [toppingPlacements, setToppingPlacements] = useState<Record<string, ToppingPlacement>>(() => initialPlacements(pizza));
+    const [toppingAmounts, setToppingAmounts] = useState<Record<string, ToppingAmount>>(() => initialToppingAmounts(pizza));
     const [finishPlacements, setFinishPlacements] = useState<Record<string, ToppingPlacement>>(() => initialFinishPlacements(pizza));
     const [cutStyle, setCutStyle] = useState<PizzaCutStyle>("eight-slice");
     const [quantity, setQuantity] = useState(1);
@@ -176,6 +188,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
     const toppingSelections = selectedToppings.map((item) => ({
         ingredientId: item.id,
         placement: toppingPlacements[item.id] ?? "whole" as const,
+        amount: toppingAmounts[item.id] ?? "normal" as const,
     }));
     const signaturePresetToppingUnits = pizza ? getSignatureToppingUnits(pizza) : undefined;
     const pricing = calculatePizzaPricing({
@@ -212,6 +225,12 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
             else next[id] = "whole";
             return next;
         });
+        setToppingAmounts((current) => {
+            const next = { ...current };
+            if (isSelected) delete next[id];
+            else next[id] = "normal";
+            return next;
+        });
     }
 
     function toggleFinish(id: string) {
@@ -227,6 +246,10 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
 
     function setPlacement(id: string, placement: ToppingPlacement) {
         setToppingPlacements((current) => ({ ...current, [id]: placement }));
+    }
+
+    function setAmount(id: string, amount: ToppingAmount) {
+        setToppingAmounts((current) => ({ ...current, [id]: amount }));
     }
 
     function setFinishPlacement(id: string, placement: ToppingPlacement) {
@@ -258,6 +281,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
         setPreBakeIngredientIds(originalPreBake);
         setPostBakeIngredientIds(originalPostBake);
         setToppingPlacements(initialPlacements(pizza));
+        setToppingAmounts(initialToppingAmounts(pizza));
         setFinishPlacements(initialFinishPlacements(pizza));
         setCutStyle("eight-slice");
         setQuantity(1);
@@ -265,18 +289,27 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
 
     function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        const comboGroupId = comboId ? createCartItemId() : undefined;
         addToCart({
             kind: "pizza", id: createCartItemId(), pizzaId: pizza?.id ?? "custom", sizeId, crustId,
             pocketDoughId: isPizzaPocket ? pocketDoughId : undefined,
             preBakeIngredientIds,
             postBakeIngredientIds,
             toppingPlacements: isPizzaPocket ? Object.fromEntries(selectedToppings.map((item) => [item.id, "whole"])) : toppingPlacements,
+            toppingAmounts,
             finishPlacements: isPizzaPocket ? Object.fromEntries(selectedFinishes.map((item) => [item.id, "whole"])) : finishPlacements,
             cutStyle,
             quantity,
             unitBasePrice: unitPrice, pricing,
+            comboId,
+            comboType: comboId === "byo-adventure" ? "byo" : comboId ? "curated" : undefined,
+            comboGroupId,
         });
-        router.push(pairedPotionId ? `/dev/order/potion/${pairedPotionId}` : "/dev/cart");
+        router.push(pairedPotionId
+            ? `/dev/order/potion/${pairedPotionId}?combo=${comboId ?? ""}&group=${comboGroupId ?? ""}`
+            : pairedDrinkPath
+                ? `${pairedDrinkPath}?combo=${comboId ?? ""}&group=${comboGroupId ?? ""}`
+                : "/dev/cart");
     }
 
     return (
@@ -315,11 +348,12 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                             <div className="dev-pizza-half-line" aria-hidden="true" />
                             {selectedToppings.flatMap((ingredient) => {
                                 const placement = isPizzaPocket ? "whole" : (toppingPlacements[ingredient.id] ?? "whole");
-                                return getToppingMarkers(ingredient.id, placement).map((marker, markerIndex) => (
+                                const amount = toppingAmounts[ingredient.id] ?? "normal";
+                                return getToppingMarkers(ingredient.id, placement, amount).map((marker, markerIndex) => (
                                     <span
                                         className={`dev-pizza-topping topping-${toppingVisualClass(ingredient.id)}`}
                                         key={`${ingredient.id}-${markerIndex}`}
-                                        title={`${ingredient.name} · ${placement}`}
+                                        title={`${ingredient.name} · ${amount} · ${placement}`}
                                         style={{
                                             left: `${marker.left}%`, top: `${marker.top}%`,
                                             "--topping-rotation": `${marker.rotation}deg`,
@@ -331,6 +365,9 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                             })}
                             {selectedFinishes.map((finish, index) => {
                                 const placement = isPizzaPocket ? "whole" : (finishPlacements[finish.id] ?? "whole");
+                                if (finish.category === "post-bake-greens") {
+                                    return <span className="dev-pizza-finish-greens" data-placement={placement} key={finish.id} title={`${finish.name} · ${placement}`}>{getToppingMarkers(finish.id, placement, "extra").map((marker, markerIndex) => <i key={markerIndex} style={{ left: `${marker.left}%`, top: `${marker.top}%`, transform: `rotate(${marker.rotation}deg) scale(${marker.scale})` }} />)}</span>;
+                                }
                                 return <span className={`dev-pizza-drizzle drizzle-${index % 3}`} data-placement={placement} key={finish.id} title={`${finish.name} · ${placement}`} />;
                             })}
                             {isPizzaPocket ? <div className="dev-pocket-fold" title={`Extra ${pocketTopCheeses.map((item) => item.name).join(" + ")} over the folded crust`} /> : null}
@@ -343,7 +380,8 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                         {selectedCount === 0 ? <p>Just dough and crust so far. Start adding layers.</p> : (
                             <div>{INGREDIENTS.filter((item) => preBakeIngredientIds.includes(item.id) || postBakeIngredientIds.includes(item.id)).map((item) => {
                                 const placement = isPizzaPocket ? "whole" : (toppingPlacements[item.id] ?? finishPlacements[item.id]);
-                                return <span key={item.id}>{item.name}{isPizzaPocket ? (postBakeIngredientIds.includes(item.id) ? " · over crust" : " · inside") : placement && placement !== "whole" ? ` · ${placement}` : ""}</span>;
+                                const amount = toppingAmounts[item.id];
+                                return <span key={item.id}>{item.name}{amount ? ` · ${amount}` : ""}{isPizzaPocket ? (postBakeIngredientIds.includes(item.id) ? " · over crust" : " · inside") : placement && placement !== "whole" ? ` · ${placement}` : ""}</span>;
                             })}</div>
                         )}
                     </div>
@@ -437,18 +475,19 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                         <div className="dev-topping-list">{TOPPINGS.map((item) => {
                             const selected = preBakeIngredientIds.includes(item.id);
                             const placement = toppingPlacements[item.id] ?? "whole";
+                            const amount = toppingAmounts[item.id] ?? "normal";
                             const nextToppingPrice = selected ? 0 : Math.max(0, calculatePizzaPricing({
                                 sizeId,
                                 crustId,
                                 pocketDoughId,
-                                toppings: [...toppingSelections, { ingredientId: item.id, placement: "whole" }],
+                                toppings: [...toppingSelections, { ingredientId: item.id, placement: "whole", amount: "normal" }],
                                 signaturePresetToppingUnits,
                             }).unitPrice - pricing.unitPrice);
                             return <article className={`dev-topping-row${selected ? " is-selected" : ""}`} key={item.id}>
                                 <button type="button" className="dev-topping-toggle" aria-pressed={selected} onClick={() => toggleTopping(item.id)}>
                                     <span className={`dev-topping-swatch topping-${toppingVisualClass(item.id)}`} aria-hidden="true" />
                                     <span><strong>{item.name}</strong><IngredientPrice>{selected
-                                        ? `${originalIngredients.has(item.id) ? "Included in house recipe · " : "1 TU · "}${isPizzaPocket ? "inside pocket" : placement === "whole" ? "whole" : `${placement} half`}`
+                                        ? `${originalIngredients.has(item.id) ? "Included in house recipe · " : "1 TU · "}${amount} · ${isPizzaPocket ? "inside pocket" : placement === "whole" ? "whole" : `${placement} half`}`
                                         : nextToppingPrice > 0
                                             ? `${pricing.mode === "signature" ? "Additional topping" : "Adds 1 TU"} · +${formatMoney(nextToppingPrice)}`
                                             : pricing.mode === "signature"
@@ -460,18 +499,21 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                                         <span className={`dev-placement-icon placement-${option}`} aria-hidden="true" />{option === "whole" ? "Whole" : `${option[0].toUpperCase()}${option.slice(1)} half`}
                                     </button>)}
                                 </div> : null}
+                                {selected ? <div className="dev-amount-control" role="group" aria-label={`${item.name} amount`}>
+                                    {TOPPING_AMOUNTS.map((option) => <button key={option} type="button" aria-pressed={amount === option} onClick={() => setAmount(item.id, option)}>{option[0].toUpperCase()}{option.slice(1)}</button>)}
+                                </div> : null}
                             </article>;
                         })}</div>
                     </fieldset>
 
                     <fieldset className="dev-builder-step">
-                        <legend><span>05</span> Finishing Drizzle</legend><p>{isPizzaPocket ? "Finishes are applied over the top of the folded, cheese-finished crust." : "Add the final layer after the pizza leaves the hearth."}</p>
+                        <legend><span>05</span> Post-Bake Finishes</legend><p>{isPizzaPocket ? "Finishes are applied over the top of the folded, cheese-finished crust." : "Choose drizzles, oils, glazes, or fresh greens after the pizza leaves the hearth."}</p>
                         <div className="dev-topping-list">{FINISHES.map((item) => {
                             const selected = postBakeIngredientIds.includes(item.id);
                             const placement = finishPlacements[item.id] ?? "whole";
                             return <article className={`dev-topping-row dev-finish-row${selected ? " is-selected" : ""}`} key={item.id}>
                                 <button type="button" className="dev-topping-toggle" aria-pressed={selected} onClick={() => toggleFinish(item.id)}>
-                                    <span className="dev-finish-swatch" aria-hidden="true" />
+                                    <span className={`dev-finish-swatch${item.category === "post-bake-greens" ? " is-greens" : ""}`} aria-hidden="true" />
                                     <span><strong>{item.name}</strong><IngredientPrice>{selected
                                         ? `${originalIngredients.has(item.id) ? "Included in house recipe · " : "Included · "}${isPizzaPocket ? "over folded crust" : placement === "whole" ? "whole" : `${placement} half`}`
                                         : originalIngredients.has(item.id) ? "Included in house recipe" : "Included"}</IngredientPrice></span>

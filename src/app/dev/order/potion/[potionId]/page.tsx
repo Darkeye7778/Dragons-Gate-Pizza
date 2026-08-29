@@ -9,11 +9,13 @@ export function generateStaticParams() {
     ];
 }
 
-export default async function PotionBuilderPage({ params }: { params: Promise<{ potionId: string }> }) {
+export default async function PotionBuilderPage({ params, searchParams }: { params: Promise<{ potionId: string }>; searchParams: Promise<{ combo?: string; group?: string }> }) {
     const { potionId } = await params;
+    const { combo, group } = await searchParams;
     const potion = potionId === "custom" ? null : MENU.potions.find((item) => item.id === potionId);
 
     if (potionId !== "custom" && !potion) notFound();
 
-    return <PotionBuilder potion={potion ?? null} />;
+    const comboId = combo === "byo-adventure" || MENU.combos.some((item) => item.id === combo) ? combo : undefined;
+    return <PotionBuilder potion={potion ?? null} comboId={comboId} comboGroupId={comboId ? group : undefined} />;
 }

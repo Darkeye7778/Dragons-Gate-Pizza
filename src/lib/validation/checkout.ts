@@ -47,11 +47,15 @@ const pizzaCartItemSchema = z.object({
     preBakeIngredientIds: z.array(z.string()),
     postBakeIngredientIds: z.array(z.string()),
     toppingPlacements: z.record(z.string(), z.enum(["whole", "left", "right"])).optional(),
+    toppingAmounts: z.record(z.string(), z.enum(["light", "normal", "extra", "double", "triple"])).optional(),
     finishPlacements: z.record(z.string(), z.enum(["whole", "left", "right"])).optional(),
     cutStyle: z.enum(["uncut", "three-slice", "four-slice", "six-slice", "eight-slice", "square"]).optional(),
     quantity: z.number().int().min(1),
     unitBasePrice: z.number().min(0),
     pricing: pizzaPricingSchema.optional(),
+    comboId: z.string().optional(),
+    comboType: z.enum(["curated", "byo"]).optional(),
+    comboGroupId: z.string().optional(),
 });
 
 const potionCartItemSchema = z.object({
@@ -59,7 +63,7 @@ const potionCartItemSchema = z.object({
     id: z.string().min(1),
     potionId: z.string().min(1),
     baseId: z.string().optional(),
-    flavorIds: z.array(z.string()).max(2),
+    flavorIds: z.array(z.string()),
     enhancementIds: z.array(z.string()),
     shimmerIds: z.array(z.string()).max(2),
     energyBrandId: z.string().optional(),
@@ -67,9 +71,27 @@ const potionCartItemSchema = z.object({
     energyAddInId: z.string().optional(),
     quantity: z.number().int().min(1),
     unitBasePrice: z.number().min(0),
+    comboId: z.string().optional(),
+    comboType: z.enum(["curated", "byo"]).optional(),
+    comboGroupId: z.string().optional(),
 });
 
-export const cartItemSchema = z.union([pizzaCartItemSchema, potionCartItemSchema]);
+const drinkCartItemSchema = z.object({
+    kind: z.literal("drink"),
+    id: z.string().min(1),
+    drinkType: z.enum(["fountain", "energy"]),
+    baseId: z.string().optional(),
+    energyBrandId: z.string().optional(),
+    energyVariantId: z.string().optional(),
+    quantity: z.number().int().min(1),
+    unitBasePrice: z.number().min(0),
+    pricingState: z.enum(["priced", "tbd"]),
+    comboId: z.string().optional(),
+    comboType: z.enum(["curated", "byo"]).optional(),
+    comboGroupId: z.string().optional(),
+});
+
+export const cartItemSchema = z.union([pizzaCartItemSchema, potionCartItemSchema, drinkCartItemSchema]);
 
 export const checkoutFormSchema = z
     .object({

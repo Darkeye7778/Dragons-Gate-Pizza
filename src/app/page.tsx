@@ -29,6 +29,7 @@ export default function LandingPage() {
     const [userInput, setUserInput] = useState("");
     const [passInput, setPassInput] = useState("");
     const [error, setError] = useState("");
+    const [notifyStatus, setNotifyStatus] = useState("");
 
     useEffect(() => {
         const update = () => {
@@ -129,7 +130,7 @@ export default function LandingPage() {
                         className="notify-form"
                         onSubmit={(e) => {
                             e.preventDefault();
-                            alert("You will be notified when the gate opens.");
+                            setNotifyStatus("Email signup is not active yet. Your address was not stored or submitted.");
                         }}
                     >
                         <input
@@ -142,7 +143,7 @@ export default function LandingPage() {
                             Notify Me
                         </button>
                     </form>
-                    <p className="notify-note">No spam. Just the call to adventure.</p>
+                    <p className="notify-note" role="status">{notifyStatus || "Signup infrastructure is still in development."}</p>
                 </section>
             </main>
 

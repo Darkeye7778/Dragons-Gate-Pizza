@@ -1,6 +1,6 @@
 ﻿import type { CrustId, Money, PizzaSizeId } from "@/lib/pricing/types";
 
-import type { ToppingPlacement } from "@/lib/menu/types";
+import type { ToppingAmount, ToppingPlacement } from "@/lib/menu/types";
 import type { PizzaPricingSnapshot } from "@/lib/pricing/pizzaPricing";
 import type { PocketDoughId } from "@/lib/pricing/types";
 
@@ -35,6 +35,7 @@ export type PizzaCartItem = {
     preBakeIngredientIds: string[];
     postBakeIngredientIds: string[];
     toppingPlacements?: Record<string, ToppingPlacement>;
+    toppingAmounts?: Record<string, ToppingAmount>;
     finishPlacements?: Record<string, ToppingPlacement>;
     cutStyle?: PizzaCutStyle;
 
@@ -42,6 +43,9 @@ export type PizzaCartItem = {
 
     unitBasePrice: Money;
     pricing?: PizzaPricingSnapshot;
+    comboId?: string;
+    comboType?: "curated" | "byo";
+    comboGroupId?: string;
 };
 
 export type PotionCartItem = {
@@ -57,10 +61,32 @@ export type PotionCartItem = {
     energyAddInId?: string;
     quantity: number;
     unitBasePrice: Money;
+    comboId?: string;
+    comboType?: "curated" | "byo";
+    comboGroupId?: string;
 };
 
-export type CartItem = PizzaCartItem | PotionCartItem;
+export type DrinkCartItem = {
+    kind: "drink";
+    id: string;
+    drinkType: "fountain" | "energy";
+    baseId?: string;
+    energyBrandId?: string;
+    energyVariantId?: string;
+    quantity: number;
+    unitBasePrice: Money;
+    pricingState: "priced" | "tbd";
+    comboId?: string;
+    comboType?: "curated" | "byo";
+    comboGroupId?: string;
+};
+
+export type CartItem = PizzaCartItem | PotionCartItem | DrinkCartItem;
 
 export function isPotionCartItem(item: CartItem): item is PotionCartItem {
     return item.kind === "potion";
+}
+
+export function isDrinkCartItem(item: CartItem): item is DrinkCartItem {
+    return item.kind === "drink";
 }

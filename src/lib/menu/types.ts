@@ -14,7 +14,11 @@ export type IngredientCategory =
     | "fruit"
     | "herb-garnish"
     | "specialty-sauce"
-    | "drizzle";
+    | "drizzle"
+    | "post-bake-greens";
+
+export type IngredientStage = "pre-bake" | "post-bake";
+export type ToppingAmount = "light" | "normal" | "extra" | "double" | "triple";
 
 export type Ingredient = {
     id: string;
@@ -23,6 +27,7 @@ export type Ingredient = {
     isCrustOption: boolean;
     isActive: boolean;
     category: IngredientCategory;
+    stage?: IngredientStage;
     isVegan?: boolean;
     isGlutenFreeIngredient?: boolean;
     allergens?: MajorAllergen[];
@@ -32,6 +37,7 @@ export type Ingredient = {
 export type PizzaPreset = {
     defaultPreBakeIngredientIds: string[];
     defaultPostBakeIngredientIds: string[];
+    defaultToppingAmounts?: Record<string, ToppingAmount>;
 };
 
 export type MenuPizza = {
@@ -47,9 +53,11 @@ export type Potion = {
     name: string;
     description?: string;
     basePrice: number;
-    defaultShimmerId: string;
-    defaultBaseId?: string;
-    defaultFlavorIds?: string[];
+    defaultBaseId: string;
+    defaultFlavorIds: string[];
+    defaultEnhancementIds: string[];
+    defaultShimmerIds: string[];
+    isWorkingName?: boolean;
 };
 
 export type DrinkOption = { id: string; name: string };
@@ -73,10 +81,9 @@ export type EnergyAddIn = {
 export type Combo = {
     id: string;
     name: string;
-    pizzaName: string;
-    pizzaId?: string;
+    pizzaId: string;
     potionId: string;
-    shimmerId: string;
+    shimmerIds: string[];
 };
 
 export type MenuCatalog = {
@@ -91,6 +98,9 @@ export type MenuCatalog = {
     energyAddIns: EnergyAddIn[];
     buildYourOwnPotionPrice: number;
     straightEnergyDrinkPrice: number;
+    additionalPotionFlavorPrice: number | null;
+    fountainDrinkPrice: number | null;
+    buildYourOwnComboPrice: number | null;
     combos: Combo[];
 };
 
@@ -108,3 +118,9 @@ export type LocationIngredientAvailability = {
 };
 
 export type ToppingPlacement = "whole" | "left" | "right";
+
+export type ToppingSelection = {
+    ingredientId: string;
+    placement: ToppingPlacement;
+    amount: ToppingAmount;
+};

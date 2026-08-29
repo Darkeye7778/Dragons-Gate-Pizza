@@ -31,6 +31,7 @@ const BASE_PALETTES: Record<string, PotionPalette> = {
     "cream-soda": { primary: "#efb45f", secondary: "#a35a24", glow: "rgba(239, 180, 95, 0.34)", label: "#ffdca9" },
     "mountain-dew": { primary: "#a9e441", secondary: "#3b9b35", glow: "rgba(137, 224, 59, 0.36)", label: "#cfff86" },
     lemonade: { primary: "#fff27a", secondary: "#d5a92b", glow: "rgba(255, 232, 83, 0.34)", label: "#fff3a1" },
+    "orange-soda": { primary: "#ff9c36", secondary: "#bf4e18", glow: "rgba(255, 132, 38, 0.36)", label: "#ffd092" },
 };
 
 const FLAVOR_COLORS: Record<string, string> = {
@@ -39,15 +40,17 @@ const FLAVOR_COLORS: Record<string, string> = {
     "blue-raspberry": "#45a9ff",
     mango: "#ffae37",
     pineapple: "#ffe05c",
-    coconut: "#fff5dc",
+    "coconut-cream": "#fff5dc",
     cherry: "#d62946",
     vanilla: "#f7e6be",
+    "vanilla-cream": "#fff0cf",
     caramel: "#c27635",
-    hazelnut: "#9b6945",
+    "hazelnut-cream": "#b17b52",
     cinnamon: "#ce6338",
     lime: "#98e757",
     "green-apple": "#79db52",
     lavender: "#bb91ee",
+    passionfruit: "#ff8f38",
 };
 
 const SHIMMER_PALETTES: Record<string, PotionPalette> = {
@@ -76,14 +79,18 @@ const SHIMMER_PALETTES: Record<string, PotionPalette> = {
     "aether-glow-teal": { primary: "#50e0c3", secondary: "#167f83", glow: "rgba(64, 220, 188, 0.44)", label: "#a4f9e8" },
     "prism-shift-rainbow": { primary: "#ff5fd1", secondary: "#54e8ff", glow: "rgba(194, 87, 255, 0.46)", label: "#ffc2ef" },
     "shadowmist-black": { primary: "#34303f", secondary: "#09080d", glow: "rgba(97, 87, 116, 0.36)", label: "#b7adca" },
+    "rose-gold": { primary: "#e9a0a7", secondary: "#b86d70", glow: "rgba(232, 132, 148, 0.42)", label: "#ffd0d4" },
+    magenta: { primary: "#e540b5", secondary: "#8e1a79", glow: "rgba(225, 55, 177, 0.42)", label: "#ffafe7" },
+    silver: { primary: "#d6dce3", secondary: "#818b99", glow: "rgba(207, 220, 232, 0.4)", label: "#f2f5f8" },
+    teal: { primary: "#45c7bd", secondary: "#167879", glow: "rgba(64, 201, 191, 0.42)", label: "#a5fff5" },
 };
 
-export default function PotionBuilder({ potion }: { potion: Potion | null }) {
+export default function PotionBuilder({ potion, comboId, comboGroupId }: { potion: Potion | null; comboId?: string; comboGroupId?: string }) {
     const router = useRouter();
     const [baseId, setBaseId] = useState(potion?.defaultBaseId ?? (potion ? "" : MENU.drinkBases[0]?.id ?? ""));
     const [flavorIds, setFlavorIds] = useState<string[]>(potion?.defaultFlavorIds ?? []);
-    const [enhancementIds, setEnhancementIds] = useState<string[]>([]);
-    const [shimmerIds, setShimmerIds] = useState<string[]>(potion ? [potion.defaultShimmerId] : []);
+    const [enhancementIds, setEnhancementIds] = useState<string[]>(potion?.defaultEnhancementIds ?? []);
+    const [shimmerIds, setShimmerIds] = useState<string[]>(potion?.defaultShimmerIds ?? []);
     const [energyAddInId, setEnergyAddInId] = useState("");
     const [energyBrandId, setEnergyBrandId] = useState("");
     const [energyVariantId, setEnergyVariantId] = useState("");
@@ -91,6 +98,7 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
 
     const pricing = calculatePotionPricing({
         potionId: potion?.id ?? "custom",
+        flavorIds,
         enhancementIds,
         energyAddInId: energyAddInId || undefined,
     });
@@ -138,6 +146,9 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
             energyVariantId: energyAddInId ? energyVariantId || undefined : undefined,
             quantity,
             unitBasePrice: pricing.unitPrice,
+            comboId,
+            comboType: comboId === "byo-adventure" ? "byo" : comboId ? "curated" : undefined,
+            comboGroupId,
         });
         router.push("/dev/cart");
     }
@@ -151,7 +162,8 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
             <header className="dev-builder-hero">
                 <span className="dev-section-kicker">Mix an arcane refreshment</span>
                 <h1>{potion?.name ?? "Build Your Own Potion"}</h1>
-                <p>{potion?.description ?? "Choose a soda or lemonade base, add up to two flavors and two shimmers, then finish it with optional enhancements or an energy upgrade."}</p>
+                {potion?.isWorkingName ? <span className="dev-data-note">Working name</span> : null}
+                <p>{potion?.description ?? "Choose a fountain base, add flavor infusions and up to two shimmers, then finish it with optional enhancements or an energy upgrade."}</p>
             </header>
 
             <form className="dev-potion-builder-layout" onSubmit={handleSubmit}>
@@ -190,6 +202,7 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
                     </div>
                     <dl className="dev-live-price">
                         <div><dt>{potion ? "Signature potion" : "Build-your-own base"}</dt><dd>{formatMoney(pricing.basePrice)}</dd></div>
+                        {pricing.additionalFlavorCount > 0 ? <div><dt>Additional flavors ({pricing.additionalFlavorCount})</dt><dd>{pricing.additionalFlavorCharge === null ? "Price TBD" : `+${formatMoney(pricing.additionalFlavorCharge)}`}</dd></div> : null}
                         {pricing.enhancementCharge > 0 ? <div><dt>Enhancements</dt><dd>+{formatMoney(pricing.enhancementCharge)}</dd></div> : null}
                         {pricing.energyCharge > 0 ? <div><dt>Energy upgrade</dt><dd>+{formatMoney(pricing.energyCharge)}</dd></div> : null}
                     </dl>
@@ -198,7 +211,8 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
                         <output aria-live="polite">{quantity}</output>
                         <button type="button" aria-label="Increase quantity" onClick={() => setQuantity((value) => value + 1)}>+</button>
                     </div></div>
-                    <div className="dev-build-total"><span>Current total</span><strong>{formatMoney(totalPrice)}</strong></div>
+                    {pricing.hasUnresolvedAdditionalFlavorPrice ? <p className="dev-data-note">Additional flavor pricing is not finalized. The amount below includes only currently priced components.</p> : null}
+                    <div className="dev-build-total"><span>{pricing.hasUnresolvedAdditionalFlavorPrice ? "Known-price total" : "Current total"}</span><strong>{formatMoney(totalPrice)}</strong></div>
                     <button className="dev-add-cart-button" type="submit">Add Potion to Cart</button>
                 </aside>
 
@@ -208,21 +222,24 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
                             <span className="dev-section-kicker">House recipe</span>
                             <h2>{potion.name}</h2>
                             <p>{potion.description ?? "This signature pairing is recorded in the final menu. Its full recipe will be published once the ingredient specification is added to the site data."}</p>
+                            <p>House recipe: {MENU.drinkBases.find((item) => item.id === potion.defaultBaseId)?.name} · {potion.defaultFlavorIds.map((id) => MENU.potionFlavors.find((item) => item.id === id)?.name ?? id).join(" + ")}{potion.defaultEnhancementIds.length ? ` · ${potion.defaultEnhancementIds.map((id) => MENU.potionEnhancements.find((item) => item.id === id)?.name ?? id).join(" + ")}` : ""} · {potion.defaultShimmerIds.map((id) => MENU.shimmers.find((item) => item.id === id)?.name ?? id).join(" + ")} shimmer.</p>
                         </section>
-                    ) : (
-                        <>
-                            <fieldset className="dev-builder-step"><legend><span>01</span> Choose a Base</legend><p>Every build starts with one fountain base.</p>
-                                <div className="dev-choice-grid dev-potion-choice-grid">{MENU.drinkBases.map((option) => <label className="dev-choice-card" key={option.id}>
-                                    <input type="radio" name="potion-base" checked={baseId === option.id} onChange={() => setBaseId(option.id)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>Included</small>
-                                </label>)}</div>
-                            </fieldset>
-                            <fieldset className="dev-builder-step"><legend><span>02</span> Flavor Infusions</legend><p>Choose up to two flavors. Both are included in the build-your-own price.</p>
-                                <div className="dev-ingredient-tile-grid">{MENU.potionFlavors.map((option) => <label className="dev-ingredient-tile" key={option.id}>
-                                    <input type="checkbox" checked={flavorIds.includes(option.id)} disabled={!flavorIds.includes(option.id) && flavorIds.length >= 2} onChange={() => setFlavorIds((current) => toggleLimited(current, option.id, 2))} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>Included</small>
-                                </label>)}</div>
-                            </fieldset>
-                        </>
-                    )}
+                    ) : null}
+                    <fieldset className="dev-builder-step"><legend><span>01</span> Choose a Base</legend><p>{potion ? "The house base is included; changing it does not reduce the signature price." : "Every build starts with one fountain base."}</p>
+                        <div className="dev-choice-grid dev-potion-choice-grid">{MENU.drinkBases.map((option) => <label className="dev-choice-card" key={option.id}>
+                            <input type="radio" name="potion-base" checked={baseId === option.id} onChange={() => setBaseId(option.id)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>{potion?.defaultBaseId === option.id ? "House recipe" : "Included"}</small>
+                        </label>)}</div>
+                    </fieldset>
+                    <fieldset className="dev-builder-step"><legend><span>02</span> Flavor Infusions</legend><p>{potion ? `This signature includes ${pricing.includedFlavorAllowance} flavor slots. Additional flavors are allowed, but their price is still TBD.` : "The first two flavors are included. Additional flavors are allowed, but their price is still TBD."}</p>
+                        <div className="dev-ingredient-tile-grid">{MENU.potionFlavors.map((option) => {
+                            const selected = flavorIds.includes(option.id);
+                            const isHouseFlavor = potion?.defaultFlavorIds.includes(option.id);
+                            const wouldBeAdditional = !selected && flavorIds.length >= pricing.includedFlavorAllowance;
+                            return <label className="dev-ingredient-tile" key={option.id}>
+                                <input type="checkbox" checked={selected} onChange={() => setFlavorIds((current) => current.includes(option.id) ? current.filter((id) => id !== option.id) : [...current, option.id])} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>{isHouseFlavor ? "Included in house recipe" : wouldBeAdditional || (selected && flavorIds.length > pricing.includedFlavorAllowance) ? "Additional price TBD" : "Included flavor slot"}</small>
+                            </label>;
+                        })}</div>
+                    </fieldset>
 
                     <fieldset className="dev-builder-step"><legend><span>{potion ? "01" : "03"}</span> Shimmer</legend><p>Choose up to two shimmer colors. Signature potions start with their paired shimmer.</p>
                         <div className="dev-ingredient-tile-grid dev-shimmer-grid">{MENU.shimmers.map((option) => <label className="dev-ingredient-tile dev-shimmer-option" key={option.id} style={{ "--shimmer-color": SHIMMER_PALETTES[option.id]?.primary } as CSSProperties}>
@@ -232,7 +249,7 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
 
                     <fieldset className="dev-builder-step"><legend><span>{potion ? "02" : "04"}</span> Enhancements</legend><p>Add creams, whipped cream, or fresh fruit pieces at the price shown for each option.</p>
                         <div className="dev-ingredient-tile-grid">{MENU.potionEnhancements.map((option) => <label className="dev-ingredient-tile" key={option.id}>
-                            <input type="checkbox" checked={enhancementIds.includes(option.id)} onChange={() => toggleEnhancement(option.id)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>+{formatMoney(option.priceDelta)}{option.isVegan ? " · Vegan" : option.allergens?.includes("milk") ? " · Contains milk" : ""}</small>
+                            <input type="checkbox" checked={enhancementIds.includes(option.id)} onChange={() => toggleEnhancement(option.id)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>{potion?.defaultEnhancementIds.includes(option.id) ? "Included in house recipe" : `+${formatMoney(option.priceDelta)}`}{option.isVegan ? " · Vegan" : option.allergens?.includes("milk") ? " · Contains milk" : ""}</small>
                         </label>)}</div>
                     </fieldset>
 
@@ -247,7 +264,7 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
                         </div> : null}
                     </fieldset>
 
-                    <section className="dev-builder-review"><span>Review the mix</span><h2>Ready to serve?</h2><p>Your current potion total is <strong>{formatMoney(totalPrice)}</strong>.</p><button className="dev-add-cart-button" type="submit">Add Potion to Cart</button></section>
+                    <section className="dev-builder-review"><span>Review the mix</span><h2>Ready to serve?</h2><p>{pricing.hasUnresolvedAdditionalFlavorPrice ? "Additional flavor pricing is still TBD. " : ""}Your current known-price total is <strong>{formatMoney(totalPrice)}</strong>.</p><button className="dev-add-cart-button" type="submit">Add Potion to Cart</button></section>
                 </div>
             </form>
         </main>

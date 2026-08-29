@@ -127,12 +127,12 @@ export function getCheeseOptions(): Ingredient[] {
 
 export function getToppingOptions(): Ingredient[] {
     return getNonCrustIngredients().filter(
-        (ingredient) => !["sauce", "cheese", "vegan-cheese", "drizzle"].includes(ingredient.category),
+        (ingredient) => ingredient.stage !== "post-bake" && !["sauce", "cheese", "vegan-cheese"].includes(ingredient.category),
     );
 }
 
 export function getFinishOptions(): Ingredient[] {
-    return getNonCrustIngredients().filter((ingredient) => ingredient.category === "drizzle");
+    return getNonCrustIngredients().filter((ingredient) => ingredient.stage === "post-bake");
 }
 
 /** Count only priced topping selections in a house recipe. Sauce, cheese, and
