@@ -1556,33 +1556,59 @@ input:focus-visible + .dev-choice-mark { outline: 2px solid #a9baff; outline-off
 .dev-potion-base { position: absolute; inset: 0; background: linear-gradient(150deg, var(--potion-primary), var(--potion-secondary)); }
 .dev-flavor-swirl {
     position: absolute;
-    inset: -30%;
-    border-radius: 44% 56% 48% 52%;
-    background: repeating-radial-gradient(ellipse at 38% 52%, transparent 0 17%, color-mix(in srgb, var(--flavor-color) 72%, white 18%) 19% 23%, transparent 26% 37%);
-    opacity: 0.48;
-    filter: blur(7px);
+    inset: -10%;
+    background: linear-gradient(-28deg,
+        transparent 0 10%,
+        color-mix(in srgb, var(--flavor-color) 70%, white 22%) 11% 16%,
+        transparent 17% 29%,
+        color-mix(in srgb, var(--flavor-color) 62%, white 20%) 30% 36%,
+        transparent 37% 52%,
+        color-mix(in srgb, var(--flavor-color) 76%, white 18%) 53% 57%,
+        transparent 58% 70%,
+        color-mix(in srgb, var(--flavor-color) 66%, white 24%) 71% 78%,
+        transparent 79% 100%);
+    opacity: 0.5;
+    filter: blur(2.5px);
+    mask-image: linear-gradient(90deg, transparent 0, black 15% 85%, transparent 100%);
     mix-blend-mode: screen;
-    animation: dev-flavor-turn 8s ease-in-out infinite alternate;
+    animation: dev-flavor-climb 7s ease-in-out infinite alternate;
 }
-.dev-flavor-swirl-1 { transform: translate(-16%, 6%) rotate(22deg) scale(0.88); }
-.dev-flavor-swirl-2 { transform: translate(16%, -4%) rotate(-38deg) scale(1.08); animation-direction: alternate-reverse; }
+.dev-flavor-swirl-1 { transform: translate(-5%, 4%); }
+.dev-flavor-swirl-2 {
+    background: linear-gradient(-34deg,
+        transparent 0 15%,
+        color-mix(in srgb, var(--flavor-color) 68%, white 22%) 16% 21%,
+        transparent 22% 34%,
+        color-mix(in srgb, var(--flavor-color) 76%, white 16%) 35% 39%,
+        transparent 40% 57%,
+        color-mix(in srgb, var(--flavor-color) 64%, white 25%) 58% 65%,
+        transparent 66% 77%,
+        color-mix(in srgb, var(--flavor-color) 72%, white 18%) 78% 83%,
+        transparent 84% 100%);
+    transform: translate(7%, -5%);
+    animation-direction: alternate-reverse;
+}
 .dev-shimmer-wash {
     position: absolute;
     inset: 0;
-    background:
-        radial-gradient(circle, color-mix(in srgb, var(--shimmer-layer) 84%, white 16%) 0 1px, transparent 1.6px) 0 0 / 17px 19px,
-        linear-gradient(118deg, transparent 10%, var(--shimmer-layer) 52%, transparent 86%);
+    background: linear-gradient(112deg,
+        var(--shimmer-layer) 0 34%,
+        color-mix(in srgb, var(--shimmer-layer) 76%, white 24%) 48%,
+        var(--shimmer-layer) 62% 100%);
     opacity: 0.25;
     mix-blend-mode: screen;
 }
-.dev-shimmer-wash-2 { background-position: 8px 10px, 0 0; transform: scaleX(-1); }
+.dev-shimmer-wash-2 { transform: scaleX(-1); }
 .dev-potion-glass-shine { position: absolute; inset: 0; background: linear-gradient(110deg, transparent 12%, rgba(255,255,255,0.24) 18%, transparent 25% 68%, rgba(255,255,255,0.1) 75%, transparent 81%); }
 .dev-potion-bubble { position: absolute; bottom: -10%; width: 14px; aspect-ratio: 1; border: 1px solid rgba(255,255,255,0.48); border-radius: 50%; animation: dev-potion-bubble 3.4s ease-in infinite; }
 .dev-potion-bubble-1 { left: 22%; }
 .dev-potion-bubble-2 { left: 52%; width: 9px; animation-delay: 1.1s; }
 .dev-potion-bubble-3 { left: 74%; width: 18px; animation-delay: 2s; }
 @keyframes dev-potion-bubble { to { bottom: 110%; opacity: 0; } }
-@keyframes dev-flavor-turn { to { rotate: 16deg; scale: 1.06; } }
+@keyframes dev-flavor-climb {
+    from { translate: 0 2%; }
+    to { translate: 0 -4%; }
+}
 
 .dev-potion-summary { margin-bottom: 22px; }
 .dev-potion-summary strong { color: #fff4e8; font-size: 1.05rem; }

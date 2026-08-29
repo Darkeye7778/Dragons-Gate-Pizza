@@ -24,14 +24,14 @@ const pizzaPricingSchema = z.object({
     toppingUnits: z.number().int().min(0),
     standardToppingUnits: z.number().int().min(0),
     additionalToppingUnits: z.number().int().min(0),
-    signatureIncludedUnitLimit: z.number().int().min(0).nullable(),
+    signatureIncludedToppingUnits: z.number().int().min(0).nullable(),
     cheeseBasePrice: z.number().min(0),
+    signatureBasePrice: z.number().min(0).nullable(),
     standardToppingCharge: z.number().min(0),
     additionalToppingCharge: z.number().min(0),
     toppingCharge: z.number().min(0),
     unitPrice: z.number().min(0),
-    usesFallbackTierPrice: z.boolean(),
-    priceSource: z.enum(["base-cheese-table", "signature-current-price"]),
+    priceSource: z.enum(["base-cheese-table", "signature-anchor"]),
     tuPolicyId: z.literal("distinct-selection-v1"),
 });
 

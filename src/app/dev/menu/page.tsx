@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { MENU } from "@/data/menu";
 import { getCheeseOptions, getCrustOptions, getFinishOptions, getGroupedPizzas, getSauceOptions, getToppingOptions } from "@/lib/menu/catalog";
+import { formatMoney } from "@/lib/pricing/format";
+import { getSignaturePizzaPrice } from "@/lib/pricing/pizzaPricing";
 
 export default function DevMenuPage() {
     const groupedPizzas = getGroupedPizzas();
@@ -52,6 +54,7 @@ export default function DevMenuPage() {
                             {group.pizzas.map((pizza) => (
                                 <article className="dev-menu-item" key={pizza.id}>
                                     <header><h4>{pizza.name}</h4><p>{pizza.description}</p></header>
+                                    <p><strong>{formatMoney(getSignaturePizzaPrice("personal_12", "regular"))}</strong> · Personal 12&quot; regular</p>
                                     <div className="dev-menu-item-details">
                                         <div>
                                             <strong>Pre-bake</strong>
@@ -86,8 +89,8 @@ export default function DevMenuPage() {
                 <header className="dev-catalog-section-heading">
                     <span>Arcane refreshments</span>
                     <h2>Signature Potions</h2>
-                    <p>Base price: <strong>$3.99</strong></p>
-                    <p>Or build your own for <strong>$3.49</strong> with one base, up to two flavors, and up to two shimmers included.</p>
+                    <p>Signature potions start at <strong>{formatMoney(Math.min(...MENU.potions.map((potion) => potion.basePrice)))}</strong>.</p>
+                    <p>Or build your own for <strong>{formatMoney(MENU.buildYourOwnPotionPrice)}</strong> with one base, up to two flavors, and up to two shimmers included.</p>
                     <Link href="/dev/order/potion/custom">Build Your Own Potion</Link>
                 </header>
                 <div className="dev-catalog-tile-grid">
@@ -96,6 +99,7 @@ export default function DevMenuPage() {
                             <h3>{potion.name}</h3>
                             <p>{potion.description ?? "Signature recipe"}</p>
                             <p>Shimmer: <strong>{MENU.shimmers.find((item) => item.id === potion.defaultShimmerId)?.name}</strong></p>
+                            <p><strong>{formatMoney(potion.basePrice)}</strong></p>
                             <Link href={`/dev/order/potion/${potion.id}`}>Order This Potion</Link>
                         </article>
                     ))}
@@ -103,13 +107,13 @@ export default function DevMenuPage() {
             </section>
 
             <section className="dev-catalog-section dev-drink-workshop">
-                <header className="dev-catalog-section-heading"><span>Mix your own magic</span><h2>Potion Workshop</h2><p>Enhancements are $0.50 each. Energy upgrades are available by the half or full can.</p></header>
+                <header className="dev-catalog-section-heading"><span>Mix your own magic</span><h2>Potion Workshop</h2><p>Enhancements are priced individually. Energy upgrades are available by the half or full can.</p></header>
                 <div className="dev-drink-directory">
                     <section><h3>Bases</h3><ul>{MENU.drinkBases.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
                     <section><h3>Flavor Infusions</h3><ul>{MENU.potionFlavors.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
-                    <section><h3>Enhancements · +$0.50 each</h3><ul>{MENU.potionEnhancements.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
+                    <section><h3>Enhancements</h3><ul>{MENU.potionEnhancements.map((item) => <li key={item.id}>{item.name} · +{formatMoney(item.priceDelta)}</li>)}</ul></section>
                     <section><h3>Shimmers · up to two included</h3><ul>{MENU.shimmers.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
-                    <section><h3>Energy</h3>{MENU.energyBrands.map((brand) => <p key={brand.id}><strong>{brand.name}</strong>: {brand.variants.map((item) => item.name).join(", ")}</p>)}<p>Half can +$1.50 · Full can +$2.50 · Straight can $3.99</p></section>
+                    <section><h3>Energy</h3>{MENU.energyBrands.map((brand) => <p key={brand.id}><strong>{brand.name}</strong>: {brand.variants.map((item) => item.name).join(", ")}</p>)}<p>{MENU.energyAddIns.map((item) => `${item.name} +${formatMoney(item.priceDelta)}`).join(" · ")} · Straight can {formatMoney(MENU.straightEnergyDrinkPrice)}</p></section>
                 </div>
             </section>
 

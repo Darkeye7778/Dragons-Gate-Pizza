@@ -3,6 +3,7 @@ import { getBasePizzaPrice, roundMoney } from "@/lib/pricing/calc";
 import {
     ADDITIONAL_TOPPING_UNIT_PRICE,
     BUILD_YOUR_OWN_TOPPING_CHARGE,
+    SIGNATURE_PERSONAL_REGULAR_PRICE,
     STANDARD_TOPPING_UNIT_LIMIT,
     STANDARD_TOPPING_UNIT_PRICE,
 } from "@/lib/pricing/priceTable";
@@ -55,14 +56,14 @@ export type PizzaPricingSnapshot = {
     toppingUnits: number;
     standardToppingUnits: number;
     additionalToppingUnits: number;
-    signatureIncludedUnitLimit: number | null;
+    signatureIncludedToppingUnits: number | null;
     cheeseBasePrice: Money;
+    signatureBasePrice: Money | null;
     standardToppingCharge: Money;
     additionalToppingCharge: Money;
     toppingCharge: Money;
     unitPrice: Money;
-    usesFallbackTierPrice: boolean;
-    priceSource: "base-cheese-table" | "signature-current-price";
+    priceSource: "base-cheese-table" | "signature-anchor";
     tuPolicyId: typeof CURRENT_TU_POLICY_ID;
 };
 
@@ -82,6 +83,13 @@ function requireBaseCheesePrice(sizeId: PizzaSizeId, crustId: CrustId): Money {
     return price;
 }
 
+export function getSignaturePizzaPrice(sizeId: PizzaSizeId, crustId: CrustId): Money {
+    const selectedCheeseBase = requireBaseCheesePrice(sizeId, crustId);
+    const anchorCheeseBase = requireBaseCheesePrice("personal_12", "regular");
+
+    return roundMoney(SIGNATURE_PERSONAL_REGULAR_PRICE + selectedCheeseBase - anchorCheeseBase);
+}
+
 export function calculatePizzaPricing({
     sizeId,
     crustId,
@@ -93,25 +101,26 @@ export function calculatePizzaPricing({
     const cheeseBasePrice = requireBaseCheesePrice(sizeId, crustId);
 
     if (typeof signaturePresetToppingUnits === "number") {
-        const signatureIncludedUnitLimit = Math.max(STANDARD_TOPPING_UNIT_LIMIT, signaturePresetToppingUnits);
-        const additionalToppingUnits = Math.max(0, toppingUnits - signatureIncludedUnitLimit);
+        const signatureIncludedToppingUnits = Math.max(0, Math.floor(signaturePresetToppingUnits));
+        const additionalToppingUnits = Math.max(0, toppingUnits - signatureIncludedToppingUnits);
         const additionalToppingCharge = roundMoney(additionalToppingUnits * ADDITIONAL_TOPPING_UNIT_PRICE);
+        const signatureBasePrice = getSignaturePizzaPrice(sizeId, crustId);
 
         return {
             mode: "signature",
             tier: "signature",
             tierLabel: "Signature recipe",
             toppingUnits,
-            standardToppingUnits: Math.min(toppingUnits, signatureIncludedUnitLimit),
+            standardToppingUnits: Math.min(toppingUnits, signatureIncludedToppingUnits),
             additionalToppingUnits,
-            signatureIncludedUnitLimit,
+            signatureIncludedToppingUnits,
             cheeseBasePrice,
+            signatureBasePrice,
             standardToppingCharge: 0,
             additionalToppingCharge,
             toppingCharge: additionalToppingCharge,
-            unitPrice: roundMoney(cheeseBasePrice + additionalToppingCharge),
-            usesFallbackTierPrice: true,
-            priceSource: "signature-current-price",
+            unitPrice: roundMoney(signatureBasePrice + additionalToppingCharge),
+            priceSource: "signature-anchor",
             tuPolicyId: CURRENT_TU_POLICY_ID,
         };
     }
@@ -132,13 +141,13 @@ export function calculatePizzaPricing({
         toppingUnits,
         standardToppingUnits,
         additionalToppingUnits,
-        signatureIncludedUnitLimit: null,
+        signatureIncludedToppingUnits: null,
         cheeseBasePrice,
+        signatureBasePrice: null,
         standardToppingCharge,
         additionalToppingCharge,
         toppingCharge,
         unitPrice: roundMoney(cheeseBasePrice + toppingCharge),
-        usesFallbackTierPrice: false,
         priceSource: "base-cheese-table",
         tuPolicyId: CURRENT_TU_POLICY_ID,
     };

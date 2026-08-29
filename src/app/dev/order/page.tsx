@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { MENU } from "@/data/menu";
-import { getGroupedPizzas } from "@/lib/menu/catalog";
+import { getGroupedPizzas, getSignatureToppingUnits } from "@/lib/menu/catalog";
+import { formatMoney } from "@/lib/pricing/format";
+import { getSignaturePizzaPrice } from "@/lib/pricing/pizzaPricing";
 
 const orderPaths = [
     ["Build Your Own Pizza", "Start from scratch with your preferred size, crust, toppings, and finishes.", "/dev/order/custom", "Start Build"],
@@ -41,7 +43,8 @@ export default function DevOrderPage() {
                                 <article className="dev-order-pizza" key={pizza.id}>
                                     <h4>{pizza.name}</h4>
                                     <p>{pizza.description}</p>
-                                    <p>Includes <strong>{pizza.preset.defaultPreBakeIngredientIds.length}</strong> pre-bake ingredients{pizza.preset.defaultPostBakeIngredientIds.length > 0 ? ` and ${pizza.preset.defaultPostBakeIngredientIds.length} finish item(s)` : ""}.</p>
+                                    <p><strong>{formatMoney(getSignaturePizzaPrice("personal_12", "regular"))}</strong> · Personal 12&quot; regular</p>
+                                    <p>Includes <strong>{getSignatureToppingUnits(pizza)}</strong> topping units in its house recipe.</p>
                                     <Link href={`/dev/order/${pizza.id}`}>Customize &amp; Add</Link>
                                 </article>
                             ))}
@@ -57,7 +60,7 @@ export default function DevOrderPage() {
                         <article className="dev-catalog-tile" key={potion.id}>
                             <h3>{potion.name}</h3>
                             <p>{potion.description ?? `Signature potion with ${MENU.shimmers.find((item) => item.id === potion.defaultShimmerId)?.name ?? "paired"} shimmer.`}</p>
-                            <strong>$3.99</strong>
+                            <strong>{formatMoney(potion.basePrice)}</strong>
                             <Link href={`/dev/order/potion/${potion.id}`}>Customize &amp; Add</Link>
                         </article>
                     ))}

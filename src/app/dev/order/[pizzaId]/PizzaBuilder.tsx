@@ -11,11 +11,13 @@ import {
     getFinishOptions,
     getNonCrustIngredients,
     getSauceOptions,
+    getSignatureToppingUnits,
     getToppingOptions,
     sortIngredientIds,
 } from "@/lib/menu/catalog";
 import type { Ingredient, MenuPizza, ToppingPlacement } from "@/lib/menu/types";
 import { getBasePizzaPrice, multiplyMoney } from "@/lib/pricing/calc";
+import { formatMoney } from "@/lib/pricing/format";
 import { calculatePizzaPricing } from "@/lib/pricing/pizzaPricing";
 import {
     ADDITIONAL_TOPPING_UNIT_PRICE,
@@ -32,10 +34,6 @@ const SAUCES = getSauceOptions();
 const CHEESES = getCheeseOptions();
 const TOPPINGS = getToppingOptions();
 const FINISHES = getFinishOptions();
-
-function formatMoney(value: number): string {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
-}
 
 function createCartItemId(): string {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -113,23 +111,24 @@ function getToppingMarkers(id: string, placement: ToppingPlacement) {
     });
 }
 
-function IngredientPrice({ children = "Included · +$0.00" }: { children?: React.ReactNode }) {
+function IngredientPrice({ children = "Included" }: { children?: React.ReactNode }) {
     return <small className="dev-included-price">{children}</small>;
 }
 
-function ChoiceTile({ ingredient, selected, onChange, type = "checkbox", name }: {
+function ChoiceTile({ ingredient, selected, onChange, type = "checkbox", name, priceLabel }: {
     ingredient: Ingredient;
     selected: boolean;
     onChange: () => void;
     type?: "checkbox" | "radio";
     name?: string;
+    priceLabel?: React.ReactNode;
 }) {
     return (
         <label className="dev-ingredient-tile">
             <input type={type} name={name} checked={selected} onChange={onChange} />
             <span className="dev-choice-mark" aria-hidden="true" />
             <strong>{ingredient.name}</strong>
-            <IngredientPrice />
+            <IngredientPrice>{priceLabel}</IngredientPrice>
         </label>
     );
 }
@@ -138,6 +137,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
     const router = useRouter();
     const originalPreBake = pizza?.preset.defaultPreBakeIngredientIds ?? [];
     const originalPostBake = pizza?.preset.defaultPostBakeIngredientIds ?? [];
+    const originalIngredients = new Set([...originalPreBake, ...originalPostBake]);
     const [sizeId, setSizeId] = useState<PizzaSizeId>(DEFAULT_PIZZA_SIZE_ID);
     const [crustId, setCrustId] = useState<CrustId>("regular");
     const [preBakeIngredientIds, setPreBakeIngredientIds] = useState<string[]>(originalPreBake);
@@ -159,9 +159,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
         ingredientId: item.id,
         placement: toppingPlacements[item.id] ?? "whole" as const,
     }));
-    const signaturePresetToppingUnits = pizza
-        ? originalPreBake.filter((id) => TOPPINGS.some((item) => item.id === id)).length
-        : undefined;
+    const signaturePresetToppingUnits = pizza ? getSignatureToppingUnits(pizza) : undefined;
     const pricing = calculatePizzaPricing({
         sizeId,
         crustId,
@@ -282,12 +280,12 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                         <p>The crust itself is vegan, but {selectedNonVeganIngredients.map((item) => item.name).join(", ")} {selectedNonVeganIngredients.length === 1 ? "is" : "are"} not.</p>
                     </div> : null}
                     <dl className="dev-live-price">
-                        <div><dt>{pricing.mode === "custom" ? "Cheese base" : "Current signature base"} · {selectedSize?.label} · {selectedCrust?.name}</dt><dd>{formatMoney(pricing.cheeseBasePrice)}</dd></div>
+                        <div><dt>{pricing.mode === "custom" ? "Cheese base" : "Signature recipe"} · {selectedSize?.label} · {selectedCrust?.name}</dt><dd>{formatMoney(pricing.signatureBasePrice ?? pricing.cheeseBasePrice)}</dd></div>
                         <div><dt>Topping units</dt><dd>{pricing.toppingUnits} TU</dd></div>
                         {pricing.mode === "custom" ? <>
-                            <div><dt>{pricing.toppingUnits >= 4 ? `BYO tier · up to five toppings` : `Toppings (${pricing.standardToppingUnits} × ${formatMoney(STANDARD_TOPPING_UNIT_PRICE)})`}</dt><dd>+{formatMoney(pricing.standardToppingCharge)}</dd></div>
-                            <div><dt>Toppings 6+ ({pricing.additionalToppingUnits} × {formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div>
-                        </> : <div><dt>Recipe additions ({pricing.additionalToppingUnits} × {formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div>}
+                            {pricing.standardToppingCharge > 0 ? <div><dt>{pricing.toppingUnits >= 4 ? `BYO tier · up to five toppings` : `Toppings (${pricing.standardToppingUnits} × ${formatMoney(STANDARD_TOPPING_UNIT_PRICE)})`}</dt><dd>+{formatMoney(pricing.standardToppingCharge)}</dd></div> : null}
+                            {pricing.additionalToppingCharge > 0 ? <div><dt>Toppings 6+ ({pricing.additionalToppingUnits} × {formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
+                        </> : pricing.additionalToppingCharge > 0 ? <div><dt>Beyond the house recipe ({pricing.additionalToppingUnits} × {formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
                     </dl>
                     <div className="dev-quantity-control">
                         <span>Quantity</span><div>
@@ -299,8 +297,9 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                     <div className="dev-build-total"><span>Current total</span><strong>{formatMoney(totalPrice)}</strong></div>
                     <button className="dev-add-cart-button" type="submit">{pairedPotionId ? "Add Pizza & Choose Paired Potion" : "Add Finished Pizza to Cart"}</button>
                     <button className="dev-reset-build" type="button" onClick={resetBuild}>{pizza ? "Restore house recipe" : "Clear this build"}</button>
-                    <p className="dev-build-note">The listed size/crust price is the cheese base. One, two, and three toppings add {formatMoney(STANDARD_TOPPING_UNIT_PRICE)} each; the {formatMoney(BUILD_YOUR_OWN_TOPPING_CHARGE)} BYO tier includes up to five. Toppings 6+ add {formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)} each. Whole and half placement currently count the same.</p>
-                    {pricing.usesFallbackTierPrice ? <p className="dev-pricing-fallback">The final menu does not list standalone signature-pizza prices, so signature recipes continue using the current development price until that table is supplied.</p> : null}
+                    <p className="dev-build-note">{pizza
+                        ? `The house recipe includes ${signaturePresetToppingUnits} topping unit${signaturePresetToppingUnits === 1 ? "" : "s"}. Remove or exchange toppings without changing the signature price; selections beyond that recipe add ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)} each.`
+                        : `The listed size/crust price is the cheese base. One, two, and three toppings add ${formatMoney(STANDARD_TOPPING_UNIT_PRICE)} each; the ${formatMoney(BUILD_YOUR_OWN_TOPPING_CHARGE)} BYO tier includes up to five. Toppings 6+ add ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)} each.`} Whole and half placement currently count the same.</p>
                 </aside>
 
                 <div className="dev-builder-controls">
@@ -335,13 +334,13 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                         <legend><span>02</span> Sauce</legend><p>Choose the layer beneath the cheese. One sauce at a time keeps the preview clear.</p>
                         <div className="dev-ingredient-tile-grid">
                             <label className="dev-ingredient-tile"><input type="radio" name="sauce" checked={sauceId === "none"} onChange={() => replaceSauce(null)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>No Sauce</strong><IngredientPrice /></label>
-                            {SAUCES.map((item) => <ChoiceTile key={item.id} ingredient={item} selected={sauceId === item.id} type="radio" name="sauce" onChange={() => replaceSauce(item.id)} />)}
+                            {SAUCES.map((item) => <ChoiceTile key={item.id} ingredient={item} selected={sauceId === item.id} type="radio" name="sauce" onChange={() => replaceSauce(item.id)} priceLabel={originalIngredients.has(item.id) ? "Included in house recipe" : "Included"} />)}
                         </div>
                     </fieldset>
 
                     <fieldset className="dev-builder-step">
                         <legend><span>03</span> Cheese</legend><p>Choose one, stack a blend, or keep it cheese-free.</p>
-                        <div className="dev-ingredient-tile-grid">{CHEESES.map((item) => <ChoiceTile key={item.id} ingredient={item} selected={preBakeIngredientIds.includes(item.id)} onChange={() => toggleIngredient(item.id)} />)}</div>
+                        <div className="dev-ingredient-tile-grid">{CHEESES.map((item) => <ChoiceTile key={item.id} ingredient={item} selected={preBakeIngredientIds.includes(item.id)} onChange={() => toggleIngredient(item.id)} priceLabel={originalIngredients.has(item.id) ? "Included in house recipe" : "Included"} />)}</div>
                     </fieldset>
 
                     <fieldset className="dev-builder-step dev-toppings-step">
@@ -359,10 +358,12 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
                                 <button type="button" className="dev-topping-toggle" aria-pressed={selected} onClick={() => toggleTopping(item.id)}>
                                     <span className={`dev-topping-swatch topping-${toppingVisualClass(item.id)}`} aria-hidden="true" />
                                     <span><strong>{item.name}</strong><IngredientPrice>{selected
-                                        ? `1 TU · ${placement === "whole" ? "whole" : `${placement} half`}`
+                                        ? `${originalIngredients.has(item.id) ? "Included in house recipe · " : "1 TU · "}${placement === "whole" ? "whole" : `${placement} half`}`
                                         : nextToppingPrice > 0
-                                            ? `Adds 1 TU · +${formatMoney(nextToppingPrice)}`
-                                            : "Adds 1 TU · recipe included"}</IngredientPrice></span><span className="dev-topping-add">{selected ? "Remove" : "Add"}</span>
+                                            ? `${pricing.mode === "signature" ? "Additional topping" : "Adds 1 TU"} · +${formatMoney(nextToppingPrice)}`
+                                            : pricing.mode === "signature"
+                                                ? originalIngredients.has(item.id) ? "Included in house recipe" : "Replacement slot included"
+                                                : "Included in current tier"}</IngredientPrice></span><span className="dev-topping-add">{selected ? "Remove" : "Add"}</span>
                                 </button>
                                 {selected ? <div className="dev-placement-control" role="group" aria-label={`${item.name} placement`}>
                                     {(["whole", "left", "right"] as const).map((option) => <button key={option} type="button" aria-pressed={placement === option} onClick={() => setPlacement(item.id, option)}>
@@ -375,7 +376,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId }: { pizza: MenuPiz
 
                     <fieldset className="dev-builder-step">
                         <legend><span>05</span> Finishing Drizzle</legend><p>Add the final layer after the pizza leaves the hearth.</p>
-                        <div className="dev-ingredient-tile-grid">{FINISHES.map((item) => <ChoiceTile key={item.id} ingredient={item} selected={postBakeIngredientIds.includes(item.id)} onChange={() => toggleIngredient(item.id, true)} />)}</div>
+                        <div className="dev-ingredient-tile-grid">{FINISHES.map((item) => <ChoiceTile key={item.id} ingredient={item} selected={postBakeIngredientIds.includes(item.id)} onChange={() => toggleIngredient(item.id, true)} priceLabel={originalIngredients.has(item.id) ? "Included in house recipe" : "Included"} />)}</div>
                     </fieldset>
 
                     <section className="dev-builder-review">

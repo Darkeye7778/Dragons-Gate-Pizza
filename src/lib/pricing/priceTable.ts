@@ -59,3 +59,10 @@ export const STANDARD_TOPPING_UNIT_PRICE = 0.5;
 /** Menu BYO tier: toppings four and five share the $2.00 BYO charge. */
 export const BUILD_YOUR_OWN_TOPPING_CHARGE = 2.0;
 export const ADDITIONAL_TOPPING_UNIT_PRICE = 0.75;
+
+/**
+ * Published anchor for every house signature recipe on a Personal (12\")
+ * regular crust. Other signature sizes and crusts follow the difference in
+ * the cheese-base table rather than being priced as BYO pizzas.
+ */
+export const SIGNATURE_PERSONAL_REGULAR_PRICE = 7.0;

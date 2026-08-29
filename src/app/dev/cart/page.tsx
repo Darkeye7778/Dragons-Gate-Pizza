@@ -12,19 +12,13 @@ import {
 } from "@/lib/cart/store";
 import { calcCartTotals } from "@/lib/cart/totals";
 import { isPotionCartItem, type CartItem, type PizzaCartItem, type PotionCartItem } from "@/lib/cart/types";
-import { getToppingOptions } from "@/lib/menu/catalog";
+import { getSignatureToppingUnits, getToppingOptions } from "@/lib/menu/catalog";
 import { calculatePizzaPricing, type PizzaPricingSnapshot } from "@/lib/pricing/pizzaPricing";
+import { formatMoney } from "@/lib/pricing/format";
 import { calculatePotionPricing } from "@/lib/pricing/potionPricing";
 import { PIZZA_SIZES } from "@/lib/pricing/priceTable";
 
 const TOPPING_IDS = new Set(getToppingOptions().map((ingredient) => ingredient.id));
-
-function formatMoney(value: number): string {
-    return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    }).format(value);
-}
 
 function getPizzaName(pizzaId: string): string {
     if (pizzaId === "custom") {
@@ -58,9 +52,7 @@ function getIngredientSummary(item: PizzaCartItem): string {
 
 function getItemPricing(item: PizzaCartItem): PizzaPricingSnapshot {
     const signature = MENU.pizzas.find((pizza) => pizza.id === item.pizzaId);
-    const signaturePresetToppingUnits = signature
-        ? signature.preset.defaultPreBakeIngredientIds.filter((id) => TOPPING_IDS.has(id)).length
-        : undefined;
+    const signaturePresetToppingUnits = signature ? getSignatureToppingUnits(signature) : undefined;
     const toppings = item.preBakeIngredientIds
         .filter((id) => TOPPING_IDS.has(id))
         .map((ingredientId) => ({
@@ -188,8 +180,8 @@ export default function DevCartPage() {
                                             <small>{getPotionSelectionSummary(item)}</small>
                                             <dl className="dev-cart-price-breakdown">
                                                 <div><dt>Potion base</dt><dd>{formatMoney(pricing.basePrice)}</dd></div>
-                                                <div><dt>Enhancements</dt><dd>+{formatMoney(pricing.enhancementCharge)}</dd></div>
-                                                <div><dt>Energy upgrade</dt><dd>+{formatMoney(pricing.energyCharge)}</dd></div>
+                                                {pricing.enhancementCharge > 0 ? <div><dt>Enhancements</dt><dd>+{formatMoney(pricing.enhancementCharge)}</dd></div> : null}
+                                                {pricing.energyCharge > 0 ? <div><dt>Energy upgrade</dt><dd>+{formatMoney(pricing.energyCharge)}</dd></div> : null}
                                                 <div><dt>Each potion</dt><dd>{formatMoney(pricing.unitPrice)}</dd></div>
                                             </dl>
                                             <Link href={`/dev/order/potion/${item.potionId}`}>Customize another</Link>
@@ -218,15 +210,17 @@ export default function DevCartPage() {
                                         <p>{size?.label ?? item.sizeId} · {crust?.name ?? item.crustId} crust</p>
                                         <small>{getIngredientSummary(item)}</small>
                                         <dl className="dev-cart-price-breakdown">
-                                            <div><dt>{pricing.mode === "custom" ? "Cheese base" : "Current signature base"}</dt><dd>{formatMoney(pricing.cheeseBasePrice)}</dd></div>
+                                            <div><dt>{pricing.mode === "custom" ? "Cheese base" : "Signature recipe"}</dt><dd>{formatMoney(pricing.signatureBasePrice ?? pricing.cheeseBasePrice)}</dd></div>
                                             <div><dt>Topping units</dt><dd>{pricing.toppingUnits} TU</dd></div>
                                             {pricing.mode === "custom" ? <>
-                                                <div><dt>{pricing.toppingUnits >= 4 ? "BYO tier · up to five toppings" : "Toppings"}</dt><dd>+{formatMoney(pricing.standardToppingCharge)}</dd></div>
-                                                <div><dt>Toppings 6+</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div>
-                                            </> : <div><dt>Recipe additions</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div>}
+                                                {pricing.standardToppingCharge > 0 ? <div><dt>{pricing.toppingUnits >= 4 ? "BYO tier · up to five toppings" : "Toppings"}</dt><dd>+{formatMoney(pricing.standardToppingCharge)}</dd></div> : null}
+                                                {pricing.additionalToppingCharge > 0 ? <div><dt>Toppings 6+</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
+                                            </> : <>
+                                                <div><dt>House recipe allowance</dt><dd>{pricing.signatureIncludedToppingUnits} TU included</dd></div>
+                                                {pricing.additionalToppingCharge > 0 ? <div><dt>Beyond the house recipe</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
+                                            </>}
                                             <div><dt>Each pizza</dt><dd>{formatMoney(item.unitBasePrice)}</dd></div>
                                         </dl>
-                                        {pricing.usesFallbackTierPrice ? <small className="dev-cart-price-note">The final menu does not list standalone signature-pizza prices; this build retains the current development signature price.</small> : null}
                                         <Link href={`/dev/order/${item.pizzaId}`}>Customize another</Link>
                                     </div>
                                     <div className="dev-cart-item-actions">

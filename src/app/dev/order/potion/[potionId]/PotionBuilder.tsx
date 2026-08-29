@@ -7,11 +7,8 @@ import { MENU } from "@/data/menu";
 import { addToCart } from "@/lib/cart/store";
 import type { Potion } from "@/lib/menu/types";
 import { multiplyMoney } from "@/lib/pricing/calc";
+import { formatMoney } from "@/lib/pricing/format";
 import { calculatePotionPricing } from "@/lib/pricing/potionPricing";
-
-function formatMoney(value: number): string {
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
-}
 
 function createCartItemId(): string {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -193,8 +190,8 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
                     </div>
                     <dl className="dev-live-price">
                         <div><dt>{potion ? "Signature potion" : "Build-your-own base"}</dt><dd>{formatMoney(pricing.basePrice)}</dd></div>
-                        <div><dt>Enhancements</dt><dd>+{formatMoney(pricing.enhancementCharge)}</dd></div>
-                        <div><dt>Energy upgrade</dt><dd>+{formatMoney(pricing.energyCharge)}</dd></div>
+                        {pricing.enhancementCharge > 0 ? <div><dt>Enhancements</dt><dd>+{formatMoney(pricing.enhancementCharge)}</dd></div> : null}
+                        {pricing.energyCharge > 0 ? <div><dt>Energy upgrade</dt><dd>+{formatMoney(pricing.energyCharge)}</dd></div> : null}
                     </dl>
                     <div className="dev-quantity-control"><span>Quantity</span><div>
                         <button type="button" aria-label="Decrease quantity" onClick={() => setQuantity((value) => Math.max(1, value - 1))} disabled={quantity === 1}>−</button>
@@ -233,7 +230,7 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
                         </label>)}</div>
                     </fieldset>
 
-                    <fieldset className="dev-builder-step"><legend><span>{potion ? "02" : "04"}</span> Enhancements</legend><p>Creams, whipped cream, and fresh fruit pieces are each {formatMoney(0.5)}.</p>
+                    <fieldset className="dev-builder-step"><legend><span>{potion ? "02" : "04"}</span> Enhancements</legend><p>Add creams, whipped cream, or fresh fruit pieces at the price shown for each option.</p>
                         <div className="dev-ingredient-tile-grid">{MENU.potionEnhancements.map((option) => <label className="dev-ingredient-tile" key={option.id}>
                             <input type="checkbox" checked={enhancementIds.includes(option.id)} onChange={() => toggleEnhancement(option.id)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>+{formatMoney(option.priceDelta)}{option.isVegan ? " · Vegan" : option.allergens?.includes("milk") ? " · Contains milk" : ""}</small>
                         </label>)}</div>
@@ -241,7 +238,7 @@ export default function PotionBuilder({ potion }: { potion: Potion | null }) {
 
                     <fieldset className="dev-builder-step"><legend><span>{potion ? "03" : "05"}</span> Energy Upgrade</legend><p>Add half or a full can, then choose the brand and variety. A straight energy drink is also listed on the menu for {formatMoney(MENU.straightEnergyDrinkPrice)}.</p>
                         <div className="dev-choice-grid dev-energy-amount-grid">
-                            <label className="dev-choice-card"><input type="radio" name="energy-amount" checked={!energyAddInId} onChange={() => setEnergyAmount("")} /><span className="dev-choice-mark" aria-hidden="true" /><strong>No Energy Add-In</strong><small>+$0.00</small></label>
+                            <label className="dev-choice-card"><input type="radio" name="energy-amount" checked={!energyAddInId} onChange={() => setEnergyAmount("")} /><span className="dev-choice-mark" aria-hidden="true" /><strong>No Energy Add-In</strong><small>Included</small></label>
                             {MENU.energyAddIns.map((option) => <label className="dev-choice-card" key={option.id}><input type="radio" name="energy-amount" checked={energyAddInId === option.id} onChange={() => setEnergyAmount(option.id)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>+{formatMoney(option.priceDelta)}</small></label>)}
                         </div>
                         {energyAddInId ? <div className="dev-energy-options">

@@ -134,3 +134,10 @@ export function getToppingOptions(): Ingredient[] {
 export function getFinishOptions(): Ingredient[] {
     return getNonCrustIngredients().filter((ingredient) => ingredient.category === "drizzle");
 }
+
+/** Count only priced topping selections in a house recipe. Sauce, cheese, and
+ * post-bake finishes are recipe layers but never consume topping units. */
+export function getSignatureToppingUnits(pizza: MenuPizza): number {
+    const toppingIds = new Set(getToppingOptions().map((ingredient) => ingredient.id));
+    return pizza.preset.defaultPreBakeIngredientIds.filter((id) => toppingIds.has(id)).length;
+}
