@@ -28,6 +28,7 @@ export default async function PizzaBuilderPage({
 
     const pairedPotionId = pair === "custom" || (pair && MENU.potions.some((item) => item.id === pair)) ? pair : undefined;
     const comboId = combo === "byo-adventure" || MENU.combos.some((item) => item.id === combo) ? combo : undefined;
+    const requestedDrinkType = drink === "fountain" || drink === "energy" ? drink : undefined;
 
-    return <PizzaBuilder pizza={pizza ?? null} pairedPotionId={pairedPotionId} pairedDrinkPath={drink === "standalone" ? "/dev/order/drinks" : undefined} comboId={comboId} />;
+    return <PizzaBuilder pizza={pizza ?? null} pairedPotionId={pairedPotionId} requestedDrinkType={requestedDrinkType} comboId={comboId} />;
 }

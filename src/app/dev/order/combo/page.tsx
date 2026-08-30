@@ -8,9 +8,10 @@ export default function ComboOrderPage() {
     const [pizzaId, setPizzaId] = useState("custom");
     const [drinkChoice, setDrinkChoice] = useState("potion:custom");
     const isPotion = drinkChoice.startsWith("potion:");
+    const standaloneDrinkType = drinkChoice === "standalone:fountain" ? "fountain" : "energy";
     const nextUrl = isPotion
         ? `/dev/order/${pizzaId}?pair=${drinkChoice.slice(7)}&combo=byo-adventure`
-        : `/dev/order/${pizzaId}?drink=standalone&combo=byo-adventure`;
+        : `/dev/order/${pizzaId}?drink=${standaloneDrinkType}&combo=byo-adventure`;
 
     return <main className="dev-catalog-page">
         <header className="dev-catalog-hero"><span className="dev-section-kicker">Pair the party</span><h1>Adventure Combos</h1><p>Twelve curated signature pairings plus one freely configurable pizza-and-drink path.</p></header>

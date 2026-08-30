@@ -154,7 +154,7 @@ function ChoiceTile({ ingredient, selected, onChange, type = "checkbox", name, p
     );
 }
 
-export default function PizzaBuilder({ pizza, pairedPotionId, pairedDrinkPath, comboId }: { pizza: MenuPizza | null; pairedPotionId?: string; pairedDrinkPath?: string; comboId?: string }) {
+export default function PizzaBuilder({ pizza, pairedPotionId, requestedDrinkType, comboId }: { pizza: MenuPizza | null; pairedPotionId?: string; requestedDrinkType?: "fountain" | "energy"; comboId?: string }) {
     const router = useRouter();
     const originalPreBake = pizza?.preset.defaultPreBakeIngredientIds ?? [];
     const originalPostBake = pizza?.preset.defaultPostBakeIngredientIds ?? [];
@@ -202,6 +202,15 @@ export default function PizzaBuilder({ pizza, pairedPotionId, pairedDrinkPath, c
     const totalPrice = multiplyMoney(unitPrice, quantity);
     const selectedCount = preBakeIngredientIds.length + postBakeIngredientIds.length;
     const pizzaDiameter = 66 + ((selectedSize?.inches ?? 16) / 25) * 30;
+    const submitLabel = requestedDrinkType === "fountain"
+        ? "Add Pizza & Choose Fountain Drink"
+        : requestedDrinkType === "energy"
+            ? "Add Pizza & Choose Energy Drink"
+            : pairedPotionId && comboId === "byo-adventure"
+                ? "Add Pizza & Customize Drink"
+                : pairedPotionId
+                    ? "Add Pizza & Choose Paired Potion"
+                    : "Add Finished Pizza to Cart";
 
     function replaceSauce(id: string | null) {
         const sauceIds = new Set(SAUCES.map((item) => item.id));
@@ -307,8 +316,8 @@ export default function PizzaBuilder({ pizza, pairedPotionId, pairedDrinkPath, c
         });
         router.push(pairedPotionId
             ? `/dev/order/potion/${pairedPotionId}?combo=${comboId ?? ""}&group=${comboGroupId ?? ""}`
-            : pairedDrinkPath
-                ? `${pairedDrinkPath}?combo=${comboId ?? ""}&group=${comboGroupId ?? ""}`
+            : requestedDrinkType
+                ? `/dev/order/drinks?type=${requestedDrinkType}&combo=${comboId ?? ""}&group=${comboGroupId ?? ""}`
                 : "/dev/cart");
     }
 
@@ -410,7 +419,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId, pairedDrinkPath, c
                         </div>
                     </div>
                     <div className="dev-build-total"><span>Current total</span><strong>{formatMoney(totalPrice)}</strong></div>
-                    <button className="dev-add-cart-button" type="submit">{pairedPotionId ? "Add Pizza & Choose Paired Potion" : "Add Finished Pizza to Cart"}</button>
+                    <button className="dev-add-cart-button" type="submit">{submitLabel}</button>
                     <button className="dev-reset-build" type="button" onClick={resetBuild}>{pizza ? "Restore house recipe" : "Clear this build"}</button>
                     <p className="dev-build-note">{pizza
                         ? `The house recipe includes ${signaturePresetToppingUnits} topping unit${signaturePresetToppingUnits === 1 ? "" : "s"}. Remove or exchange toppings without changing the signature price; selections beyond that recipe add ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)} each.`
@@ -540,7 +549,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId, pairedDrinkPath, c
                     <section className="dev-builder-review">
                         <span>07 · Review the build</span><h2>Ready for the hearth?</h2>
                         <p>{selectedCount} ingredient selection{selectedCount === 1 ? "" : "s"}, {pricing.toppingUnits} topping unit{pricing.toppingUnits === 1 ? "" : "s"} on the {pricing.tierLabel} path, {isPizzaPocket ? `${selectedPocketDough?.name} Pizza Pocket, ` : ""}{PIZZA_CUT_LABELS[cutStyle].toLowerCase()}, and a current total of <strong>{formatMoney(totalPrice)}</strong>.</p>
-                        <button className="dev-add-cart-button" type="submit">{pairedPotionId ? "Add Pizza & Choose Paired Potion" : "Add Finished Pizza to Cart"}</button>
+                        <button className="dev-add-cart-button" type="submit">{submitLabel}</button>
                     </section>
                 </div>
             </form>
