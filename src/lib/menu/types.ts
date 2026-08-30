@@ -98,8 +98,8 @@ export type MenuCatalog = {
     energyAddIns: EnergyAddIn[];
     buildYourOwnPotionPrice: number;
     straightEnergyDrinkPrice: number;
-    additionalPotionFlavorPrice: number | null;
-    fountainDrinkPrice: number | null;
+    additionalPotionFlavorPrice: number;
+    fountainDrinkPrice: number;
     buildYourOwnComboPrice: number | null;
     combos: Combo[];
 };

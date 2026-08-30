@@ -67,3 +67,11 @@ export const PIZZA_POCKET_UPCHARGE = 1;
  * the cheese-base table rather than being priced as BYO pizzas.
  */
 export const SIGNATURE_PERSONAL_REGULAR_PRICE = 7.0;
+
+export const FOUNTAIN_DRINK_PRICE = 2.49;
+export const BUILD_YOUR_OWN_POTION_PRICE = 3.49;
+export const INCLUDED_BYO_POTION_FLAVORS = 2;
+export const ADDITIONAL_POTION_FLAVOR_PRICE = 0.5;
+export const SIGNATURE_POTION_PRICE = 3.99;
+export const STRAIGHT_ENERGY_DRINK_PRICE = 3.99;
+export const ADVENTURE_COMBO_DISCOUNT = 1.5;

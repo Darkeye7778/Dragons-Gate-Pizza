@@ -18,36 +18,36 @@ export type ToppingSelectionForPricing = {
 
 export type ToppingUnitCalculator = (selections: ToppingSelectionForPricing[]) => number;
 
-/**
- * Provisional TU policy. The menu defines topping prices but does not define
- * how half, extra, double, or triple portions change TU. Until that rule is
- * supplied, each distinct topping is one TU and placement is visual.
- */
-export const CURRENT_TU_POLICY_ID = "distinct-selection-v1";
+export const CURRENT_TU_POLICY_ID = "weighted-amount-v2";
+
+export const TOPPING_UNIT_WEIGHTS: Record<ToppingAmount, number> = {
+    light: 0.5,
+    normal: 1,
+    extra: 1.5,
+    double: 2,
+    triple: 3,
+};
 
 export function getToppingUnitWeight(amount: ToppingAmount): number {
-    // Quantity-to-TU weights are intentionally unresolved. Every selected
-    // ingredient remains one TU under distinct-selection-v1.
-    void amount;
-    return 1;
+    return TOPPING_UNIT_WEIGHTS[amount];
 }
 
-export const calculateDistinctSelectionToppingUnits: ToppingUnitCalculator = (selections) =>
+export const calculateWeightedToppingUnits: ToppingUnitCalculator = (selections) =>
     [...new Map(selections.map((selection) => [selection.ingredientId, selection])).values()]
         .reduce((total, selection) => total + getToppingUnitWeight(selection.amount ?? "normal"), 0);
 
 export function calculateToppingUnits(
     selections: ToppingSelectionForPricing[],
-    calculator: ToppingUnitCalculator = calculateDistinctSelectionToppingUnits,
+    calculator: ToppingUnitCalculator = calculateWeightedToppingUnits,
 ): number {
-    return Math.max(0, Math.floor(calculator(selections)));
+    return Math.max(0, calculator(selections));
 }
 
 export function getPizzaPriceTier(toppingUnits: number): PizzaPriceTier {
-    if (toppingUnits === 0) return "cheese";
-    if (toppingUnits === 1) return "one_top";
-    if (toppingUnits === 2) return "two_top";
-    if (toppingUnits === 3) return "three_top";
+    if (toppingUnits <= 0) return "cheese";
+    if (toppingUnits < 2) return "one_top";
+    if (toppingUnits < 3) return "two_top";
+    if (toppingUnits < 4) return "three_top";
     return "byo";
 }
 
@@ -66,6 +66,7 @@ export type PizzaPricingSnapshot = {
     toppingUnits: number;
     standardToppingUnits: number;
     additionalToppingUnits: number;
+    completedAdditionalToppingUnits: number;
     signatureIncludedToppingUnits: number | null;
     cheeseBasePrice: Money;
     signatureBasePrice: Money | null;
@@ -124,9 +125,10 @@ export function calculatePizzaPricing({
     const cheeseBasePrice = requireBaseCheesePrice(sizeId, pricedCrustId);
 
     if (typeof signaturePresetToppingUnits === "number") {
-        const signatureIncludedToppingUnits = Math.max(0, Math.floor(signaturePresetToppingUnits));
+        const signatureIncludedToppingUnits = Math.max(0, signaturePresetToppingUnits);
         const additionalToppingUnits = Math.max(0, toppingUnits - signatureIncludedToppingUnits);
-        const additionalToppingCharge = roundMoney(additionalToppingUnits * ADDITIONAL_TOPPING_UNIT_PRICE);
+        const completedAdditionalToppingUnits = Math.floor(additionalToppingUnits);
+        const additionalToppingCharge = roundMoney(completedAdditionalToppingUnits * ADDITIONAL_TOPPING_UNIT_PRICE);
         const signatureBasePrice = getSignaturePizzaPrice(sizeId, pricedCrustId);
 
         return {
@@ -136,6 +138,7 @@ export function calculatePizzaPricing({
             toppingUnits,
             standardToppingUnits: Math.min(toppingUnits, signatureIncludedToppingUnits),
             additionalToppingUnits,
+            completedAdditionalToppingUnits,
             signatureIncludedToppingUnits,
             cheeseBasePrice,
             signatureBasePrice,
@@ -153,10 +156,11 @@ export function calculatePizzaPricing({
     const tier = getPizzaPriceTier(toppingUnits);
     const standardToppingUnits = Math.min(toppingUnits, STANDARD_TOPPING_UNIT_LIMIT);
     const additionalToppingUnits = Math.max(0, toppingUnits - STANDARD_TOPPING_UNIT_LIMIT);
+    const completedAdditionalToppingUnits = Math.floor(additionalToppingUnits);
     const standardToppingCharge = toppingUnits >= 4
         ? BUILD_YOUR_OWN_TOPPING_CHARGE
         : roundMoney(standardToppingUnits * STANDARD_TOPPING_UNIT_PRICE);
-    const additionalToppingCharge = roundMoney(additionalToppingUnits * ADDITIONAL_TOPPING_UNIT_PRICE);
+    const additionalToppingCharge = roundMoney(completedAdditionalToppingUnits * ADDITIONAL_TOPPING_UNIT_PRICE);
     const toppingCharge = roundMoney(standardToppingCharge + additionalToppingCharge);
 
     return {
@@ -166,6 +170,7 @@ export function calculatePizzaPricing({
         toppingUnits,
         standardToppingUnits,
         additionalToppingUnits,
+        completedAdditionalToppingUnits,
         signatureIncludedToppingUnits: null,
         cheeseBasePrice,
         signatureBasePrice: null,

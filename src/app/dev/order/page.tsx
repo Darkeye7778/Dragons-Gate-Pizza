@@ -7,8 +7,7 @@ import { getSignaturePizzaPrice } from "@/lib/pricing/pizzaPricing";
 const orderPaths = [
     ["Build Your Own Pizza", "Start from scratch with your preferred size, crust, toppings, and finishes.", "/dev/order/custom", "Start Build"],
     ["Signature Pizzas", "Start with one of the house builds, then customize it how you want.", "#signature-pizzas", "Jump to Signatures"],
-    ["Drinks & Potions", "Mix a fountain potion with flavors, shimmer, enhancements, and an optional energy upgrade.", "/dev/order/potion/custom", "Build a Potion"],
-    ["Standalone Drinks", "Choose a fountain base or a straight Red Bull or Monster can.", "/dev/order/drinks", "Order Drinks"],
+    ["Drinks & Potions", "Choose a regular soda, build or customize a Potion, or grab a straight energy drink.", "/dev/order/drinks", "Explore Drinks"],
     ["Adventure Combos", "Choose a canonical pairing or build your own pizza-and-drink adventure.", "/dev/order/combo", "Explore Combos"],
     ["View Cart", "Already picked some stuff? Go straight to the cart.", "/dev/cart", "Open Cart"],
 ];

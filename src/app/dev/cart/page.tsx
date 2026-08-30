@@ -14,7 +14,7 @@ import { calcCartTotals } from "@/lib/cart/totals";
 import { isDrinkCartItem, isPotionCartItem, PIZZA_CUT_LABELS, type CartItem, type DrinkCartItem, type PizzaCartItem, type PotionCartItem } from "@/lib/cart/types";
 import { getSignatureToppingUnits, getToppingOptions } from "@/lib/menu/catalog";
 import { calculatePizzaPricing, type PizzaPricingSnapshot } from "@/lib/pricing/pizzaPricing";
-import { formatMoney } from "@/lib/pricing/format";
+import { formatMoney, formatSignedMoney } from "@/lib/pricing/format";
 import { calculatePotionPricing } from "@/lib/pricing/potionPricing";
 import { PIZZA_SIZES } from "@/lib/pricing/priceTable";
 
@@ -86,7 +86,7 @@ function repriceCartItem(item: CartItem): CartItem {
     if (isDrinkCartItem(item)) {
         return item.drinkType === "energy"
             ? { ...item, pricingState: "priced" as const, unitBasePrice: MENU.straightEnergyDrinkPrice }
-            : { ...item, pricingState: "tbd" as const, unitBasePrice: 0 };
+            : { ...item, pricingState: "priced" as const, unitBasePrice: MENU.fountainDrinkPrice };
     }
     if (isPotionCartItem(item)) {
         const pricing = calculatePotionPricing(item);
@@ -126,12 +126,12 @@ function repriceCartItem(item: CartItem): CartItem {
 
 function getPotionName(item: PotionCartItem): string {
     return item.potionId === "custom"
-        ? "Build Your Own Potion"
+        ? item.flavorIds.length === 0 ? "Regular Soda" : "Build Your Own Potion"
         : MENU.potions.find((potion) => potion.id === item.potionId)?.name ?? "Signature Potion";
 }
 
 function getCartItemName(item: CartItem): string {
-    if (isDrinkCartItem(item)) return item.drinkType === "fountain" ? "Fountain Drink" : "Energy Drink";
+    if (isDrinkCartItem(item)) return item.drinkType === "fountain" ? "Regular Soda" : "Energy Drink";
     return isPotionCartItem(item) ? getPotionName(item) : getPizzaName(item.pizzaId);
 }
 
@@ -226,8 +226,8 @@ export default function DevCartPage() {
                             if (isDrinkCartItem(item)) {
                                 return <article className="dev-cart-item" key={item.id}>
                                     <span className="dev-cart-item-number">{String(index + 1).padStart(2, "0")}</span>
-                                    <div className="dev-cart-item-copy"><h2>{item.drinkType === "fountain" ? "Fountain Drink" : "Straight Energy Drink"}</h2>
-                                        {item.comboGroupId ? <p className="dev-data-note">Build Your Own Adventure Combo · pricing coming soon</p> : null}
+                                    <div className="dev-cart-item-copy"><h2>{item.drinkType === "fountain" ? "Regular Soda" : "Straight Energy Drink"}</h2>
+                                        {item.comboGroupId ? <p className="dev-data-note">Build Your Own Adventure Combo</p> : null}
                                         <p>{getDrinkSummary(item)}</p><dl className="dev-cart-price-breakdown"><div><dt>Each drink</dt><dd>{item.pricingState === "tbd" ? "Price TBD" : formatMoney(item.unitBasePrice)}</dd></div></dl><Link href="/dev/order/drinks">Order another drink</Link>
                                     </div>
                                     <div className="dev-cart-item-actions"><strong>{item.pricingState === "tbd" ? "TBD" : formatMoney(item.unitBasePrice * item.quantity)}</strong><div className="dev-quantity-control"><div><button type="button" onClick={() => changeQuantity(item.id, Math.max(1, item.quantity - 1))} disabled={item.quantity === 1}>−</button><output>{item.quantity}</output><button type="button" onClick={() => changeQuantity(item.id, item.quantity + 1)}>+</button></div></div><button className="dev-cart-remove" type="button" onClick={() => removeItem(item.id)}>Remove</button></div>
@@ -240,12 +240,12 @@ export default function DevCartPage() {
                                         <span className="dev-cart-item-number">{String(index + 1).padStart(2, "0")}</span>
                                         <div className="dev-cart-item-copy">
                                             <h2>{getPotionName(item)}</h2>
-                                            {item.comboGroupId ? <p className="dev-data-note">{item.comboType === "curated" ? "Curated Adventure Combo" : "Build Your Own Adventure Combo · pricing coming soon"}</p> : null}
+                                            {item.comboGroupId ? <p className="dev-data-note">{item.comboType === "curated" ? "Curated Adventure Combo" : "Build Your Own Adventure Combo"}</p> : null}
                                             <p>Arcane refreshment</p>
                                             <small>{getPotionSelectionSummary(item)}</small>
                                             <dl className="dev-cart-price-breakdown">
-                                                <div><dt>Potion base</dt><dd>{formatMoney(pricing.basePrice)}</dd></div>
-                                                {pricing.additionalFlavorCount > 0 ? <div><dt>Additional flavors</dt><dd>{pricing.additionalFlavorCharge === null ? "Price TBD" : `+${formatMoney(pricing.additionalFlavorCharge)}`}</dd></div> : null}
+                                                <div><dt>{pricing.productKind === "regular-soda" ? "Regular soda" : pricing.productKind === "signature-potion" ? "Signature Potion" : "Build Your Own Potion"}</dt><dd>{formatMoney(pricing.basePrice)}</dd></div>
+                                                {pricing.additionalFlavorCount > 0 ? <div><dt>Additional flavors</dt><dd>+{formatMoney(pricing.additionalFlavorCharge)}</dd></div> : null}
                                                 {pricing.enhancementCharge > 0 ? <div><dt>Enhancements</dt><dd>+{formatMoney(pricing.enhancementCharge)}</dd></div> : null}
                                                 {pricing.energyCharge > 0 ? <div><dt>Energy upgrade</dt><dd>+{formatMoney(pricing.energyCharge)}</dd></div> : null}
                                                 <div><dt>Each potion</dt><dd>{formatMoney(pricing.unitPrice)}</dd></div>
@@ -283,7 +283,7 @@ export default function DevCartPage() {
                                     <span className="dev-cart-item-number">{String(index + 1).padStart(2, "0")}</span>
                                     <div className="dev-cart-item-copy">
                                         <h2>{getPizzaName(item.pizzaId)}</h2>
-                                        {item.comboGroupId ? <p className="dev-data-note">{item.comboType === "curated" ? "Curated Adventure Combo" : "Build Your Own Adventure Combo · pricing coming soon"}</p> : null}
+                                        {item.comboGroupId ? <p className="dev-data-note">{item.comboType === "curated" ? "Curated Adventure Combo" : "Build Your Own Adventure Combo"}</p> : null}
                                         <p>{size?.label ?? item.sizeId} · {item.crustId === "pizza-pocket" ? `Pizza Pocket · ${pocketDough?.name ?? "Regular"} dough` : `${crust?.name ?? item.crustId} crust`} · {PIZZA_CUT_LABELS[item.cutStyle ?? "eight-slice"]}</p>
                                         <small>{getIngredientSummary(item)}</small>
                                         {item.crustId === "pizza-pocket" ? <small>Preparation: fillings folded into one side · Extra {pocketTopCheese} over the crust</small> : null}
@@ -295,10 +295,10 @@ export default function DevCartPage() {
                                             <div><dt>Cut</dt><dd>{PIZZA_CUT_LABELS[item.cutStyle ?? "eight-slice"]}</dd></div>
                                             {pricing.mode === "custom" ? <>
                                                 {pricing.standardToppingCharge > 0 ? <div><dt>{pricing.toppingUnits >= 4 ? "BYO tier · up to five toppings" : "Toppings"}</dt><dd>+{formatMoney(pricing.standardToppingCharge)}</dd></div> : null}
-                                                {pricing.additionalToppingCharge > 0 ? <div><dt>Toppings 6+</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
+                                                {pricing.additionalToppingCharge > 0 ? <div><dt>Completed additional TU ({pricing.completedAdditionalToppingUnits})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
                                             </> : <>
                                                 <div><dt>House recipe allowance</dt><dd>{pricing.signatureIncludedToppingUnits} TU included</dd></div>
-                                                {pricing.additionalToppingCharge > 0 ? <div><dt>Beyond the house recipe</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
+                                                {pricing.additionalToppingCharge > 0 ? <div><dt>Completed TU beyond house recipe ({pricing.completedAdditionalToppingUnits})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
                                             </>}
                                             <div><dt>Each pizza</dt><dd>{formatMoney(item.unitBasePrice)}</dd></div>
                                         </dl>
@@ -335,16 +335,20 @@ export default function DevCartPage() {
                         <span className="dev-section-kicker">Order summary</span>
                         <dl>
                             <div><dt>{totals.hasUnresolvedPrice ? "Known-price subtotal" : "Order subtotal"}</dt><dd>{formatMoney(totals.subtotal)}</dd></div>
+                            {totals.comboDiscount > 0 ? <div><dt>Adventure Combo discount</dt><dd>-{formatMoney(totals.comboDiscount)}</dd></div> : null}
                             <div><dt>Estimated tax</dt><dd>Calculated later</dd></div>
+                            <div><dt>Exact pre-tax total</dt><dd>{formatMoney(totals.exactTotal)}</dd></div>
+                            <div><dt>Nickel-rounding adjustment</dt><dd>{formatSignedMoney(totals.roundingAdjustment)}</dd></div>
                         </dl>
                         <div className="dev-cart-total">
-                            <span>{totals.hasUnresolvedPrice ? "Known-price total" : "Prototype total"}</span>
-                            <strong>{formatMoney(totals.subtotal)}{totals.hasUnresolvedPrice ? " + TBD items" : ""}</strong>
+                            <span>{totals.hasUnresolvedPrice ? "Known-price rounded total" : "Rounded pre-tax total"}</span>
+                            <strong>{formatMoney(totals.finalPayableTotal)}{totals.hasUnresolvedPrice ? " + TBD items" : ""}</strong>
                         </div>
                         <Link className="dev-add-cart-button" href="/dev/checkout">Prototype Checkout</Link>
                         <p>
                             This development build stores selections locally. It does not accept payment or submit an order to a restaurant.
                         </p>
+                        <p>At purchase, nickel rounding is applied once to the final total after tax and any legitimate final adjustments.</p>
                         <Link href="/dev/order">Add another pizza</Link>
                     </aside>
                 </div>

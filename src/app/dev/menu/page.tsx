@@ -3,6 +3,7 @@ import { MENU } from "@/data/menu";
 import { getCheeseOptions, getCrustOptions, getFinishOptions, getGroupedPizzas, getSauceOptions, getToppingOptions } from "@/lib/menu/catalog";
 import { formatMoney } from "@/lib/pricing/format";
 import { getSignaturePizzaPrice } from "@/lib/pricing/pizzaPricing";
+import { ADVENTURE_COMBO_DISCOUNT } from "@/lib/pricing/priceTable";
 
 export default function DevMenuPage() {
     const groupedPizzas = getGroupedPizzas();
@@ -89,10 +90,12 @@ export default function DevMenuPage() {
             <section className="dev-catalog-section dev-potions-section">
                 <header className="dev-catalog-section-heading">
                     <span>Arcane refreshments</span>
-                    <h2>Signature Potions</h2>
-                    <p>Signature potions start at <strong>{formatMoney(Math.min(...MENU.potions.map((potion) => potion.basePrice)))}</strong>.</p>
-                    <p>Or build your own for <strong>{formatMoney(MENU.buildYourOwnPotionPrice)}</strong> with one base, two included flavors, and up to two shimmers. Additional flavor pricing is still TBD.</p>
-                    <Link href="/dev/order/potion/custom">Build Your Own Potion</Link>
+                    <h2>Drinks &amp; Potions</h2>
+                    <p><strong>Regular Soda · {formatMoney(MENU.fountainDrinkPrice)}</strong>. Choose any fountain base with no flavor mix-ins.</p>
+                    <p><strong>Build Your Own Potion · {formatMoney(MENU.fountainDrinkPrice)}+</strong>. Add a flavor to turn your soda into a {formatMoney(MENU.buildYourOwnPotionPrice)} Potion; your first two flavors are included. Each flavor after that adds {formatMoney(MENU.additionalPotionFlavorPrice)}.</p>
+                    <p><strong>Signature Potions · {formatMoney(Math.min(...MENU.potions.map((potion) => potion.basePrice)))}</strong>. Every flavor in the canonical recipe is included.</p>
+                    <p><strong>Energy Drinks · {formatMoney(MENU.straightEnergyDrinkPrice)}</strong>. Choose a straight Red Bull or Monster can, or add a half/full can upgrade to a Potion.</p>
+                    <Link href="/dev/order/drinks">Order Drinks &amp; Potions</Link>
                 </header>
                 <div className="dev-catalog-tile-grid">
                     {MENU.potions.map((potion) => (
@@ -109,7 +112,7 @@ export default function DevMenuPage() {
             </section>
 
             <section className="dev-catalog-section dev-drink-workshop">
-                <header className="dev-catalog-section-heading"><span>Mix your own magic</span><h2>Potion Workshop</h2><p>Enhancements are priced individually. Energy upgrades are available by the half or full can.</p></header>
+                <header className="dev-catalog-section-heading"><span>Mix your own magic</span><h2>Potion Workshop</h2><p>The first two custom-Potion flavors are included; each additional flavor adds {formatMoney(MENU.additionalPotionFlavorPrice)}. Enhancements are priced individually, and energy upgrades are available by the half or full can.</p></header>
                 <div className="dev-drink-directory">
                     <section><h3>Bases</h3><ul>{MENU.drinkBases.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
                     <section><h3>Flavor Infusions</h3><ul>{MENU.potionFlavors.map((item) => <li key={item.id}>{item.name}</li>)}</ul></section>
@@ -137,13 +140,8 @@ export default function DevMenuPage() {
             </section>
 
             <section className="dev-menu-build">
-                <div><span>Choose both sides</span><h2>Build Your Own Adventure Combo</h2><p>Pair any pizza build with any orderable drink. Combo pricing is coming soon; no discount or restriction has been invented.</p></div>
+                <div><span>Choose both sides</span><h2>Build Your Own Adventure Combo</h2><p>Pair any pizza build with any orderable drink. Both products are priced normally, then the completed pair receives a {formatMoney(ADVENTURE_COMBO_DISCOUNT)} discount.</p></div>
                 <Link href="/dev/order/combo">Build a BYO Combo</Link>
-            </section>
-
-            <section className="dev-menu-build">
-                <div><span>Drinks without the potion workshop</span><h2>Standalone Drinks</h2><p>Order a fountain drink with pricing marked TBD, or a straight Red Bull or Monster can for {formatMoney(MENU.straightEnergyDrinkPrice)}.</p></div>
-                <Link href="/dev/order/drinks">Order Drinks</Link>
             </section>
 
             <section className="dev-catalog-section">

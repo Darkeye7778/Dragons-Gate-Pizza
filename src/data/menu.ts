@@ -1,5 +1,11 @@
 import type { Ingredient, MenuCatalog } from "@/lib/menu/types";
 import { validateMenuCatalog } from "@/lib/menu/validate";
+import {
+    ADDITIONAL_POTION_FLAVOR_PRICE,
+    BUILD_YOUR_OWN_POTION_PRICE,
+    FOUNTAIN_DRINK_PRICE,
+    STRAIGHT_ENERGY_DRINK_PRICE,
+} from "@/lib/pricing/priceTable";
 
 const ingredient = (
     id: string,
@@ -213,10 +219,10 @@ export const MENU: MenuCatalog = {
         { id: "half-can", name: "Half Can", priceDelta: 1.5 },
         { id: "full-can", name: "Full Can", priceDelta: 2.5 },
     ],
-    buildYourOwnPotionPrice: 3.49,
-    straightEnergyDrinkPrice: 3.99,
-    additionalPotionFlavorPrice: null,
-    fountainDrinkPrice: null,
+    buildYourOwnPotionPrice: BUILD_YOUR_OWN_POTION_PRICE,
+    straightEnergyDrinkPrice: STRAIGHT_ENERGY_DRINK_PRICE,
+    additionalPotionFlavorPrice: ADDITIONAL_POTION_FLAVOR_PRICE,
+    fountainDrinkPrice: FOUNTAIN_DRINK_PRICE,
     buildYourOwnComboPrice: null,
 
     combos: [

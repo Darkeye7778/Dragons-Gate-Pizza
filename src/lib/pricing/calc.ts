@@ -67,3 +67,8 @@ export function calcTax(subtotal: Money, taxRate: number): Money {
 export function multiplyMoney(amount: Money, quantity: number): Money {
     return roundMoney(amount * quantity);
 }
+
+export function roundToNearestNickel(amount: Money): Money {
+    const cents = dollarsToCents(amount);
+    return centsToDollars(Math.round(cents / 5) * 5);
+}

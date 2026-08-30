@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:pricing": "node scripts/run-pricing-tests.mjs"
   },
   "dependencies": {
     "next": "^16.1.6",
@@ -22,6 +23,7 @@
     "baseline-browser-mapping": "^2.10.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.5",
+    "jiti": "^2.6.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

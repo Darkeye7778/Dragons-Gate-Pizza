@@ -21,10 +21,11 @@ const pizzaPricingSchema = z.object({
     mode: z.enum(["custom", "signature"]),
     tier: z.enum(["cheese", "one_top", "two_top", "three_top", "byo", "signature"]),
     tierLabel: z.string(),
-    toppingUnits: z.number().int().min(0),
-    standardToppingUnits: z.number().int().min(0),
-    additionalToppingUnits: z.number().int().min(0),
-    signatureIncludedToppingUnits: z.number().int().min(0).nullable(),
+    toppingUnits: z.number().min(0),
+    standardToppingUnits: z.number().min(0),
+    additionalToppingUnits: z.number().min(0),
+    completedAdditionalToppingUnits: z.number().int().min(0),
+    signatureIncludedToppingUnits: z.number().min(0).nullable(),
     cheeseBasePrice: z.number().min(0),
     signatureBasePrice: z.number().min(0).nullable(),
     pocketDoughId: z.enum(["regular", "vegan", "gluten-free"]).nullable(),
@@ -34,7 +35,7 @@ const pizzaPricingSchema = z.object({
     toppingCharge: z.number().min(0),
     unitPrice: z.number().min(0),
     priceSource: z.enum(["base-cheese-table", "signature-anchor"]),
-    tuPolicyId: z.literal("distinct-selection-v1"),
+    tuPolicyId: z.literal("weighted-amount-v2"),
 });
 
 const pizzaCartItemSchema = z.object({

@@ -19,7 +19,7 @@ import {
 import type { Ingredient, MenuPizza, ToppingAmount, ToppingPlacement } from "@/lib/menu/types";
 import { getBasePizzaPrice, multiplyMoney } from "@/lib/pricing/calc";
 import { formatMoney } from "@/lib/pricing/format";
-import { calculatePizzaPricing } from "@/lib/pricing/pizzaPricing";
+import { calculatePizzaPricing, getToppingUnitWeight } from "@/lib/pricing/pizzaPricing";
 import {
     ADDITIONAL_TOPPING_UNIT_PRICE,
     BUILD_YOUR_OWN_TOPPING_CHARGE,
@@ -203,7 +203,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId, requestedDrinkType
     const selectedCount = preBakeIngredientIds.length + postBakeIngredientIds.length;
     const pizzaDiameter = 66 + ((selectedSize?.inches ?? 16) / 25) * 30;
     const submitLabel = requestedDrinkType === "fountain"
-        ? "Add Pizza & Choose Fountain Drink"
+        ? "Add Pizza & Choose Regular Soda"
         : requestedDrinkType === "energy"
             ? "Add Pizza & Choose Energy Drink"
             : pairedPotionId && comboId === "byo-adventure"
@@ -408,8 +408,8 @@ export default function PizzaBuilder({ pizza, pairedPotionId, requestedDrinkType
                         <div><dt>Topping units</dt><dd>{pricing.toppingUnits} TU</dd></div>
                         {pricing.mode === "custom" ? <>
                             {pricing.standardToppingCharge > 0 ? <div><dt>{pricing.toppingUnits >= 4 ? `BYO tier · up to five toppings` : `Toppings (${pricing.standardToppingUnits} × ${formatMoney(STANDARD_TOPPING_UNIT_PRICE)})`}</dt><dd>+{formatMoney(pricing.standardToppingCharge)}</dd></div> : null}
-                            {pricing.additionalToppingCharge > 0 ? <div><dt>Toppings 6+ ({pricing.additionalToppingUnits} × {formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
-                        </> : pricing.additionalToppingCharge > 0 ? <div><dt>Beyond the house recipe ({pricing.additionalToppingUnits} × {formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
+                            {pricing.additionalToppingCharge > 0 ? <div><dt>Completed TU above five ({pricing.completedAdditionalToppingUnits} × {formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
+                        </> : pricing.additionalToppingCharge > 0 ? <div><dt>Completed TU beyond the house recipe ({pricing.completedAdditionalToppingUnits} × {formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)})</dt><dd>+{formatMoney(pricing.additionalToppingCharge)}</dd></div> : null}
                     </dl>
                     <div className="dev-quantity-control">
                         <span>Quantity</span><div>
@@ -422,8 +422,8 @@ export default function PizzaBuilder({ pizza, pairedPotionId, requestedDrinkType
                     <button className="dev-add-cart-button" type="submit">{submitLabel}</button>
                     <button className="dev-reset-build" type="button" onClick={resetBuild}>{pizza ? "Restore house recipe" : "Clear this build"}</button>
                     <p className="dev-build-note">{pizza
-                        ? `The house recipe includes ${signaturePresetToppingUnits} topping unit${signaturePresetToppingUnits === 1 ? "" : "s"}. Remove or exchange toppings without changing the signature price; selections beyond that recipe add ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)} each.`
-                        : `The listed size/crust price is the cheese base. One, two, and three toppings add ${formatMoney(STANDARD_TOPPING_UNIT_PRICE)} each; the ${formatMoney(BUILD_YOUR_OWN_TOPPING_CHARGE)} BYO tier includes up to five. Toppings 6+ add ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)} each.`} {isPizzaPocket ? "All fillings share one side before folding; the pocket preparation adds $1.00." : "Whole and half placement currently count the same."}</p>
+                        ? `The house recipe includes ${signaturePresetToppingUnits} topping unit${signaturePresetToppingUnits === 1 ? "" : "s"}. Remove or exchange toppings without changing the signature price; each completed TU beyond that recipe adds ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)}.`
+                        : `The listed size/crust price is the cheese base. Light, Normal, Extra, Double, and Triple portions count as 0.5, 1, 1.5, 2, and 3 TU. The ${formatMoney(BUILD_YOUR_OWN_TOPPING_CHARGE)} BYO tier includes 4–5 TU; each completed TU above five adds ${formatMoney(ADDITIONAL_TOPPING_UNIT_PRICE)}.`} {isPizzaPocket ? "All fillings share one side before folding; the pocket preparation adds $1.00." : "Whole and half placement count the same."}</p>
                 </aside>
 
                 <div className="dev-builder-controls">
@@ -496,7 +496,7 @@ export default function PizzaBuilder({ pizza, pairedPotionId, requestedDrinkType
                                 <button type="button" className="dev-topping-toggle" aria-pressed={selected} onClick={() => toggleTopping(item.id)}>
                                     <span className={`dev-topping-swatch topping-${toppingVisualClass(item.id)}`} aria-hidden="true" />
                                     <span><strong>{item.name}</strong><IngredientPrice>{selected
-                                        ? `${originalIngredients.has(item.id) ? "Included in house recipe · " : "1 TU · "}${amount} · ${isPizzaPocket ? "inside pocket" : placement === "whole" ? "whole" : `${placement} half`}`
+                                        ? `${originalIngredients.has(item.id) ? "Included in house recipe · " : `${getToppingUnitWeight(amount)} TU · `}${amount} · ${isPizzaPocket ? "inside pocket" : placement === "whole" ? "whole" : `${placement} half`}`
                                         : nextToppingPrice > 0
                                             ? `${pricing.mode === "signature" ? "Additional topping" : "Adds 1 TU"} · +${formatMoney(nextToppingPrice)}`
                                             : pricing.mode === "signature"

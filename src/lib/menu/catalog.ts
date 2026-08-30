@@ -6,6 +6,7 @@ import type {
     MenuPizza,
     Potion,
 } from "@/lib/menu/types";
+import { getToppingUnitWeight } from "@/lib/pricing/pizzaPricing";
 
 export function getPizzaById(id: string): MenuPizza {
     const pizza = MENU.pizzas.find((item) => item.id === id);
@@ -139,5 +140,7 @@ export function getFinishOptions(): Ingredient[] {
  * post-bake finishes are recipe layers but never consume topping units. */
 export function getSignatureToppingUnits(pizza: MenuPizza): number {
     const toppingIds = new Set(getToppingOptions().map((ingredient) => ingredient.id));
-    return pizza.preset.defaultPreBakeIngredientIds.filter((id) => toppingIds.has(id)).length;
+    return pizza.preset.defaultPreBakeIngredientIds
+        .filter((id) => toppingIds.has(id))
+        .reduce((total, id) => total + getToppingUnitWeight(pizza.preset.defaultToppingAmounts?.[id] ?? "normal"), 0);
 }

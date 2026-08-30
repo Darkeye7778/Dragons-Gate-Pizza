@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { MENU } from "@/data/menu";
+import { ADVENTURE_COMBO_DISCOUNT } from "@/lib/pricing/priceTable";
+import { formatMoney } from "@/lib/pricing/format";
 
 export default function ComboOrderPage() {
     const [pizzaId, setPizzaId] = useState("custom");
@@ -22,12 +24,12 @@ export default function ComboOrderPage() {
                 return <article className="dev-combo-item" key={combo.id}><h3>{combo.name}</h3><p>{pizza?.name} + {potion?.name}</p><p>{combo.shimmerIds.map((id) => MENU.shimmers.find((item) => item.id === id)?.name ?? id).join(" + ")} shimmer</p><Link href={`/dev/order/${combo.pizzaId}?pair=${combo.potionId}&combo=${combo.id}`}>Build This Pairing</Link></article>;
             })}</div>
         </section>
-        <section className="dev-builder-step"><span className="dev-section-kicker">Any pizza + any drink</span><h2>Build Your Own Adventure Combo</h2><p>Choose both products here, then customize the real pizza and drink builders in sequence. BYO Combo pricing is coming soon; no discount has been assumed.</p>
+        <section className="dev-builder-step"><span className="dev-section-kicker">Any pizza + any drink</span><h2>Build Your Own Adventure Combo</h2><p>Choose both products here, then customize the real pizza and drink builders in sequence. The final pizza and drink prices receive one {formatMoney(ADVENTURE_COMBO_DISCOUNT)} Adventure Combo discount.</p>
             <div className="dev-energy-options">
                 <label><span>Pizza</span><select value={pizzaId} onChange={(event) => setPizzaId(event.target.value)}><option value="custom">Build Your Own Pizza</option>{MENU.pizzas.map((pizza) => <option key={pizza.id} value={pizza.id}>{pizza.name}</option>)}</select></label>
-                <label><span>Drink</span><select value={drinkChoice} onChange={(event) => setDrinkChoice(event.target.value)}><option value="potion:custom">Build Your Own Potion</option>{MENU.potions.map((potion) => <option key={potion.id} value={`potion:${potion.id}`}>{potion.name}</option>)}<option value="standalone:fountain">Fountain Drink</option><option value="standalone:energy">Straight Energy Drink</option></select></label>
+                <label><span>Drink</span><select value={drinkChoice} onChange={(event) => setDrinkChoice(event.target.value)}><option value="standalone:fountain">Regular Soda</option><option value="potion:custom">Build Your Own Potion</option>{MENU.potions.map((potion) => <option key={potion.id} value={`potion:${potion.id}`}>{potion.name}</option>)}<option value="standalone:energy">Straight Energy Drink</option></select></label>
             </div>
-            <p className="dev-data-note">BYO Combo pricing coming soon</p><Link className="dev-add-cart-button" href={nextUrl}>Customize This Pair</Link>
+            <p className="dev-data-note">Every combo is priced from the products you actually build, then discounted {formatMoney(ADVENTURE_COMBO_DISCOUNT)}.</p><Link className="dev-add-cart-button" href={nextUrl}>Customize This Pair</Link>
         </section>
     </main>;
 }

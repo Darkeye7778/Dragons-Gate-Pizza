@@ -8,6 +8,7 @@ import { addToCart } from "@/lib/cart/store";
 import type { Potion } from "@/lib/menu/types";
 import { multiplyMoney } from "@/lib/pricing/calc";
 import { formatMoney } from "@/lib/pricing/format";
+import { ADVENTURE_COMBO_DISCOUNT } from "@/lib/pricing/priceTable";
 import { calculatePotionPricing } from "@/lib/pricing/potionPricing";
 
 function createCartItemId(): string {
@@ -103,6 +104,8 @@ export default function PotionBuilder({ potion, comboId, comboGroupId }: { potio
         energyAddInId: energyAddInId || undefined,
     });
     const totalPrice = multiplyMoney(pricing.unitPrice, quantity);
+    const customDrinkName = pricing.productKind === "regular-soda" ? "Regular Soda" : "Build Your Own Potion";
+    const displayName = potion?.name ?? customDrinkName;
     const energyBrand = MENU.energyBrands.find((brand) => brand.id === energyBrandId);
     const potionPalette = useMemo(() => BASE_PALETTES[baseId || "signature"] ?? BASE_PALETTES.signature, [baseId]);
     const shimmerLabelColor = SHIMMER_PALETTES[shimmerIds[0]]?.label ?? potionPalette.label;
@@ -157,14 +160,15 @@ export default function PotionBuilder({ potion, comboId, comboGroupId }: { potio
         <main className="dev-catalog-page dev-potion-builder-page">
             <nav className="dev-order-breadcrumb" aria-label="Order navigation">
                 <Link href="/dev/order">Order Ahead</Link><span aria-hidden="true">/</span>
-                <span>{potion?.name ?? "Build Your Own Potion"}</span>
+                <span>{potion?.name ?? "Drinks & Potions"}</span>
             </nav>
             <header className="dev-builder-hero">
                 <span className="dev-section-kicker">Mix an arcane refreshment</span>
-                <h1>{potion?.name ?? "Build Your Own Potion"}</h1>
+                <h1>{potion?.name ?? "Soda & Potion Builder"}</h1>
                 {potion?.isWorkingName ? <span className="dev-data-note">Working name</span> : null}
-                <p>{potion?.description ?? "Choose a fountain base, add flavor infusions and up to two shimmers, then finish it with optional enhancements or an energy upgrade."}</p>
+                <p>{potion?.description ?? `Choose any fountain soda for ${formatMoney(MENU.fountainDrinkPrice)}. Add a flavor to turn it into a Potion for ${formatMoney(MENU.buildYourOwnPotionPrice)}; your first two flavors are included.`}</p>
             </header>
+            {comboId ? <p className="dev-data-note">This drink will complete your Adventure Combo. The {formatMoney(ADVENTURE_COMBO_DISCOUNT)} combo discount is applied after both products reach the cart.</p> : null}
 
             <form className="dev-potion-builder-layout" onSubmit={handleSubmit}>
                 <aside className="dev-potion-preview" style={{
@@ -173,7 +177,7 @@ export default function PotionBuilder({ potion, comboId, comboGroupId }: { potio
                     "--potion-glow": potionPalette.glow,
                     "--potion-label": shimmerLabelColor,
                 } as CSSProperties}>
-                    <div className="dev-preview-heading"><div><span>Live mix</span><h2>Your Potion</h2></div></div>
+                    <div className="dev-preview-heading"><div><span>Live mix</span><h2>{potion || pricing.productKind !== "regular-soda" ? "Your Potion" : "Your Soda"}</h2></div></div>
                     <div className="dev-potion-vessel" aria-hidden="true">
                         <div className="dev-potion-bottle" data-base={baseId || "signature"}>
                             <div className="dev-potion-liquid">
@@ -196,13 +200,13 @@ export default function PotionBuilder({ potion, comboId, comboGroupId }: { potio
                         </div>
                     </div>
                     <div className="dev-potion-summary" aria-live="polite">
-                        <strong>{potion?.name ?? MENU.drinkBases.find((item) => item.id === baseId)?.name}</strong>
+                        <strong>{displayName}</strong>
                         <p>{potion?.description ?? (flavorIds.length ? flavorIds.map((id) => MENU.potionFlavors.find((item) => item.id === id)?.name).join(" + ") : "No flavor infusions selected")}</p>
                         <small>{shimmerIds.length ? `${shimmerIds.map((id) => MENU.shimmers.find((item) => item.id === id)?.name).join(" + ")} shimmer` : "No shimmer selected"}</small>
                     </div>
                     <dl className="dev-live-price">
-                        <div><dt>{potion ? "Signature potion" : "Build-your-own base"}</dt><dd>{formatMoney(pricing.basePrice)}</dd></div>
-                        {pricing.additionalFlavorCount > 0 ? <div><dt>Additional flavors ({pricing.additionalFlavorCount})</dt><dd>{pricing.additionalFlavorCharge === null ? "Price TBD" : `+${formatMoney(pricing.additionalFlavorCharge)}`}</dd></div> : null}
+                        <div><dt>{potion ? "Signature potion" : pricing.productKind === "regular-soda" ? "Regular soda" : "Build-your-own Potion"}</dt><dd>{formatMoney(pricing.basePrice)}</dd></div>
+                        {pricing.additionalFlavorCount > 0 ? <div><dt>Additional flavors ({pricing.additionalFlavorCount})</dt><dd>+{formatMoney(pricing.additionalFlavorCharge)}</dd></div> : null}
                         {pricing.enhancementCharge > 0 ? <div><dt>Enhancements</dt><dd>+{formatMoney(pricing.enhancementCharge)}</dd></div> : null}
                         {pricing.energyCharge > 0 ? <div><dt>Energy upgrade</dt><dd>+{formatMoney(pricing.energyCharge)}</dd></div> : null}
                     </dl>
@@ -211,9 +215,8 @@ export default function PotionBuilder({ potion, comboId, comboGroupId }: { potio
                         <output aria-live="polite">{quantity}</output>
                         <button type="button" aria-label="Increase quantity" onClick={() => setQuantity((value) => value + 1)}>+</button>
                     </div></div>
-                    {pricing.hasUnresolvedAdditionalFlavorPrice ? <p className="dev-data-note">Additional flavor pricing is not finalized. The amount below includes only currently priced components.</p> : null}
-                    <div className="dev-build-total"><span>{pricing.hasUnresolvedAdditionalFlavorPrice ? "Known-price total" : "Current total"}</span><strong>{formatMoney(totalPrice)}</strong></div>
-                    <button className="dev-add-cart-button" type="submit">Add Potion to Cart</button>
+                    <div className="dev-build-total"><span>Current total</span><strong>{formatMoney(totalPrice)}</strong></div>
+                    <button className="dev-add-cart-button" type="submit">Add {potion ? potion.name : customDrinkName} to Cart</button>
                 </aside>
 
                 <div className="dev-builder-controls">
@@ -230,13 +233,20 @@ export default function PotionBuilder({ potion, comboId, comboGroupId }: { potio
                             <input type="radio" name="potion-base" checked={baseId === option.id} onChange={() => setBaseId(option.id)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>{potion?.defaultBaseId === option.id ? "House recipe" : "Included"}</small>
                         </label>)}</div>
                     </fieldset>
-                    <fieldset className="dev-builder-step"><legend><span>02</span> Flavor Infusions</legend><p>{potion ? `This signature includes ${pricing.includedFlavorAllowance} flavor slots. Additional flavors are allowed, but their price is still TBD.` : "The first two flavors are included. Additional flavors are allowed, but their price is still TBD."}</p>
+                    <fieldset className="dev-builder-step"><legend><span>02</span> Flavor Infusions</legend><p>{potion ? `This signature includes ${pricing.includedFlavorAllowance} flavor slot${pricing.includedFlavorAllowance === 1 ? "" : "s"}. Each flavor beyond the house recipe adds ${formatMoney(MENU.additionalPotionFlavorPrice)}.` : `Your first flavor upgrades the ${formatMoney(MENU.fountainDrinkPrice)} soda to a ${formatMoney(MENU.buildYourOwnPotionPrice)} Potion. The first two flavors are included; each additional flavor adds ${formatMoney(MENU.additionalPotionFlavorPrice)}.`}</p>
                         <div className="dev-ingredient-tile-grid">{MENU.potionFlavors.map((option) => {
                             const selected = flavorIds.includes(option.id);
                             const isHouseFlavor = potion?.defaultFlavorIds.includes(option.id);
-                            const wouldBeAdditional = !selected && flavorIds.length >= pricing.includedFlavorAllowance;
+                            const selectedIndex = flavorIds.indexOf(option.id);
+                            const occupiesIncludedSlot = selectedIndex >= 0 && selectedIndex < pricing.includedFlavorAllowance;
+                            const hasAvailableIncludedSlot = !selected && flavorIds.length < pricing.includedFlavorAllowance;
+                            const priceLabel = isHouseFlavor
+                                ? "Included in house recipe"
+                                : occupiesIncludedSlot || hasAvailableIncludedSlot
+                                    ? "Included flavor slot"
+                                    : `+${formatMoney(MENU.additionalPotionFlavorPrice)}`;
                             return <label className="dev-ingredient-tile" key={option.id}>
-                                <input type="checkbox" checked={selected} onChange={() => setFlavorIds((current) => current.includes(option.id) ? current.filter((id) => id !== option.id) : [...current, option.id])} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>{isHouseFlavor ? "Included in house recipe" : wouldBeAdditional || (selected && flavorIds.length > pricing.includedFlavorAllowance) ? "Additional price TBD" : "Included flavor slot"}</small>
+                                <input type="checkbox" checked={selected} onChange={() => setFlavorIds((current) => current.includes(option.id) ? current.filter((id) => id !== option.id) : [...current, option.id])} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>{priceLabel}</small>
                             </label>;
                         })}</div>
                     </fieldset>
@@ -248,9 +258,19 @@ export default function PotionBuilder({ potion, comboId, comboGroupId }: { potio
                     </fieldset>
 
                     <fieldset className="dev-builder-step"><legend><span>{potion ? "02" : "04"}</span> Enhancements</legend><p>Add creams, whipped cream, or fresh fruit pieces at the price shown for each option.</p>
-                        <div className="dev-ingredient-tile-grid">{MENU.potionEnhancements.map((option) => <label className="dev-ingredient-tile" key={option.id}>
-                            <input type="checkbox" checked={enhancementIds.includes(option.id)} onChange={() => toggleEnhancement(option.id)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>{potion?.defaultEnhancementIds.includes(option.id) ? "Included in house recipe" : `+${formatMoney(option.priceDelta)}`}{option.isVegan ? " · Vegan" : option.allergens?.includes("milk") ? " · Contains milk" : ""}</small>
-                        </label>)}</div>
+                        <div className="dev-ingredient-tile-grid">{MENU.potionEnhancements.map((option) => {
+                            const selectedIndex = enhancementIds.indexOf(option.id);
+                            const occupiesIncludedSlot = selectedIndex >= 0 && selectedIndex < pricing.includedEnhancementAllowance;
+                            const availableIncludedSlot = selectedIndex < 0 && enhancementIds.length < pricing.includedEnhancementAllowance;
+                            const priceLabel = potion?.defaultEnhancementIds.includes(option.id)
+                                ? "Included in house recipe"
+                                : occupiesIncludedSlot || availableIncludedSlot
+                                    ? "Included enhancement slot"
+                                    : `+${formatMoney(option.priceDelta)}`;
+                            return <label className="dev-ingredient-tile" key={option.id}>
+                                <input type="checkbox" checked={selectedIndex >= 0} onChange={() => toggleEnhancement(option.id)} /><span className="dev-choice-mark" aria-hidden="true" /><strong>{option.name}</strong><small>{priceLabel}{option.isVegan ? " · Vegan" : option.allergens?.includes("milk") ? " · Contains milk" : ""}</small>
+                            </label>;
+                        })}</div>
                     </fieldset>
 
                     <fieldset className="dev-builder-step"><legend><span>{potion ? "03" : "05"}</span> Energy Upgrade</legend><p>Add half or a full can, then choose the brand and variety. A straight energy drink is also listed on the menu for {formatMoney(MENU.straightEnergyDrinkPrice)}.</p>
@@ -264,7 +284,7 @@ export default function PotionBuilder({ potion, comboId, comboGroupId }: { potio
                         </div> : null}
                     </fieldset>
 
-                    <section className="dev-builder-review"><span>Review the mix</span><h2>Ready to serve?</h2><p>{pricing.hasUnresolvedAdditionalFlavorPrice ? "Additional flavor pricing is still TBD. " : ""}Your current known-price total is <strong>{formatMoney(totalPrice)}</strong>.</p><button className="dev-add-cart-button" type="submit">Add Potion to Cart</button></section>
+                    <section className="dev-builder-review"><span>Review the mix</span><h2>Ready to serve?</h2><p>Your current total is <strong>{formatMoney(totalPrice)}</strong>.</p><button className="dev-add-cart-button" type="submit">Add {potion ? potion.name : customDrinkName} to Cart</button></section>
                 </div>
             </form>
         </main>

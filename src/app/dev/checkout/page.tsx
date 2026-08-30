@@ -6,7 +6,7 @@ import { MENU } from "@/data/menu";
 import { clearCart, readCart } from "@/lib/cart/store";
 import { calcCartTotals } from "@/lib/cart/totals";
 import { isDrinkCartItem, isPotionCartItem, PIZZA_CUT_LABELS, type CartItem } from "@/lib/cart/types";
-import { formatMoney } from "@/lib/pricing/format";
+import { formatMoney, formatSignedMoney } from "@/lib/pricing/format";
 import { calculatePotionPricing } from "@/lib/pricing/potionPricing";
 import { PIZZA_SIZES } from "@/lib/pricing/priceTable";
 import { checkoutFormSchema } from "@/lib/validation/checkout";
@@ -16,7 +16,7 @@ type Step = "fulfillment" | "customer" | "review" | "confirmation";
 function ingredientName(id: string) { return MENU.ingredients.find((item) => item.id === id)?.name ?? id; }
 function comboLabel(item: CartItem) {
     if (!item.comboGroupId) return null;
-    if (item.comboType === "byo") return "Build Your Own Adventure Combo · pricing coming soon";
+    if (item.comboType === "byo") return "Build Your Own Adventure Combo";
     return MENU.combos.find((combo) => combo.id === item.comboId)?.name ?? "Curated Adventure Combo";
 }
 
@@ -60,16 +60,20 @@ export default function CheckoutPage() {
 
         {step === "review" ? <section className="dev-builder-step"><h2>Order Review</h2><p>{fulfillmentType === "dine_in" ? "Dine In" : fulfillmentType[0].toUpperCase() + fulfillmentType.slice(1)} · {customer.firstName} {customer.lastName} · {customer.email} · {customer.phone}</p>
             <div className="dev-checkout-review-items">{items.map((item) => {
-                if (isDrinkCartItem(item)) return <article key={item.id}><h3>{item.drinkType === "fountain" ? "Fountain Drink" : "Straight Energy Drink"}</h3>{comboLabel(item) ? <p className="dev-data-note">{comboLabel(item)}</p> : null}<p>{item.drinkType === "fountain" ? MENU.drinkBases.find((base) => base.id === item.baseId)?.name : `${MENU.energyBrands.find((brand) => brand.id === item.energyBrandId)?.name} · ${item.energyVariantId}`}</p><p>Quantity {item.quantity} · {item.pricingState === "tbd" ? "Price TBD" : `${formatMoney(item.unitBasePrice)} each · ${formatMoney(item.unitBasePrice * item.quantity)}`}</p></article>;
+                if (isDrinkCartItem(item)) return <article key={item.id}><h3>{item.drinkType === "fountain" ? "Regular Soda" : "Straight Energy Drink"}</h3>{comboLabel(item) ? <p className="dev-data-note">{comboLabel(item)}</p> : null}<p>{item.drinkType === "fountain" ? MENU.drinkBases.find((base) => base.id === item.baseId)?.name : `${MENU.energyBrands.find((brand) => brand.id === item.energyBrandId)?.name} · ${item.energyVariantId}`}</p><p>Quantity {item.quantity} · {item.pricingState === "tbd" ? "Price TBD" : `${formatMoney(item.unitBasePrice)} each · ${formatMoney(item.unitBasePrice * item.quantity)}`}</p></article>;
                 if (isPotionCartItem(item)) {
                     const potionPricing = calculatePotionPricing(item);
-                    return <article key={item.id}><h3>{item.potionId === "custom" ? "Build Your Own Potion" : MENU.potions.find((potion) => potion.id === item.potionId)?.name}</h3>{comboLabel(item) ? <p className="dev-data-note">{comboLabel(item)}</p> : null}<p>Base: {MENU.drinkBases.find((base) => base.id === item.baseId)?.name} · Flavors: {item.flavorIds.map((id) => MENU.potionFlavors.find((flavor) => flavor.id === id)?.name ?? id).join(", ") || "None"}</p><p>Enhancements: {item.enhancementIds.map((id) => MENU.potionEnhancements.find((entry) => entry.id === id)?.name ?? id).join(", ") || "None"} · Shimmer: {item.shimmerIds.map((id) => MENU.shimmers.find((entry) => entry.id === id)?.name ?? id).join(" + ") || "None"}</p><p>Energy: {item.energyAddInId ? `${item.energyAddInId} · ${item.energyBrandId} · ${item.energyVariantId}` : "None"} · Quantity {item.quantity} · {formatMoney(item.unitBasePrice)} each · {formatMoney(item.unitBasePrice * item.quantity)}</p>{potionPricing.hasUnresolvedAdditionalFlavorPrice ? <p className="dev-data-note">Additional flavor price remains TBD and is not included in the known-price total.</p> : null}</article>;
+                    const potionName = item.potionId === "custom"
+                        ? potionPricing.productKind === "regular-soda" ? "Regular Soda" : "Build Your Own Potion"
+                        : MENU.potions.find((potion) => potion.id === item.potionId)?.name;
+                    return <article key={item.id}><h3>{potionName}</h3>{comboLabel(item) ? <p className="dev-data-note">{comboLabel(item)}</p> : null}<p>Base: {MENU.drinkBases.find((base) => base.id === item.baseId)?.name} · Flavors: {item.flavorIds.map((id) => MENU.potionFlavors.find((flavor) => flavor.id === id)?.name ?? id).join(", ") || "None"}</p><p>Enhancements: {item.enhancementIds.map((id) => MENU.potionEnhancements.find((entry) => entry.id === id)?.name ?? id).join(", ") || "None"} · Shimmer: {item.shimmerIds.map((id) => MENU.shimmers.find((entry) => entry.id === id)?.name ?? id).join(" + ") || "None"}</p><p>Energy: {item.energyAddInId ? `${item.energyAddInId} · ${item.energyBrandId} · ${item.energyVariantId}` : "None"} · Quantity {item.quantity} · {formatMoney(item.unitBasePrice)} each · {formatMoney(item.unitBasePrice * item.quantity)}</p></article>;
                 }
                 const selectedCrust = MENU.ingredients.find((entry) => entry.id === item.crustId);
                 const selectedSize = PIZZA_SIZES.find((entry) => entry.id === item.sizeId);
                 return <article key={item.id}><h3>{item.pizzaId === "custom" ? "Build Your Own Pizza" : MENU.pizzas.find((pizza) => pizza.id === item.pizzaId)?.name}</h3>{comboLabel(item) ? <p className="dev-data-note">{comboLabel(item)}</p> : null}<p>{selectedSize?.label ?? item.sizeId} · {item.crustId === "pizza-pocket" ? `Pizza Pocket · ${item.pocketDoughId} dough · +$1.00 fold` : selectedCrust?.name ?? item.crustId} · {PIZZA_CUT_LABELS[item.cutStyle ?? "eight-slice"]}</p><p>Pre-bake: {item.preBakeIngredientIds.map((id) => `${ingredientName(id)}${item.toppingAmounts?.[id] ? ` (${item.toppingAmounts[id]} · ${item.toppingPlacements?.[id] ?? "whole"})` : ""}`).join(", ") || "None"}</p><p>Finishes: {item.postBakeIngredientIds.map((id) => `${ingredientName(id)} (${item.crustId === "pizza-pocket" ? "over folded crust" : item.finishPlacements?.[id] ?? "whole"})`).join(", ") || "None"}</p><p>Quantity {item.quantity} · {formatMoney(item.unitBasePrice)} each · {formatMoney(item.unitBasePrice * item.quantity)}</p></article>;
             })}</div>
-            <dl className="dev-live-price"><div><dt>{totals.hasUnresolvedPrice ? "Known-price subtotal" : "Subtotal"}</dt><dd>{formatMoney(totals.subtotal)}{totals.hasUnresolvedPrice ? " + TBD items" : ""}</dd></div><div><dt>Tax</dt><dd>Calculated later</dd></div><div><dt>Delivery fees</dt><dd>{fulfillmentType === "delivery" ? "TBD" : "None"}</dd></div></dl>
+            <dl className="dev-live-price"><div><dt>{totals.hasUnresolvedPrice ? "Known-price subtotal" : "Subtotal"}</dt><dd>{formatMoney(totals.subtotal)}{totals.hasUnresolvedPrice ? " + TBD items" : ""}</dd></div>{totals.comboDiscount > 0 ? <div><dt>Adventure Combo discount</dt><dd>-{formatMoney(totals.comboDiscount)}</dd></div> : null}<div><dt>Tax</dt><dd>Calculated later</dd></div><div><dt>Delivery fees</dt><dd>{fulfillmentType === "delivery" ? "TBD" : "None"}</dd></div><div><dt>Exact pre-tax prototype total</dt><dd>{formatMoney(totals.exactTotal)}</dd></div><div><dt>Rounding adjustment</dt><dd>{formatSignedMoney(totals.roundingAdjustment)}</dd></div><div><dt>Rounded pre-tax prototype total</dt><dd>{formatMoney(totals.finalPayableTotal)}</dd></div></dl>
+            <p className="dev-data-note">The production transaction will apply nickel rounding once, after tax and any legitimate final adjustments. Tax is not configured in this prototype.</p>
             <p className="dev-data-note">This is a non-payment prototype. Placing it will not contact a restaurant or collect payment.</p><div className="dev-checkout-actions"><button type="button" onClick={() => setStep("customer")}>Back</button><button className="dev-add-cart-button" type="button" onClick={placePrototypeOrder}>Place Prototype Order</button></div>
         </section> : null}
     </main>;
