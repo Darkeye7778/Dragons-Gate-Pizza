@@ -1,4 +1,4 @@
-import { discord, isRunId, setting, staffRoleIds } from "./config";
+import { discord, isRunId, setting } from "./config";
 import { db, ticket, ticketFields, ticketForChannel, type Ticket } from "./db";
 import { embed, mention, noPings, ticketCard } from "./messages";
 
@@ -29,21 +29,20 @@ async function setPermission(channel: string, next: Overwrite, current?: Overwri
   await discord(`/channels/${channel}/permissions/${id}`, "PUT", overwrite);
 }
 
-async function restrictStaffReplies(channel: string, claimant: string) {
+async function restrictTicketAccess(channel: string, claimant: string) {
   const current = await channelPermissions(channel);
-  const staff = staffRoleIds();
-  const roles = new Set([...staff, setting("DISCORD_SERVER_ID"),
+  const roles = new Set([setting("DISCORD_SERVER_ID"),
     ...[...current.values()].filter(overwrite => overwrite.type === 0).map(overwrite => overwrite.id)]);
-  await setPermission(channel, permissions(claimant, 1, write, createThreads, current.get(claimant)), current.get(claimant));
   await Promise.all([...roles].map(id =>
-    setPermission(channel, permissions(id, 0, staff.includes(id) ? read : BigInt(0), denyPosting, current.get(id)), current.get(id))));
+    setPermission(channel, permissions(id, 0, BigInt(0), view, current.get(id)), current.get(id))));
+  await setPermission(channel, permissions(claimant, 1, write, createThreads, current.get(claimant)), current.get(claimant));
 }
 
 async function makeReadOnly(channel: string) {
   const current = await channelPermissions(channel);
   const bot = setting("DISCORD_APP_ID");
   const overwrites = [...current.values()].map(overwrite => overwrite.id === bot && overwrite.type === 1 ? overwrite :
-    permissions(overwrite.id, overwrite.type, BigInt(0), denyPosting, overwrite));
+    permissions(overwrite.id, overwrite.type, BigInt(0), overwrite.type === 0 ? view | denyPosting : denyPosting, overwrite));
   if (overwrites.some(overwrite => overwrite.allow !== current.get(overwrite.id)?.allow ||
       overwrite.deny !== current.get(overwrite.id)?.deny)) {
     await discord(`/channels/${channel}`, "PATCH", {permission_overwrites: overwrites});
@@ -84,7 +83,6 @@ export async function openTicket(id: string, kind: Ticket["kind"], opener: strin
         type: 0, name: ticketChannelName(id, kind, subject, runId), parent_id: parent, topic,
         permission_overwrites: [
           permissions(guild, 0, BigInt(0), view),
-          ...staffRoleIds().map(role => permissions(role, 0, write, BigInt(0))),
           permissions(opener, 1, write, createThreads),
           permissions(setting("DISCORD_APP_ID"), 1, write, BigInt(0)),
         ],
@@ -117,7 +115,7 @@ export async function claimTicket(id: string, moderator: string) {
   let current = claimed ?? await ticket(id);
   if (!current?.channel_id) throw new Error("Ticket not found");
   if (!current.closed_at && current.claimed_by === moderator) {
-    await restrictStaffReplies(current.channel_id, moderator);
+    await restrictTicketAccess(current.channel_id, moderator);
     current = await ticket(id);
     if (!current?.channel_id) throw new Error("Ticket not found");
     if (current.closed_at) await makeReadOnly(current.channel_id);
@@ -129,7 +127,7 @@ export async function claimTicket(id: string, moderator: string) {
 export async function addTicketParticipant(channel: string, claimant: string, participant: string) {
   const current = await ticketForChannel(channel);
   if (!current || current.closed_at || current.claimed_by !== claimant) return false;
-  await restrictStaffReplies(channel, claimant);
+  await restrictTicketAccess(channel, claimant);
   const currentPermissions = await channelPermissions(channel);
   const previous = currentPermissions.get(participant);
   await setPermission(channel, permissions(participant, 1, write, createThreads, previous), previous);
@@ -148,7 +146,7 @@ export async function closeTicket(id: string, moderator: string, outcome: string
   if (!current?.channel_id) throw new Error("Ticket not found");
   const channel = current.channel_id;
   if (!current.closed_at) {
-    // Keep the channel for the runner and staff as a read-only record.
+    // Keep the channel as a read-only record for its participants.
     await makeReadOnly(channel);
     const transcript: TranscriptMessage[] = [];
     let before = "";

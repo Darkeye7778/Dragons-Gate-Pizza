@@ -45,20 +45,21 @@ export async function reviewCard(queue: Queue, stale: boolean, run: Run, paginat
 export function ticketCard(ticket: Ticket, options?: {older?: Ticket; newer?: Ticket; count: number; index: number}) {
   const name = ticket.kind === "appeal" ? "Appeal" : "Ticket";
   const short = ticket.id.slice(-8);
-  const status = ticket.closed_at ? "Closed" : ticket.claimed_by ? `Claimed by ${mention(ticket.claimed_by)}` : "Open · Unclaimed";
+  const status = ticket.closed_at ? "Closed" : ticket.claimed_by ? `Claimed by ${mention(ticket.claimed_by)}` : "Unclaimed · Claim to open the channel";
+  const showChannel = ticket.channel_id && ticket.claimed_by;
   const controls: object[] = [];
   if (options) controls.push(button("← Older", `ticket:show:${options.older?.id ?? ticket.id}`, !options.older),
     button("Newer →", `ticket:show:${options.newer?.id ?? ticket.id}`, !options.newer));
-  if (ticket.channel_id) controls.push(linkButton("Open channel",
+  if (showChannel) controls.push(linkButton("Open channel",
     `https://discord.com/channels/${setting("DISCORD_SERVER_ID")}/${ticket.channel_id}`));
   if (!ticket.closed_at) controls.push(
-    button("Claim", `ticket:claim:${ticket.id}`, !!ticket.claimed_by),
+    button(ticket.claimed_by ? "Refresh access" : "Claim", `ticket:claim:${ticket.id}`),
     button("Close", `ticket:close:${ticket.id}`),
   );
   return {
     embeds: [{...embed(`${name} #${short}`, [
       status, `Opened by ${mention(ticket.opener)}`,
-      ticket.channel_id ? `Channel: <#${ticket.channel_id}>` : "",
+      showChannel ? `Channel: <#${ticket.channel_id}>` : "",
       ticket.run_id ? `Run: https://www.speedrun.com/runs/${ticket.run_id}` : "",
       ticket.closed_at && ticket.outcome ? `Outcome: ${ticket.outcome.slice(0, 1000)}` : "",
     ].filter(Boolean).join("\n")),

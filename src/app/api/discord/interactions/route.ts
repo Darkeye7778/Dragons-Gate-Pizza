@@ -185,7 +185,7 @@ export async function POST(request: Request) {
   if (i.type === 3 && action === "claim") return work(i, "private", async () => {
     const current = await claimTicket(id, user);
     return note(current.closed_at ? "This ticket is already closed." :
-      current.claimed_by === user ? `You claimed <#${current.channel_id}>.` : `Already claimed by <@${current.claimed_by}>.`);
+      current.claimed_by === user ? `You can now open <#${current.channel_id}>.` : `Already claimed by <@${current.claimed_by}>.`);
   });
   if (i.type === 3 && action === "close") return modal(custom, "Close ticket", field("Outcome or reason for closing", "outcome", 2, 1000));
   if (i.type === 5 && action === "close") {
