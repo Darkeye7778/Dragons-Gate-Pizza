@@ -48,8 +48,9 @@ function work(i: Interaction, kind: "public" | "private" | "update", task: () =>
   return Response.json(kind === "update" ? {type: 6} : {type: 5, ...(kind === "private" ? {data: {flags: 64}} : {})});
 }
 
-function field(label: string, custom_id: string, style: number, max_length: number, required = true) {
-  return {type: 18, label, component: {type: 4, custom_id, style, required, max_length}};
+function field(label: string, custom_id: string, style: number, max_length: number,
+  {required = true, description, placeholder}: {required?: boolean; description?: string; placeholder?: string} = {}) {
+  return {type: 18, label, description, component: {type: 4, custom_id, style, required, max_length, placeholder}};
 }
 
 function modal(custom_id: string, title: string, ...components: object[]) {
@@ -158,14 +159,19 @@ export async function POST(request: Request) {
     const expected = setting(appeal ? "DISCORD_APPEAL_PANEL_ID" : "DISCORD_SUPPORT_PANEL_ID");
     if (channel !== expected) return reply(note("Open this form from the Help category."), true);
     if (i.type === 3) return appeal
-      ? modal(custom, "Appeal a run decision", field("Speedrun.com run link or ID", "run", 1, 200),
-          field("Why should we take another look?", "detail", 2, 1500), field("Relevant timestamps", "times", 1, 200, false))
+      ? modal(custom, "Appeal a run decision",
+          field("Speedrun.com run link or ID", "run", 1, 200, {
+            description: "Open your submission on Speedrun.com (check the bell if it was rejected), then copy its page URL.",
+            placeholder: "https://www.speedrun.com/runs/abcd1234",
+          }),
+          field("Why should we take another look?", "detail", 2, 1500),
+          field("Relevant timestamps", "times", 1, 200, {required: false}))
       : modal(custom, "Open a support ticket", field("Short title (used for the channel name)", "subject", 1, 70),
           field("What can the mods help with?", "detail", 2, 1500));
     if (i.type === 5) {
       const input = values(i.data?.components ?? []);
       const runId = appeal ? parseRunLink(input.run?.trim() ?? "") : null;
-      if (appeal && !runId) return reply(note("Please use a Speedrun.com run URL or eight-character run ID. Reopen the appeal form to try again."), true);
+      if (appeal && !runId) return reply(note("Copy the page URL of the submission you’re appealing and reopen the form. An eight-character run ID also works."), true);
       if (!input.detail?.trim()) return reply(note("Add a short explanation and try again."), true);
       const detail = input.detail.trim().slice(0, 1500) + (input.times?.trim() ? `\nTimestamps: ${input.times.trim().slice(0, 200)}` : "");
       return work(i, "private", async () => {
