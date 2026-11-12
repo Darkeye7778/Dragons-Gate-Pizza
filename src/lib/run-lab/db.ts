@@ -26,7 +26,10 @@ export async function db<T>(table: string, query: Record<string, string> = {}, m
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!response.ok) throw new Error(`Run Lab storage returned HTTP ${response.status} for ${table}`);
-  return response.status === 204 ? undefined as T : await response.json();
+  if (response.status === 204 || prefer.split(",").some(value => value.trim() === "return=minimal")) {
+    return undefined as T;
+  }
+  return response.json();
 }
 
 export async function ticket(id: string) {
