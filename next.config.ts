@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  outputFileTracingIncludes: {
+    "/run-lab/[[...asset]]": ["./src/run-lab-ui/**/*"],
+    "/run-lab/*": ["./src/run-lab-ui/**/*"],
+  },
 };
 
 export default nextConfig;
