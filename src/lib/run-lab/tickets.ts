@@ -1,6 +1,6 @@
-import { discord, DiscordApiError, isRunId, setting } from "./config";
+import { discord, DiscordApiError, isRunId, setting, staffRoleIds } from "./config";
 import { db, ticket, ticketFields, ticketForChannel, type Ticket } from "./db";
-import { closedTicketMessage, embed, mention, ticketCard } from "./messages";
+import { closedTicketMessage, embed, mention, rolePings, ticketCard } from "./messages";
 import { archiveTicketTranscript, readTicketTranscript, requireMessageContent, transcriptDestination, type TranscriptMessage } from "./ticket-transcript";
 
 const view = BigInt(1024);
@@ -101,7 +101,7 @@ export async function openTicket(id: string, kind: Ticket["kind"], opener: strin
         [runId ? `Run: https://www.speedrun.com/runs/${runId}` : "", detail].filter(Boolean).join("\n"))],
     });
     const tracker = await discord<{id: string}>(`/channels/${setting("DISCORD_TICKET_TRACKER_ID")}/messages`, "POST", {
-      ...ticketCard(current), nonce: `tracker-${id}`.slice(-25), enforce_nonce: true,
+      ...ticketCard(current), ...rolePings(...staffRoleIds()), nonce: `tracker-${id}`.slice(-25), enforce_nonce: true,
     });
     [current] = await db<Ticket[]>("run_lab_tickets", {id: `eq.${id}`, select: ticketFields}, "PATCH", {tracker_id: tracker.id});
   }

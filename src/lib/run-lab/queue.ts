@@ -98,9 +98,21 @@ export function formatTime(ms: number | null) {
   return `${Math.floor(whole / 3600000)}:${String(Math.floor(whole / 60000) % 60).padStart(2, "0")}:${String(Math.floor(whole / 1000) % 60).padStart(2, "0")}.${String(whole % 1000).padStart(3, "0")}`;
 }
 
-export async function runStatus(id: string) {
+export async function readRun(id: string) {
   if (!isRunId(id)) throw new Error("Invalid run ID");
   const {data} = await upstream<SourceRun>(`runs/${id}`);
-  if (data.game !== gameId) throw new Error("Wrong game");
-  return data.status?.status;
+  if (data.game !== gameId || data.id !== id) throw new Error("Unexpected run");
+  return data;
+}
+
+export async function isWorldRecord(run: SourceRun) {
+  if (!isRunId(run.category)) throw new Error("Invalid category ID");
+  const {data} = await upstream<{
+    game: string; category: string; runs: {place: number; run: SourceRun}[];
+  }>(`leaderboards/${gameId}/category/${run.category}`, {top: "1"});
+  if (data.game !== gameId || data.category !== run.category || !Array.isArray(data.runs) ||
+      !data.runs.length || data.runs.some(entry => entry?.place !== 1 || !isRunId(entry.run?.id))) {
+    throw new Error("Speedrun.com returned an unexpected leaderboard");
+  }
+  return data.runs.length === 1 && data.runs[0].run.id === run.id;
 }

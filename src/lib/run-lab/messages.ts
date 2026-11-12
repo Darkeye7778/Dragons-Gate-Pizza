@@ -1,8 +1,16 @@
-import { origin, setting } from "./config";
+import { isId, origin, setting } from "./config";
 import { db, type Ticket } from "./db";
 import { formatTime, runFlags, type Queue, type Report, type Run } from "./queue";
 
 export const noPings = {parse: []};
+export function rolePings(...ids: (string | undefined)[]) {
+  const roles = [...new Set(ids.filter(isId))].filter(id => id !== process.env.DISCORD_SERVER_ID);
+  return {
+    ...(roles.length ? {content: roles.map(id => `<@&${id}>`).join(" ")} : {}),
+    allowed_mentions: {parse: [], roles},
+  };
+}
+
 export const embed = (title: string, description: string) => ({title, description, color: 0x8259d5});
 export const mention = (id: string) => `<@${id}>`;
 export const linkButton = (label: string, url: string) => ({type: 2, style: 5, label, url});

@@ -1,8 +1,8 @@
 import {timingSafeEqual} from "node:crypto";
-import {discord, setting} from "@/lib/run-lab/config";
+import {discord, isId, setting, staffRoleIds} from "@/lib/run-lab/config";
 import {db} from "@/lib/run-lab/db";
-import {embed, linkButton, labLink, noPings, row} from "@/lib/run-lab/messages";
-import {getQueue, runFlags, runStatus} from "@/lib/run-lab/queue";
+import {embed, linkButton, labLink, rolePings, row} from "@/lib/run-lab/messages";
+import {getQueue, isWorldRecord, readRun, runFlags} from "@/lib/run-lab/queue";
 
 type Notice = {run_id: string; category: string; pending_message: string | null; resolved_status: string | null; verified_message: string | null};
 export const maxDuration = 60;
@@ -31,22 +31,27 @@ export async function POST(request: Request) {
       const message = await discord<{id: string}>(`/channels/${setting("DISCORD_PENDING_RUNS_ID")}/messages`, "POST", {
         embeds: [embed("New run needs review", [`${run.category.slice(0, 100)} · ${run.id}`, ...runFlags(run, queue.runs)].join("\n"))],
         components: [row(linkButton("Speedrun.com", run.url), linkButton("Open Run Lab", labLink(run.id)))],
-        allowed_mentions: noPings, nonce: `pending-${run.id}`, enforce_nonce: true,
+        ...rolePings(...staffRoleIds()), nonce: `pending-${run.id}`, enforce_nonce: true,
       });
       await db("run_lab_notices", {on_conflict: "run_id"}, "POST", {run_id: run.id, category: run.category, pending_message: message.id},
         "resolution=merge-duplicates,return=minimal");
       sent++;
     }
     if (!queue.truncated) for (const item of candidates.filter(n => !current.has(n.run_id)).slice(0, 15)) {
-      const status = item.resolved_status ?? await runStatus(item.run_id);
+      const recordRole = process.env.DISCORD_WR_UPDATES_ROLE_ID;
+      const checkRecord = isId(recordRole);
+      const run = !item.resolved_status || checkRecord ? await readRun(item.run_id) : undefined;
+      const status = run ? run.status?.status : item.resolved_status;
       if (status !== "verified" && status !== "rejected") continue;
       const where = {run_id: `eq.${item.run_id}`};
       await db("run_lab_notices", where, "PATCH", {resolved_status: status});
       if (status !== "verified" || item.verified_message) continue;
+      const record = checkRecord && run ? await isWorldRecord(run) : false;
       const url = `https://www.speedrun.com/runs/${item.run_id}`;
       const message = await discord<{id: string}>(`/channels/${setting("DISCORD_VERIFIED_RUNS_ID")}/messages`, "POST", {
-        embeds: [embed("Run verified", `${item.category.slice(0, 100)} · [View on Speedrun.com](${url})`)],
-        allowed_mentions: noPings, nonce: `verified-${item.run_id}`, enforce_nonce: true,
+        embeds: [embed(record ? "New world record" : "Run verified", `${item.category.slice(0, 100)} · [View on Speedrun.com](${url})`)],
+        ...rolePings(process.env.DISCORD_NEW_RUNS_ROLE_ID, record ? recordRole : undefined),
+        nonce: `verified-${item.run_id}`, enforce_nonce: true,
       });
       await db("run_lab_notices", where, "PATCH", {verified_message: message.id});
       verified++;

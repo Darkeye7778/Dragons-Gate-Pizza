@@ -20,6 +20,7 @@ The private dashboard is at `/run-lab`. Discord sends slash commands, button cli
 | `DISCORD_APPEAL_PANEL_ID`, `DISCORD_SUPPORT_PANEL_ID` | `#submit-an-appeal` and `#submit-a-ticket` |
 | `DISCORD_RUN_REVIEW_ID`, `DISCORD_TICKET_TRACKER_ID` | `#run-review` and `#ticket-tracker` |
 | `DISCORD_MOD_LOG_ID`, `DISCORD_PENDING_RUNS_ID`, `DISCORD_VERIFIED_RUNS_ID` | `#mod-log`, `#new-pending-runs`, and `#verified-runs` |
+| `DISCORD_NEW_RUNS_ROLE_ID`, `DISCORD_WR_UPDATES_ROLE_ID` | Optional role IDs for **New Runs** and **New World Records**, respectively. Copy each role ID in Discord with Developer Mode enabled |
 | `DISCORD_TICKET_LOGS_ID` | Optional `#ticket-logs` channel ID. Falls back to `#mod-log`. Deny **View Channel** for `@everyone` and grant access to staff and the bot only. The bot needs **Attach Files** here |
 | `RUN_LAB_SUPABASE_URL`, `RUN_LAB_SUPABASE_KEY` | Supabase project URL and server secret key |
 | `RUN_LAB_SESSION_SECRET`, `RUN_LAB_POLL_SECRET` | Two independently generated random secrets. Run `openssl rand -hex 32` twice |
@@ -33,6 +34,7 @@ The private dashboard is at `/run-lab`. Discord sends slash commands, button cli
    ```
 
 6. In Supabase Cron, schedule an HTTP **POST** to `<origin>/api/run-lab/poll` hourly with `Authorization: Bearer <RUN_LAB_POLL_SECRET>`. Keep the secret in Supabase Vault for a SQL-scheduled job. A failed refresh returns an error and sends no alerts. The verified feed follows runs the bot previously saw pending and confirms their status with Speedrun.com.
+7. In `#new-pending-runs`, `#ticket-tracker`, and `#verified-runs`, allow the Auto Mod Boss role **Mention @everyone, @here, and All Roles** in the channel permissions so it can ping roles that are not publicly mentionable. The bot limits mentions in these alerts to the configured roles. New pending runs, tickets, and appeals ping Moderator and the configured Admin role. A newly verified run pings **New Runs**, plus **New World Records** on the same post if Speedrun.com lists the run as the sole first-place entry in its category. Tied first-place entries receive the ordinary verified notice.
 
 ## Test it in Discord
 
