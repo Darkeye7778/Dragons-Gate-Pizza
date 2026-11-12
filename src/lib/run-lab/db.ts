@@ -36,6 +36,10 @@ export async function ticket(id: string) {
   return (await db<Ticket[]>("run_lab_tickets", { id: `eq.${id}`, select: ticketFields }))[0];
 }
 
+export async function ticketForChannel(channelId: string) {
+  return (await db<Ticket[]>("run_lab_tickets", { channel_id: `eq.${channelId}`, select: ticketFields }))[0];
+}
+
 export async function openTickets() {
   return db<Ticket[]>("run_lab_tickets", {
     closed_at: "is.null", channel_id: "not.is.null", select: ticketFields, order: "created_at.asc,id.asc", limit: "1000",

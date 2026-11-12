@@ -5,16 +5,19 @@ import {isModerator} from "@/lib/run-lab/auth";
 import {openTickets, ticket} from "@/lib/run-lab/db";
 import {button, embed, noPings, reviewCard, row, ticketCard} from "@/lib/run-lab/messages";
 import {getQueue} from "@/lib/run-lab/queue";
-import {claimTicket, closeTicket, openTicket, parseRunLink} from "@/lib/run-lab/tickets";
+import {addTicketParticipant, claimTicket, closeTicket, openTicket, parseRunLink} from "@/lib/run-lab/tickets";
 
 export const maxDuration = 60;
 
-type Option = {name: string; value?: string};
+type Option = {name: string; value?: string; options?: Option[]};
 type Input = {custom_id?: string; value?: string; component?: Input; components?: Input[]};
 type Interaction = {
   id: string; type: number; token: string; application_id: string; guild_id?: string; channel_id?: string;
   member?: {roles: string[]; user?: {id: string}};
-  data?: {name?: string; custom_id?: string; options?: Option[]; components?: Input[]};
+  data?: {
+    name?: string; custom_id?: string; options?: Option[]; components?: Input[];
+    resolved?: {members?: Record<string, object>; users?: Record<string, {bot?: boolean}>};
+  };
 };
 
 type Message = {embeds: object[]; components?: object[]; allowed_mentions?: object};
@@ -122,8 +125,22 @@ export async function POST(request: Request) {
   const deny = () => reply(note("This action requires the moderator role and the designated staff channel."), true);
 
   if (i.type === 2) {
-    if (!isModerator(i.member?.roles)) return deny();
     const options = i.data?.options ?? [];
+    if (i.data?.name === "ticket" && options[0]?.name === "add") {
+      if (!isModerator(i.member?.roles) || !isId(channel)) {
+        return reply(note("Only the moderator or admin who claimed the ticket can add someone."), true);
+      }
+      const participant = options[0].options?.find(option => option.name === "member")?.value;
+      const resolved = i.data.resolved;
+      if (!isId(participant) || !resolved?.members?.[participant] || !resolved.users?.[participant] ||
+          resolved.users[participant].bot || participant === setting("DISCORD_APP_ID")) {
+        return reply(note("Choose a person from this server to add to the ticket."), true);
+      }
+      return work(i, "private", async () => note(await addTicketParticipant(channel, user, participant)
+        ? `<@${participant}> can now read and reply in this ticket.`
+        : "Run this inside an open ticket you claimed."));
+    }
+    if (!isModerator(i.member?.roles)) return deny();
     if (i.data?.name === "review" && review) {
       const runId = options.find(option => option.name === "run")?.value;
       if (runId && !isRunId(runId)) return reply(note("Enter an eight-character Speedrun.com run ID."), true);
@@ -142,7 +159,8 @@ export async function POST(request: Request) {
     if (i.type === 3) return appeal
       ? modal(custom, "Appeal a run decision", field("Speedrun.com run link or ID", "run", 1, 200),
           field("Why should we take another look?", "detail", 2, 1500), field("Relevant timestamps", "times", 1, 200, false))
-      : modal(custom, "Open a support ticket", field("What can the mods help with?", "detail", 2, 1500));
+      : modal(custom, "Open a support ticket", field("Short title (used for the channel name)", "subject", 1, 70),
+          field("What can the mods help with?", "detail", 2, 1500));
     if (i.type === 5) {
       const input = values(i.data?.components ?? []);
       const runId = appeal ? parseRunLink(input.run?.trim() ?? "") : null;
@@ -150,7 +168,7 @@ export async function POST(request: Request) {
       if (!input.detail?.trim()) return reply(note("Add a short explanation and try again."), true);
       const detail = input.detail.trim().slice(0, 1500) + (input.times?.trim() ? `\nTimestamps: ${input.times.trim().slice(0, 200)}` : "");
       return work(i, "private", async () => {
-        const result = await openTicket(i.id, intake, user, detail, runId);
+        const result = await openTicket(i.id, intake, user, detail, runId, input.subject?.trim().slice(0, 70));
         return note(`Your private channel is <#${result.channel_id}>.`, appeal ? "Appeal opened" : "Ticket opened");
       });
     }

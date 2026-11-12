@@ -15,6 +15,10 @@ export function isId(value: unknown): value is string {
   return typeof value === "string" && /^\d{16,22}$/.test(value);
 }
 
+export function staffRoleIds() {
+  return [...new Set([setting("DISCORD_MOD_ROLE_ID"), process.env.DISCORD_ADMIN_ROLE_ID].filter(isId))];
+}
+
 export function isRunId(value: unknown): value is string {
   return typeof value === "string" && /^[a-z0-9]{8}$/i.test(value);
 }

@@ -33,7 +33,13 @@ if (mode === "commands") {
       {type: 1, name: "tickets", description: "Browse open support tickets and appeals"},
     ],
   });
-  console.log("Registered /review, /list runs, and /list tickets in the server.");
+  await send(path, {
+    name: "ticket", description: "Manage the ticket you claimed",
+    options: [{type: 1, name: "add", description: "Add someone to this ticket", options: [
+      {type: 6, name: "member", description: "Server member to give access", required: true},
+    ]}],
+  });
+  console.log("Registered /review, /list runs, /list tickets, and /ticket add in the server.");
 } else {
   for (const panel of [
     {kind: "appeal", channel: required("DISCORD_APPEAL_PANEL_ID"), label: "Open an Appeal",

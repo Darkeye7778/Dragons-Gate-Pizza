@@ -1,10 +1,61 @@
-import { discord, isRunId, setting } from "./config";
-import { db, ticket, ticketFields, type Ticket } from "./db";
+import { discord, isRunId, setting, staffRoleIds } from "./config";
+import { db, ticket, ticketFields, ticketForChannel, type Ticket } from "./db";
 import { embed, mention, noPings, ticketCard } from "./messages";
 
-const view = 1024, send = 2048, embedLinks = 16384, attach = 32768, read = 65536;
-const createThreads = 2 ** 35 + 2 ** 36, sendInThreads = 2 ** 38;
-const memberPermissions = String(view | send | embedLinks | attach | read);
+const view = BigInt(1024);
+const read = view | BigInt(65536);
+const write = read | BigInt(2048 | 16384 | 32768);
+const createThreads = BigInt(2 ** 35 + 2 ** 36);
+const denyPosting = BigInt(2048 | 32768) | createThreads | BigInt(2 ** 38);
+
+type Overwrite = {id: string; type: 0 | 1; allow: string; deny: string};
+
+function permissions(id: string, type: Overwrite["type"], allow: bigint, deny: bigint, existing?: Overwrite): Overwrite {
+  return {
+    id, type,
+    allow: ((BigInt(existing?.allow ?? "0") | allow) & ~deny).toString(),
+    deny: ((BigInt(existing?.deny ?? "0") | deny) & ~allow).toString(),
+  };
+}
+
+async function channelPermissions(channel: string) {
+  const {permission_overwrites} = await discord<{permission_overwrites: Overwrite[]}>(`/channels/${channel}`);
+  return new Map(permission_overwrites.map(overwrite => [overwrite.id, overwrite]));
+}
+
+async function setPermission(channel: string, next: Overwrite, current?: Overwrite) {
+  if (current?.allow === next.allow && current.deny === next.deny) return;
+  const {id, ...overwrite} = next;
+  await discord(`/channels/${channel}/permissions/${id}`, "PUT", overwrite);
+}
+
+async function restrictStaffReplies(channel: string, claimant: string) {
+  const current = await channelPermissions(channel);
+  const staff = staffRoleIds();
+  const roles = new Set([...staff, setting("DISCORD_SERVER_ID"),
+    ...[...current.values()].filter(overwrite => overwrite.type === 0).map(overwrite => overwrite.id)]);
+  await setPermission(channel, permissions(claimant, 1, write, createThreads, current.get(claimant)), current.get(claimant));
+  await Promise.all([...roles].map(id =>
+    setPermission(channel, permissions(id, 0, staff.includes(id) ? read : BigInt(0), denyPosting, current.get(id)), current.get(id))));
+}
+
+async function makeReadOnly(channel: string) {
+  const current = await channelPermissions(channel);
+  const bot = setting("DISCORD_APP_ID");
+  const overwrites = [...current.values()].map(overwrite => overwrite.id === bot && overwrite.type === 1 ? overwrite :
+    permissions(overwrite.id, overwrite.type, BigInt(0), denyPosting, overwrite));
+  if (overwrites.some(overwrite => overwrite.allow !== current.get(overwrite.id)?.allow ||
+      overwrite.deny !== current.get(overwrite.id)?.deny)) {
+    await discord(`/channels/${channel}`, "PATCH", {permission_overwrites: overwrites});
+  }
+}
+
+function ticketChannelName(id: string, kind: Ticket["kind"], subject: string, runId: string | null) {
+  const slug = subject.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48).replace(/-$/, "");
+  const suffix = id.slice(-8);
+  return kind === "appeal" ? `appeal-${runId?.toLowerCase() ?? "run"}-${suffix}` : `ticket-${slug || "support"}-${suffix}`;
+}
 
 export function parseRunLink(value: string) {
   if (isRunId(value)) return value;
@@ -18,7 +69,7 @@ export function parseRunLink(value: string) {
   return null;
 }
 
-export async function openTicket(id: string, kind: Ticket["kind"], opener: string, detail: string, runId: string | null) {
+export async function openTicket(id: string, kind: Ticket["kind"], opener: string, detail: string, runId: string | null, subject = "") {
   await db("run_lab_tickets", {on_conflict: "id"}, "POST", {id, kind, opener, detail, run_id: runId},
     "resolution=ignore-duplicates,return=minimal");
   let current = await ticket(id);
@@ -30,12 +81,12 @@ export async function openTicket(id: string, kind: Ticket["kind"], opener: strin
     const parent = setting("DISCORD_OPEN_TICKETS_CATEGORY_ID");
     const channel = channels.find(c => c.topic === topic && c.parent_id === parent) ??
       await discord<{id: string}>(`/guilds/${guild}/channels`, "POST", {
-        type: 0, name: `${kind === "appeal" ? "appeal" : "ticket"}-${id.slice(-8)}`, parent_id: parent, topic,
+        type: 0, name: ticketChannelName(id, kind, subject, runId), parent_id: parent, topic,
         permission_overwrites: [
-          {id: guild, type: 0, deny: String(view), allow: "0"},
-          {id: setting("DISCORD_MOD_ROLE_ID"), type: 0, allow: memberPermissions, deny: "0"},
-          {id: opener, type: 1, allow: memberPermissions, deny: String(createThreads)},
-          {id: setting("DISCORD_APP_ID"), type: 1, allow: memberPermissions, deny: "0"},
+          permissions(guild, 0, BigInt(0), view),
+          ...staffRoleIds().map(role => permissions(role, 0, write, BigInt(0))),
+          permissions(opener, 1, write, createThreads),
+          permissions(setting("DISCORD_APP_ID"), 1, write, BigInt(0)),
         ],
       });
     [current] = await db<Ticket[]>("run_lab_tickets", {id: `eq.${id}`, select: ticketFields}, "PATCH", {channel_id: channel.id});
@@ -63,10 +114,30 @@ export async function claimTicket(id: string, moderator: string) {
   const [claimed] = await db<Ticket[]>("run_lab_tickets", {
     id: `eq.${id}`, claimed_by: "is.null", closed_at: "is.null", select: ticketFields,
   }, "PATCH", {claimed_by: moderator});
-  const current = claimed ?? await ticket(id);
-  if (!current) throw new Error("Ticket not found");
+  let current = claimed ?? await ticket(id);
+  if (!current?.channel_id) throw new Error("Ticket not found");
+  if (!current.closed_at && current.claimed_by === moderator) {
+    await restrictStaffReplies(current.channel_id, moderator);
+    current = await ticket(id);
+    if (!current?.channel_id) throw new Error("Ticket not found");
+    if (current.closed_at) await makeReadOnly(current.channel_id);
+  }
   await syncTracker(current);
   return current;
+}
+
+export async function addTicketParticipant(channel: string, claimant: string, participant: string) {
+  const current = await ticketForChannel(channel);
+  if (!current || current.closed_at || current.claimed_by !== claimant) return false;
+  await restrictStaffReplies(channel, claimant);
+  const currentPermissions = await channelPermissions(channel);
+  const previous = currentPermissions.get(participant);
+  await setPermission(channel, permissions(participant, 1, write, createThreads, previous), previous);
+  if ((await ticket(current.id))?.closed_at) {
+    await makeReadOnly(channel);
+    return false;
+  }
+  return true;
 }
 
 type TranscriptMessage = {id: string; author: {id: string; username: string}; content: string; timestamp: string;
@@ -78,9 +149,7 @@ export async function closeTicket(id: string, moderator: string, outcome: string
   const channel = current.channel_id;
   if (!current.closed_at) {
     // Keep the channel for the runner and staff as a read-only record.
-    await discord(`/channels/${channel}/permissions/${current.opener}`, "PUT", {
-      type: 1, allow: String(view | read), deny: String(send + attach + createThreads + sendInThreads),
-    });
+    await makeReadOnly(channel);
     const transcript: TranscriptMessage[] = [];
     let before = "";
     for (;;) {
@@ -97,6 +166,7 @@ export async function closeTicket(id: string, moderator: string, outcome: string
     current = closed ?? await ticket(id);
     if (!current) throw new Error("Ticket not found");
   }
+  await makeReadOnly(channel);
   await syncTracker(current);
   const message = {embeds: [embed("Ticket closed", `Outcome: ${current.outcome}\nClosed by ${mention(moderator)}`)], allowed_mentions: noPings};
   await Promise.all([

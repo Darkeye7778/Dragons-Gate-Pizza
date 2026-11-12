@@ -1,6 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { discord, isId, origin, setting } from "./config";
+import { discord, isId, origin, setting, staffRoleIds } from "./config";
 
 export const sessionName = "run_lab_session";
 export const stateName = "run_lab_oauth";
@@ -31,7 +31,7 @@ export async function sessionUser() {
 }
 
 export function isModerator(roles?: string[]) {
-  return roles?.includes(setting("DISCORD_MOD_ROLE_ID")) ?? false;
+  return staffRoleIds().some(role => roles?.includes(role));
 }
 
 export async function moderator() {

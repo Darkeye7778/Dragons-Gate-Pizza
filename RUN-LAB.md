@@ -1,6 +1,6 @@
 # Rip It! Run Lab on DGP
 
-The private dashboard is at `/run-lab`. Discord sends slash commands, button clicks, and form submissions to `/api/discord/interactions`. The app responds through Discord and uses the bot account to create channels and send notifications. A member needs the configured moderator role to sign in to the site and use staff commands.
+The private dashboard is at `/run-lab`. Discord sends slash commands, button clicks, and form submissions to `/api/discord/interactions`. The app responds through Discord and uses the bot account to create channels and send notifications. Members with the configured Moderator or Admin role can sign in to the site and use staff commands.
 
 ## Set up the services
 
@@ -15,6 +15,7 @@ The private dashboard is at `/run-lab`. Discord sends slash commands, button cli
 | `DISCORD_CLIENT_SECRET` | Discord Developer Portal, OAuth2 |
 | `DISCORD_BOT_TOKEN` | Discord Developer Portal, Bot |
 | `DISCORD_SERVER_ID`, `DISCORD_MOD_ROLE_ID` | Server ID and Moderator role ID |
+| `DISCORD_ADMIN_ROLE_ID` | Optional Admin role ID. Grants the same Run Lab access as Moderator |
 | `DISCORD_OPEN_TICKETS_CATEGORY_ID` | Open Tickets category ID |
 | `DISCORD_APPEAL_PANEL_ID`, `DISCORD_SUPPORT_PANEL_ID` | `#submit-an-appeal` and `#submit-a-ticket` |
 | `DISCORD_RUN_REVIEW_ID`, `DISCORD_TICKET_TRACKER_ID` | `#run-review` and `#ticket-tracker` |
@@ -35,7 +36,9 @@ The private dashboard is at `/run-lab`. Discord sends slash commands, button cli
 ## Test it in Discord
 
 - In `#run-review`, use `/review` to open the oldest pending run, optionally supply a run ID, or use `/list runs`. Arrow buttons edit the same embed. The reply is visible to the staff channel. If the source is down, the last successful queue is labeled with its refresh time.
-- As a regular member, open an appeal. Confirm a second regular member cannot see it. Use Claim in `#ticket-tracker` as a mod, then use `/list tickets` to browse open items. Close the appeal with an outcome and confirm the tracker changes, the opener’s channel becomes read-only, and the result is posted to `#mod-log`. Closed channels retain the conversation and the database stores a staff-side transcript.
+- Open a support ticket as a regular member and confirm the channel name includes its short title. Appeal channel names include the Speedrun.com run ID. Confirm a second regular member cannot see the ticket.
+- Use **Claim** in `#ticket-tracker` as a moderator or configured admin. Confirm the claimant and opener can reply while other staff can read the channel. As the claimant, run `/ticket add member:@Name` inside the ticket to let that person read and reply. Run it again to add another person. Discord server owners and roles with the built-in **Administrator** permission can bypass channel restrictions.
+- Use `/list tickets` to browse open items. Close the test ticket with an outcome and confirm the tracker changes, the channel becomes read-only for participants, and the result is posted to `#mod-log`. Closed channels retain the conversation and the database stores a staff-side transcript.
 - Open `/run-lab` and sign in with a moderator account. Check that a regular member is denied. Play the recording embed or open a local video. Run the frame precheck and confirm the estimated frames show up for a second moderator and in the Discord review card.
 
 ## Move existing Run Lab data
