@@ -5,7 +5,7 @@ import {isModerator} from "@/lib/run-lab/auth";
 import {openTickets, ticket} from "@/lib/run-lab/db";
 import {button, embed, noPings, reviewCard, row, ticketCard} from "@/lib/run-lab/messages";
 import {getQueue} from "@/lib/run-lab/queue";
-import {addTicketParticipant, claimTicket, closeTicket, openTicket, parseRunLink} from "@/lib/run-lab/tickets";
+import {addTicketParticipant, claimTicket, closeTicket, deleteClosedTicket, openTicket, parseRunLink} from "@/lib/run-lab/tickets";
 
 export const maxDuration = 60;
 
@@ -28,7 +28,7 @@ function reply(message: Message, ephemeral = false) {
   return Response.json({type: 4, data: {...message, ...(ephemeral ? {flags: 64} : {})}});
 }
 
-function work(i: Interaction, kind: "public" | "private" | "update", task: () => Promise<Message>) {
+function work(i: Interaction, kind: "public" | "private" | "update", task: () => Promise<Message | null>) {
   after(async () => {
     let message;
     try { message = await task(); }
@@ -36,6 +36,7 @@ function work(i: Interaction, kind: "public" | "private" | "update", task: () =>
       console.error("Run Lab interaction failed", error instanceof Error ? error.message : "Unknown error");
       message = note("This action couldn’t finish. Try again or contact a moderator.", "Run Lab unavailable");
     }
+    if (!message) return;
     try {
       const response = await fetch(`${discordApi}/webhooks/${i.application_id}/${encodeURIComponent(i.token)}/messages/@original`, {
         method: "PATCH", headers: {"Content-Type": "application/json"}, body: JSON.stringify(message),
@@ -174,10 +175,16 @@ export async function POST(request: Request) {
     }
   }
 
+  const remove = custom.match(/^ticket:delete:(\d{16,22})$/)?.[1];
+  if (i.type === 3 && remove && isId(channel)) return work(i, "private", async () =>
+    await deleteClosedTicket(remove, channel, user)
+      ? null
+      : note("Only the opener can delete this channel after the ticket has closed and its transcript has been archived."));
+
   if (!isModerator(i.member?.roles)) return deny();
   const run = custom.match(/^review:(oldest|[a-z0-9]{8})$/i)?.[1];
   if (i.type === 3 && run && review) return work(i, "update", () => showReview(run === "oldest" ? undefined : run));
-  const control = custom.match(/^ticket:(show|claim|close):(oldest|\d{16,22})$/);
+  const control = custom.match(/^ticket:(show|claim|close|finish):(oldest|\d{16,22})$/);
   if (!control || !tracker) return deny();
   const [, action, id] = control;
   if (i.type === 3 && action === "show") return work(i, "update", () => showTicket(id === "oldest" ? undefined : id));
@@ -188,13 +195,13 @@ export async function POST(request: Request) {
       current.claimed_by === user ? `You can now open <#${current.channel_id}>.` : `Already claimed by <@${current.claimed_by}>.`);
   });
   if (i.type === 3 && action === "close") return modal(custom, "Close ticket", field("Outcome or reason for closing", "outcome", 2, 1000));
-  if (i.type === 5 && action === "close") {
-    const outcome = values(i.data?.components ?? []).outcome?.trim().slice(0, 1000);
-    if (!outcome) return reply(note("Enter an outcome before closing the ticket."), true);
+  if ((i.type === 5 && action === "close") || (i.type === 3 && action === "finish")) {
+    const outcome = i.type === 5 ? values(i.data?.components ?? []).outcome?.trim().slice(0, 1000) : undefined;
+    if (i.type === 5 && !outcome) return reply(note("Enter an outcome before closing the ticket."), true);
     return work(i, "private", async () => {
       if (!await ticket(id)) return note("Ticket not found.");
       const closed = await closeTicket(id, user, outcome);
-      return note(`Closed <#${closed.channel_id}> and saved its transcript.`);
+      return note(`Closed the ticket and sent the opener a notice. [Open the staff transcript](${closed.archive_url}).`);
     });
   }
   return deny();

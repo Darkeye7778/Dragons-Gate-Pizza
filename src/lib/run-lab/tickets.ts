@@ -1,6 +1,7 @@
-import { discord, isRunId, setting } from "./config";
+import { discord, DiscordApiError, isRunId, setting } from "./config";
 import { db, ticket, ticketFields, ticketForChannel, type Ticket } from "./db";
-import { embed, mention, noPings, ticketCard } from "./messages";
+import { closedTicketMessage, embed, mention, ticketCard } from "./messages";
+import { archiveTicketTranscript, readTicketTranscript, requireMessageContent, transcriptDestination, type TranscriptMessage } from "./ticket-transcript";
 
 const view = BigInt(1024);
 const read = view | BigInt(65536);
@@ -38,11 +39,15 @@ async function restrictTicketAccess(channel: string, claimant: string) {
   await setPermission(channel, permissions(claimant, 1, write, createThreads, current.get(claimant)), current.get(claimant));
 }
 
-async function makeReadOnly(channel: string) {
+async function makeReadOnly(channel: string, opener: string) {
   const current = await channelPermissions(channel);
   const bot = setting("DISCORD_APP_ID");
-  const overwrites = [...current.values()].map(overwrite => overwrite.id === bot && overwrite.type === 1 ? overwrite :
-    permissions(overwrite.id, overwrite.type, BigInt(0), overwrite.type === 0 ? view | denyPosting : denyPosting, overwrite));
+  const overwrites = [...current.values()].map(overwrite => {
+    if (overwrite.type === 1 && overwrite.id === bot) return overwrite;
+    if (overwrite.type === 1 && overwrite.id === opener) return permissions(opener, 1, read, denyPosting, overwrite);
+    return permissions(overwrite.id, overwrite.type, BigInt(0), view, overwrite);
+  });
+  if (!current.has(opener)) overwrites.push(permissions(opener, 1, read, denyPosting));
   if (overwrites.some(overwrite => overwrite.allow !== current.get(overwrite.id)?.allow ||
       overwrite.deny !== current.get(overwrite.id)?.deny)) {
     await discord(`/channels/${channel}`, "PATCH", {permission_overwrites: overwrites});
@@ -118,7 +123,7 @@ export async function claimTicket(id: string, moderator: string) {
     await restrictTicketAccess(current.channel_id, moderator);
     current = await ticket(id);
     if (!current?.channel_id) throw new Error("Ticket not found");
-    if (current.closed_at) await makeReadOnly(current.channel_id);
+    if (current.closed_at) await makeReadOnly(current.channel_id, current.opener);
   }
   await syncTracker(current);
   return current;
@@ -132,46 +137,70 @@ export async function addTicketParticipant(channel: string, claimant: string, pa
   const previous = currentPermissions.get(participant);
   await setPermission(channel, permissions(participant, 1, write, createThreads, previous), previous);
   if ((await ticket(current.id))?.closed_at) {
-    await makeReadOnly(channel);
+    await makeReadOnly(channel, current.opener);
     return false;
   }
   return true;
 }
 
-type TranscriptMessage = {id: string; author: {id: string; username: string}; content: string; timestamp: string;
-  attachments?: {filename: string; url: string}[]};
-
-export async function closeTicket(id: string, moderator: string, outcome: string) {
-  let current = await ticket(id);
-  if (!current?.channel_id) throw new Error("Ticket not found");
-  const channel = current.channel_id;
-  if (!current.closed_at) {
-    // Keep the channel as a read-only record for its participants.
-    await makeReadOnly(channel);
-    const transcript: TranscriptMessage[] = [];
-    let before = "";
-    for (;;) {
-      const page = await discord<TranscriptMessage[]>(`/channels/${channel}/messages?limit=100${before ? `&before=${before}` : ""}`);
-      transcript.push(...page.map(({id, author, content, timestamp, attachments}) =>
-        ({id, author: {id: author.id, username: author.username}, content, timestamp,
-          attachments: attachments?.map(({filename, url}) => ({filename, url}))})));
-      if (page.length < 100) break;
-      before = page[99].id;
+export async function closeTicket(id: string, moderator: string, outcome?: string) {
+  const initial = await ticket(id);
+  if (!initial?.channel_id) throw new Error("Ticket not found");
+  if (!initial.closed_at && !outcome) throw new Error("Enter an outcome before closing the ticket");
+  const channel = initial.channel_id;
+  let current = initial;
+  try {
+    const destination = current.archive_url ? null : await transcriptDestination(channel);
+    let transcript: TranscriptMessage[] | undefined;
+    if (!current.closed_at) {
+      await requireMessageContent();
+      await makeReadOnly(channel, current.opener);
+      const messages = await readTicketTranscript(channel);
+      const [closed] = await db<Ticket[]>("run_lab_tickets", {id: `eq.${id}`, closed_at: "is.null", select: ticketFields}, "PATCH", {
+        closed_at: new Date().toISOString(), outcome, transcript: messages,
+      });
+      if (closed) transcript = messages;
+      current = closed ?? await ticket(id) ?? current;
+      if (!current.closed_at) throw new Error("Could not save ticket closure");
     }
-    const [closed] = await db<Ticket[]>("run_lab_tickets", {id: `eq.${id}`, closed_at: "is.null", select: ticketFields}, "PATCH", {
-      closed_at: new Date().toISOString(), outcome, transcript: transcript.reverse(),
+    if (!current.close_notice_id) await makeReadOnly(channel, current.opener);
+    if (!current.archive_url && destination) {
+      if (!transcript) {
+        const [saved] = await db<{transcript: TranscriptMessage[] | null}[]>("run_lab_tickets", {id: `eq.${id}`, select: "transcript"});
+        transcript = saved?.transcript ?? undefined;
+      }
+      if (!transcript) throw new Error("Ticket transcript is unavailable");
+      const url = await archiveTicketTranscript(current, destination, moderator, transcript);
+      const [archived] = await db<Ticket[]>("run_lab_tickets", {id: `eq.${id}`, archive_url: "is.null", select: ticketFields},
+        "PATCH", {archive_url: url});
+      current = archived ?? await ticket(id) ?? current;
+    }
+    if (!current.archive_url) throw new Error("Could not save the transcript link");
+    if (!current.close_notice_id) {
+      const notice = await discord<{id: string}>(`/channels/${channel}/messages`, "POST", {
+        ...closedTicketMessage(current), nonce: `receipt-${id}`.slice(-25), enforce_nonce: true,
+      });
+      const [notified] = await db<Ticket[]>("run_lab_tickets", {id: `eq.${id}`, close_notice_id: "is.null", select: ticketFields},
+        "PATCH", {close_notice_id: notice.id});
+      current = notified ?? await ticket(id) ?? current;
+      if (!current.close_notice_id) throw new Error("Could not save the closure notice");
+    }
+  } finally {
+    await syncTracker(current).catch(error => {
+      console.error("Run Lab could not update the ticket tracker", error instanceof Error ? error.message : "Unknown error");
     });
-    current = closed ?? await ticket(id);
-    if (!current) throw new Error("Ticket not found");
   }
-  await makeReadOnly(channel);
-  await syncTracker(current);
-  const message = {embeds: [embed("Ticket closed", `Outcome: ${current.outcome}\nClosed by ${mention(moderator)}`)], allowed_mentions: noPings};
-  await Promise.all([
-    discord(`/channels/${channel}/messages`, "POST", {...message, nonce: `close-${id}`.slice(-25), enforce_nonce: true}),
-    discord(`/channels/${setting("DISCORD_MOD_LOG_ID")}/messages`, "POST", {
-      ...message, content: `<#${channel}>${current.run_id ? ` · run ${current.run_id}` : ""}`, nonce: `log-${id}`.slice(-25), enforce_nonce: true,
-    }),
-  ]);
   return current;
+}
+
+export async function deleteClosedTicket(id: string, channel: string, user: string) {
+  const current = await ticket(id);
+  if (current?.channel_id !== channel || current.opener !== user || !current.closed_at ||
+      !current.archive_url || !current.close_notice_id) return false;
+  try {
+    await discord(`/channels/${channel}`, "DELETE");
+  } catch (error) {
+    if (!(error instanceof DiscordApiError) || error.status !== 404) throw error;
+  }
+  return true;
 }

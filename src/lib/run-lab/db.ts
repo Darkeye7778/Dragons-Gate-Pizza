@@ -10,11 +10,13 @@ export type Ticket = {
   tracker_id: string | null;
   claimed_by: string | null;
   closed_at: string | null;
+  archive_url: string | null;
+  close_notice_id: string | null;
   outcome: string | null;
   created_at: string;
 };
 
-export const ticketFields = "id,kind,opener,run_id,detail,channel_id,tracker_id,claimed_by,closed_at,outcome,created_at";
+export const ticketFields = "id,kind,opener,run_id,detail,channel_id,tracker_id,claimed_by,closed_at,archive_url,close_notice_id,outcome,created_at";
 
 export async function db<T>(table: string, query: Record<string, string> = {}, method = "GET", body?: object, prefer = "return=representation"): Promise<T> {
   const url = new URL(`/rest/v1/${table}`, setting("RUN_LAB_SUPABASE_URL"));
