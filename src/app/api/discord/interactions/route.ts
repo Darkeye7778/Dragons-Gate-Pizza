@@ -1,6 +1,6 @@
 import {createPublicKey, verify} from "node:crypto";
 import {after} from "next/server";
-import {discordApi, isId, isRunId, setting} from "@/lib/run-lab/config";
+import {discordApi, isId, isRunId, setting, speedrunUrl} from "@/lib/run-lab/config";
 import {isModerator} from "@/lib/run-lab/auth";
 import {openTickets, ticket} from "@/lib/run-lab/db";
 import {button, embed, noPings, reviewCard, row, ticketCard} from "@/lib/run-lab/messages";
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
       ? modal(custom, "Appeal a run decision",
           field("Speedrun.com run link or ID", "run", 1, 200, {
             description: "Open your submission on Speedrun.com (check the bell if it was rejected), then copy its page URL.",
-            placeholder: "https://www.speedrun.com/runs/abcd1234",
+            placeholder: speedrunUrl("abcd1234"),
           }),
           field("Why should we take another look?", "detail", 2, 1500),
           field("Relevant timestamps", "times", 1, 200, {required: false}))

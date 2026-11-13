@@ -1,4 +1,4 @@
-import { isId, origin, setting } from "./config";
+import { isId, origin, setting, speedrunUrl } from "./config";
 import { db, type Ticket } from "./db";
 import { formatTime, runFlags, type Queue, type Report, type Run } from "./queue";
 
@@ -72,7 +72,7 @@ export function ticketCard(ticket: Ticket, options?: {older?: Ticket; newer?: Ti
     embeds: [{...embed(`${name} #${short}`, [
       status, `Opened by ${mention(ticket.opener)}`,
       showChannel ? `Channel: <#${ticket.channel_id}>` : "",
-      ticket.run_id ? `Run: https://www.speedrun.com/runs/${ticket.run_id}` : "",
+      ticket.run_id ? `Run: ${speedrunUrl(ticket.run_id)}` : "",
       ticket.closed_at && ticket.outcome ? `Outcome: ${ticket.outcome.slice(0, 1000)}` : "",
     ].filter(Boolean).join("\n")),
     ...(options ? {footer: {text: `${options.index + 1} of ${options.count} open · Oldest first`}} : {})}],

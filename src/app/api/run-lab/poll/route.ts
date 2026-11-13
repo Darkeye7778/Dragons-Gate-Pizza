@@ -1,5 +1,5 @@
 import {timingSafeEqual} from "node:crypto";
-import {discord, isId, setting, staffRoleIds} from "@/lib/run-lab/config";
+import {discord, isId, setting, speedrunUrl, staffRoleIds} from "@/lib/run-lab/config";
 import {db} from "@/lib/run-lab/db";
 import {embed, linkButton, labLink, rolePings, row} from "@/lib/run-lab/messages";
 import {getQueue, isWorldRecord, readRun, runFlags} from "@/lib/run-lab/queue";
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       await db("run_lab_notices", where, "PATCH", {resolved_status: status});
       if (status !== "verified" || item.verified_message) continue;
       const record = checkRecord && run ? await isWorldRecord(run) : false;
-      const url = `https://www.speedrun.com/runs/${item.run_id}`;
+      const url = speedrunUrl(item.run_id);
       const message = await discord<{id: string}>(`/channels/${setting("DISCORD_VERIFIED_RUNS_ID")}/messages`, "POST", {
         embeds: [embed(record ? "New world record" : "Run verified", `${item.category.slice(0, 100)} · [View on Speedrun.com](${url})`)],
         ...rolePings(process.env.DISCORD_NEW_RUNS_ROLE_ID, record ? recordRole : undefined),

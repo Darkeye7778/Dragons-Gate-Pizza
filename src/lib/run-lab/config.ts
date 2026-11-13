@@ -1,5 +1,10 @@
 export const gameId = "j1npmkx6";
+export const gameUrl = "https://www.speedrun.com/Rip_It_Card_Collector";
 export const discordApi = "https://discord.com/api/v10";
+
+export function speedrunUrl(runId: string) {
+  return `${gameUrl}/runs/${runId}`;
+}
 
 export function setting(name: string): string {
   const value = process.env[name];

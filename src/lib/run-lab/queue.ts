@@ -1,4 +1,4 @@
-import { gameId, isRunId } from "./config";
+import { gameId, gameUrl, isRunId, speedrunUrl } from "./config";
 import { db } from "./db";
 
 export type Run = {
@@ -44,14 +44,14 @@ export async function readLiveQueue(): Promise<Queue> {
   }
   const runs = [...new Map(raw.filter(r => r.game === gameId && r.status?.status === "new" && isRunId(r.id)).map(r => [r.id, {
     id: r.id, category: names.get(r.category) ?? "Unknown category", submitted: r.submitted ?? null,
-    seconds: r.times?.primary_t ?? null, url: `https://www.speedrun.com/runs/${r.id}`,
+    seconds: r.times?.primary_t ?? null, url: speedrunUrl(r.id),
     videos: (r.videos?.links ?? []).map(l => webUrl(l.uri)).filter(Boolean), videoText: r.videos?.text ?? "",
     players: (r.players ?? []).flatMap(p => p.name || p.id || []), comment: r.comment ?? "",
   }])).values()];
   runs.sort((a, b) => (Date.parse(a.submitted ?? "") || Number.MAX_SAFE_INTEGER) -
     (Date.parse(b.submitted ?? "") || Number.MAX_SAFE_INTEGER) || a.id.localeCompare(b.id));
   return {
-    game: {id: gameId, name: "Rip It! Card Collector", url: "https://www.speedrun.com/Rip_It_Card_Collector"},
+    game: {id: gameId, name: "Rip It! Card Collector", url: gameUrl},
     checkedAt: new Date().toISOString(), truncated: page.pagination?.links?.some(l => l.rel === "next") ?? false, runs,
   };
 }
@@ -66,7 +66,8 @@ export async function getQueue(): Promise<{queue: Queue; stale: boolean}> {
   } catch (error) {
     const [cached] = await db<{snapshot: Queue}[]>("run_lab_queue", {key: "eq.rip-it", select: "snapshot"});
     if (!cached) throw error;
-    return {queue: cached.snapshot, stale: true};
+    const queue = {...cached.snapshot, runs: cached.snapshot.runs.map(run => ({...run, url: speedrunUrl(run.id)}))};
+    return {queue, stale: true};
   }
 }
 

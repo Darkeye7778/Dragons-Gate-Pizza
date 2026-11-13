@@ -1,4 +1,4 @@
-import { discord, DiscordApiError, isRunId, setting, staffRoleIds } from "./config";
+import { discord, DiscordApiError, isRunId, setting, speedrunUrl, staffRoleIds } from "./config";
 import { db, ticket, ticketFields, ticketForChannel, type Ticket } from "./db";
 import { closedTicketMessage, embed, mention, rolePings, ticketCard } from "./messages";
 import { archiveTicketTranscript, readTicketTranscript, requireMessageContent, transcriptDestination, type TranscriptMessage } from "./ticket-transcript";
@@ -66,7 +66,7 @@ export function parseRunLink(value: string) {
   try {
     const url = new URL(value);
     if (url.protocol === "https:" && ["speedrun.com", "www.speedrun.com"].includes(url.hostname)) {
-      const id = url.pathname.match(/\/runs\/([a-z0-9]{8})\/?$/i)?.[1];
+      const id = url.pathname.match(/\/runs?\/([a-z0-9]{8})\/?$/i)?.[1];
       if (id && isRunId(id)) return id;
     }
   } catch { /* An ID is also accepted. */ }
@@ -98,7 +98,7 @@ export async function openTicket(id: string, kind: Ticket["kind"], opener: strin
     await discord(`/channels/${current.channel_id}/messages`, "POST", {
       content: mention(opener), allowed_mentions: {parse: [], users: [opener]}, nonce: `ticket-${id}`.slice(-25), enforce_nonce: true,
       embeds: [embed(kind === "appeal" ? "Run appeal opened" : "Support ticket opened",
-        [runId ? `Run: https://www.speedrun.com/runs/${runId}` : "", detail].filter(Boolean).join("\n"))],
+        [runId ? `Run: ${speedrunUrl(runId)}` : "", detail].filter(Boolean).join("\n"))],
     });
     const tracker = await discord<{id: string}>(`/channels/${setting("DISCORD_TICKET_TRACKER_ID")}/messages`, "POST", {
       ...ticketCard(current), ...rolePings(...staffRoleIds()), nonce: `tracker-${id}`.slice(-25), enforce_nonce: true,
