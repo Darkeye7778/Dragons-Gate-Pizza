@@ -123,7 +123,7 @@ function moderationRun(id) {
     ${r.comment ? `<p>${e(r.comment)}</p>` : ""}${r.videoText ? `<p>${e(r.videoText)}</p>` : ""}
     ${flags.length ? `<p>${e(flags.join(" · "))}</p>` : ""}
     ${report ? `<p>Last video precheck · ${e(new Date(report.at).toLocaleString())}</p>${moderationReport(report, r)}` : ""}
-    ${youtube ? `<iframe id="submitted-youtube" title="Submitted YouTube recording" src="https://www.youtube-nocookie.com/embed/${youtube}" width="560" height="315" style="width:100%;border:0" allowfullscreen loading="lazy"></iframe>` : ""}
+    ${youtube ? `<iframe id="submitted-youtube" title="Submitted YouTube recording" referrerpolicy="strict-origin" src="https://www.youtube-nocookie.com/embed/${youtube}" width="560" height="315" style="width:100%;border:0" allowfullscreen loading="lazy"></iframe>` : ""}
     ${youtube && report ? `<div class="actions">${report.start==null?"":btn("Jump to estimated start","youtube-seek",report.start)}${report.finish==null?"":btn("Jump to estimated finish","youtube-seek",report.finish)}</div>` : ""}
     ${label("Open the original video file",videoPicker+">","Video stays on your device. Add reference frames in the reviewer to enable visual checks.")}
     <div id="mod-player"></div>`,
