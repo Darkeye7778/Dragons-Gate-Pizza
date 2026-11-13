@@ -4,7 +4,7 @@ import { discord, isId, origin, setting, staffRoleIds } from "./config";
 
 export const sessionName = "run_lab_session";
 export const stateName = "run_lab_oauth";
-const hours = 8;
+const sessionMaxAgeSeconds = 30 * 24 * 60 * 60;
 
 export function cookieOptions(maxAge: number) {
   return { httpOnly: true, sameSite: "lax" as const, secure: origin().startsWith("https:"), path: "/", maxAge };
@@ -17,8 +17,8 @@ function sign(value: string) {
 export function stateToken() { return randomBytes(32).toString("base64url"); }
 
 export function makeSession(id: string) {
-  const value = `${id}.${Date.now() + hours * 3600000}`;
-  return {value: `${value}.${sign(value)}`, maxAge: hours * 3600};
+  const value = `${id}.${Date.now() + sessionMaxAgeSeconds * 1000}`;
+  return {value: `${value}.${sign(value)}`, maxAge: sessionMaxAgeSeconds};
 }
 
 export async function sessionUser() {
