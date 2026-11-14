@@ -1,10 +1,11 @@
 import {createPublicKey, verify} from "node:crypto";
 import {after} from "next/server";
-import {discordApi, isId, isRunId, setting, speedrunUrl} from "@/lib/run-lab/config";
+import {discord, discordApi, DiscordApiError, isId, isRunId, setting, speedrunUrl} from "@/lib/run-lab/config";
 import {isModerator} from "@/lib/run-lab/auth";
 import {openTickets, ticket} from "@/lib/run-lab/db";
 import {button, embed, noPings, reviewCard, row, ticketCard} from "@/lib/run-lab/messages";
 import {getQueue} from "@/lib/run-lab/queue";
+import {activityEvents, activityModes, getStaffActivity, setStaffActivity} from "@/lib/run-lab/staff-activity.mjs";
 import {addTicketParticipant, claimTicket, closeTicket, deleteClosedTicket, openTicket, parseRunLink} from "@/lib/run-lab/tickets";
 
 export const maxDuration = 60;
@@ -13,7 +14,7 @@ type Option = {name: string; value?: string; options?: Option[]};
 type Input = {custom_id?: string; value?: string; component?: Input; components?: Input[]};
 type Interaction = {
   id: string; type: number; token: string; application_id: string; guild_id?: string; channel_id?: string;
-  member?: {roles: string[]; user?: {id: string}};
+  member?: {roles: string[]; permissions?: string; user?: {id: string}};
   data?: {
     name?: string; custom_id?: string; options?: Option[]; components?: Input[];
     resolved?: {members?: Record<string, object>; users?: Record<string, {bot?: boolean}>};
@@ -110,14 +111,69 @@ function validSignature(request: Request, raw: Buffer) {
   }), Buffer.from(signature, "hex"));
 }
 
+async function staffLog(guildId: string, command?: Option) {
+  const value = (name: string) => command?.options?.find(option => option.name === name)?.value;
+  const message = (description: string) => note(description, "Auto Mod · Staff log");
+  let changes: Record<string, string | string[]> | undefined;
+  switch (command?.name) {
+    case "channel": {
+      const destination = value("destination");
+      if (!isId(destination)) return message("Choose a private text channel in this server.");
+      try {
+        const channel = await discord<{guild_id: string; type: number; permission_overwrites?: {id: string; type: number; deny: string}[]}>(`/channels/${destination}`);
+        if (channel.guild_id !== guildId || channel.type !== 0) return message("Choose a private text channel in this server.");
+        const everyone = channel.permission_overwrites?.find(overwrite => overwrite.id === guildId && overwrite.type === 0);
+        if (!everyone || !(BigInt(everyone.deny) & BigInt(1024))) return message("Deny View Channel for @everyone in that channel first.");
+      } catch (error) {
+        if (error instanceof DiscordApiError && [403, 404].includes(error.status)) return message("Give Auto Mod Boss access to the log channel first.");
+        throw error;
+      }
+      changes = {channel_id: destination};
+      break;
+    }
+    case "event": {
+      const event = activityEvents.find(choice => choice.value === value("event"));
+      const mode = activityModes.find(choice => choice.value === value("mode"));
+      if (!event || !mode) return message("Pick an event and a logging mode.");
+      changes = {[event.value]: mode.value};
+      break;
+    }
+    case "roles": {
+      const roles = [value("role"), value("second-role")].filter(isId);
+      if (roles.includes(guildId)) return message("Choose staff roles. The @everyone role can’t be used here.");
+      changes = {ping_role_ids: [...new Set(roles)]};
+      break;
+    }
+    case "status": break;
+    default: return message("Use `/staff-log status` to see your settings.");
+  }
+
+  const settings = changes ? await setStaffActivity(guildId, changes) : await getStaffActivity(guildId);
+  const channel = settings.channel_id ? `<#${settings.channel_id}>` : "None selected. Use `/staff-log channel`.";
+  const roles = settings.ping_role_ids.map((role: string) => `<@&${role}>`).join(", ") || "None selected. Events set to ping will post quietly.";
+  const modes = activityEvents.map(event => `${event.name} — ${activityModes.find(mode => mode.value === settings[event.value])?.name ?? "Off"}`);
+  return message([`**Channel** ${channel}`, `**Ping roles** ${roles}`, ...modes].join("\n"));
+}
+
 export async function POST(request: Request) {
   const raw = Buffer.from(await request.arrayBuffer());
   if (!validSignature(request, raw)) return new Response("Invalid signature", {status: 401});
   let i: Interaction;
   try { i = JSON.parse(raw.toString()); } catch { return new Response("Invalid body", {status: 400}); }
   if (i.type === 1) return Response.json({type: 1});
-  if (i.application_id !== setting("DISCORD_APP_ID") || i.guild_id !== setting("DISCORD_SERVER_ID") ||
-      !isId(i.id) || !isId(i.member?.user?.id)) return reply(note("Use this bot in the Rip It! server."), true);
+  if (i.application_id !== setting("DISCORD_APP_ID") || !isId(i.guild_id) || !isId(i.id) || !isId(i.member?.user?.id)) {
+    return reply(note("Use this bot inside a Discord server."), true);
+  }
+  const guildId = i.guild_id;
+  if (i.type === 2 && i.data?.name === "staff-log") {
+    const permissions = i.member?.permissions ?? "";
+    // Administrator and Manage Server are the same permissions Discord uses when showing the command.
+    if (!/^\d+$/.test(permissions) || !(BigInt(permissions) & BigInt(8 | 32))) {
+      return reply(note("You need Manage Server to change staff log settings.", "Auto Mod · Staff log"), true);
+    }
+    return work(i, "private", () => staffLog(guildId, i.data?.options?.[0]));
+  }
+  if (guildId !== setting("DISCORD_SERVER_ID")) return reply(note("Use this command in the Rip It! server."), true);
 
   const user = i.member!.user!.id;
   const channel = i.channel_id;

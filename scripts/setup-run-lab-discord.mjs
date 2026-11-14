@@ -1,3 +1,5 @@
+import {activityEvents, activityModes} from "../src/lib/run-lab/staff-activity.mjs";
+
 const mode = process.argv[2];
 if (!["commands", "panels"].includes(mode)) throw new Error("Use commands or panels");
 const required = (name) => {
@@ -39,7 +41,25 @@ if (mode === "commands") {
       {type: 6, name: "member", description: "Server member to give access", required: true},
     ]}],
   });
-  console.log("Registered /review, /list runs, /list tickets, and /ticket add in the server.");
+  await send(path, {
+    name: "staff-log", description: "Configure Auto Mod's private server activity log",
+    default_member_permissions: "32",
+    options: [
+      {type: 1, name: "status", description: "Show the current logging settings"},
+      {type: 1, name: "channel", description: "Choose the private staff log channel", options: [
+        {type: 7, name: "destination", description: "Private text channel", channel_types: [0], required: true},
+      ]},
+      {type: 1, name: "event", description: "Turn logging or staff pings on or off for an event", options: [
+        {type: 3, name: "event", description: "Activity to configure", choices: activityEvents, required: true},
+        {type: 3, name: "mode", description: "Off, log quietly, or log and ping", choices: activityModes, required: true},
+      ]},
+      {type: 1, name: "roles", description: "Set up to two ping roles, or leave both blank to clear them", options: [
+        {type: 8, name: "role", description: "First staff role"},
+        {type: 8, name: "second-role", description: "Second staff role"},
+      ]},
+    ],
+  });
+  console.log("Registered /review, /list runs, /list tickets, /ticket add, and /staff-log in the server.");
 } else {
   for (const panel of [
     {kind: "appeal", channel: required("DISCORD_APPEAL_PANEL_ID"), label: "Open an Appeal",

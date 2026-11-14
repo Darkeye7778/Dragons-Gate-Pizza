@@ -1,4 +1,4 @@
-import { setting } from "./config";
+import {requestStorage} from "./storage.mjs";
 
 export type Ticket = {
   id: string;
@@ -19,19 +19,7 @@ export type Ticket = {
 export const ticketFields = "id,kind,opener,run_id,detail,channel_id,tracker_id,claimed_by,closed_at,archive_url,close_notice_id,outcome,created_at";
 
 export async function db<T>(table: string, query: Record<string, string> = {}, method = "GET", body?: object, prefer = "return=representation"): Promise<T> {
-  const url = new URL(`/rest/v1/${table}`, setting("RUN_LAB_SUPABASE_URL"));
-  url.search = new URLSearchParams(query).toString();
-  const key = setting("RUN_LAB_SUPABASE_KEY");
-  const response = await fetch(url, {
-    method, cache: "no-store", signal: AbortSignal.timeout(8000),
-    headers: { apikey: key, ...(key.startsWith("eyJ") ? {Authorization: `Bearer ${key}`} : {}), "Content-Type": "application/json", Prefer: prefer },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) throw new Error(`Run Lab storage returned HTTP ${response.status} for ${table}`);
-  if (response.status === 204 || prefer.split(",").some(value => value.trim() === "return=minimal")) {
-    return undefined as T;
-  }
-  return response.json();
+  return requestStorage(process.env, table, query, method, body, prefer) as Promise<T>;
 }
 
 export async function ticket(id: string) {
