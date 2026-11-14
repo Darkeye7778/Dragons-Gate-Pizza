@@ -9,7 +9,7 @@ export type Queue = { game: { id: string; name: string; url: string }; checkedAt
 export type Report = { start: number | null; finish: number | null; finishKey: string; startScanned: boolean; finishScanned: boolean; at: string };
 type SourceRun = {
   id: string; game: string; category: string; submitted?: string; times?: { primary_t?: number };
-  status?: { status?: string }; videos?: { links?: { uri: string }[]; text?: string };
+  status?: { status?: string; "verify-date"?: string | null }; videos?: { links?: { uri: string }[]; text?: string };
   players?: { name?: string; id?: string }[]; comment?: string;
 };
 
@@ -30,12 +30,16 @@ export function webUrl(value: string): string {
   } catch { return ""; }
 }
 
+async function categoryNames() {
+  const {data} = await upstream<{id: string; name: string}[]>(`games/${gameId}/categories`);
+  return new Map(data.map(({id, name}) => [id, name]));
+}
+
 export async function readLiveQueue(): Promise<Queue> {
   const params = { game: gameId, status: "new", orderby: "submitted", direction: "asc", max: "200" };
-  const [categories, first] = await Promise.all([
-    upstream<{id: string; name: string}[]>(`games/${gameId}/categories`), upstream<SourceRun[]>("runs", params),
+  const [names, first] = await Promise.all([
+    categoryNames(), upstream<SourceRun[]>("runs", params),
   ]);
-  const names = new Map(categories.data.map(({id, name}) => [id, name]));
   const raw = [...first.data];
   let page = first;
   for (let offset = 200; offset < 1000 && page.pagination?.links?.some(l => l.rel === "next"); offset += 200) {
@@ -99,11 +103,31 @@ export function formatTime(ms: number | null) {
   return `${Math.floor(whole / 3600000)}:${String(Math.floor(whole / 60000) % 60).padStart(2, "0")}:${String(Math.floor(whole / 1000) % 60).padStart(2, "0")}.${String(whole % 1000).padStart(3, "0")}`;
 }
 
-export async function readRun(id: string) {
-  if (!isRunId(id)) throw new Error("Invalid run ID");
-  const {data} = await upstream<SourceRun>(`runs/${id}`);
-  if (data.game !== gameId || data.id !== id) throw new Error("Unexpected run");
-  return data;
+export async function readVerifiedRuns(since: number) {
+  const params = {game: gameId, status: "verified", orderby: "verify-date", direction: "desc", max: "200"};
+  const recent = new Map<string, {run: SourceRun; verifiedAt: number}>();
+  let offset = 0;
+  for (;;) {
+    const page = await upstream<SourceRun[]>("runs", {...params, offset: String(offset)});
+    if (!Array.isArray(page.data)) throw new Error("Speedrun.com returned unexpected verified runs");
+    let reachedOlderRuns = false;
+    for (const run of page.data) {
+      if (run?.game !== gameId || run.status?.status !== "verified" || !isRunId(run.id) || !isRunId(run.category)) {
+        throw new Error("Speedrun.com returned an unexpected verified run");
+      }
+      const verifiedAt = Date.parse(run.status["verify-date"] ?? "");
+      if (!Number.isFinite(verifiedAt)) continue;
+      if (verifiedAt < since) reachedOlderRuns = true;
+      else recent.set(run.id, {run, verifiedAt});
+    }
+    if (reachedOlderRuns || !page.pagination?.links?.some(link => link.rel === "next")) break;
+    if (!page.data.length) throw new Error("Speedrun.com returned an empty verified page with more results");
+    offset += page.data.length;
+  }
+  if (!recent.size) return [];
+  const names = await categoryNames();
+  return [...recent.values()].sort((a, b) => a.verifiedAt - b.verifiedAt || a.run.id.localeCompare(b.run.id))
+    .map(({run}) => ({run, category: names.get(run.category) ?? "Unknown category"}));
 }
 
 export async function isWorldRecord(run: SourceRun) {

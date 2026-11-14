@@ -33,7 +33,7 @@ The private dashboard is at `/run-lab`. Discord sends slash commands, button cli
    node --env-file=.env.local scripts/setup-run-lab-discord.mjs panels
    ```
 
-6. In Supabase Cron, schedule an HTTP **POST** to `<origin>/api/run-lab/poll` hourly with `Authorization: Bearer <RUN_LAB_POLL_SECRET>`. Keep the secret in Supabase Vault for a SQL-scheduled job. A failed refresh returns an error and sends no alerts. The verified feed follows runs the bot previously saw pending and confirms their status with Speedrun.com.
+6. In Supabase Cron, schedule an HTTP **POST** to `<origin>/api/run-lab/poll` with `Authorization: Bearer <RUN_LAB_POLL_SECRET>`. Keep the secret in Supabase Vault for a SQL-scheduled job. Pending and verified alerts use the same schedule. The bot checks Speedrun.com's verified feed for approvals that happened between polls, including previously rejected runs. On the first successful check it looks back 24 hours and skips runs it already announced. A pending queue refresh failure returns an error and sends no alerts.
 7. In `#new-pending-runs`, `#ticket-tracker`, and `#verified-runs`, allow the Auto Mod Boss role **Mention @everyone, @here, and All Roles** in the channel permissions so it can ping roles that are not publicly mentionable. The bot limits mentions in these alerts to the configured roles. New pending runs, tickets, and appeals ping Moderator and the configured Admin role. A newly verified run pings **New Runs**, plus **New World Records** on the same post if Speedrun.com lists the run as the sole first-place entry in its category. Tied first-place entries receive the ordinary verified notice.
 
 ## Test it in Discord
