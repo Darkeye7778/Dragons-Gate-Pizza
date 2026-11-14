@@ -36,6 +36,26 @@ The private dashboard is at `/run-lab`. Discord sends slash commands, button cli
 6. In Supabase Cron, schedule an HTTP **POST** to `<origin>/api/run-lab/poll` with `Authorization: Bearer <RUN_LAB_POLL_SECRET>`. Keep the secret in Supabase Vault for a SQL-scheduled job. Pending and verified alerts use the same schedule. The bot checks Speedrun.com's verified feed for approvals that happened between polls, including previously rejected runs. On the first successful check it looks back 24 hours and skips runs it already announced. A pending queue refresh failure returns an error and sends no alerts.
 7. In `#new-pending-runs`, `#ticket-tracker`, and `#verified-runs`, allow the Auto Mod Boss role **Mention @everyone, @here, and All Roles** in the channel permissions so it can ping roles that are not publicly mentionable. The bot limits mentions in these alerts to the configured roles. New pending runs, tickets, and appeals ping Moderator and the configured Admin role. A newly verified run pings **New Runs**, plus **New World Records** on the same post if Speedrun.com lists the run as the sole first-place entry in its category. Tied first-place entries receive the ordinary verified notice.
 
+## Optional Discord staff activity logging
+
+Auto Mod Boss can post member joins, departures, and single or bulk message deletions to a private staff channel as they happen. Run one copy of `npm run start:discord-staff-activity` on an always-on Node.js host from this repository. It uses the same Discord bot and a live Gateway connection. The website and the Speedrun.com cron job have their own entry points.
+
+1. Use `#mod-log` or create `#staff-activity`. Deny **View Channel** for `@everyone` and grant access to staff and the bot. The bot needs **View Channel**, **Send Messages**, and **Embed Links**. For role pings, allow the bot **Mention @everyone, @here, and All Roles** in the log channel if the staff roles are not publicly mentionable.
+2. For joins or departures, enable **Server Members Intent** under **Bot → Privileged Gateway Intents** in the Discord Developer Portal.
+3. Set these environment variables on the always-on host. Configure the process to restart on failure. For a local test, use `node --env-file=.env.local scripts/discord-staff-activity.mjs` with the settings in `.env.local`.
+
+| Variable | Value |
+|---|---|
+| `DISCORD_BOT_TOKEN`, `DISCORD_SERVER_ID` | Same values as the existing bot |
+| `DISCORD_STAFF_ACTIVITY_LOG_ID` | ID of the private staff channel |
+| `DISCORD_STAFF_ACTIVITY_EVENTS` | Comma-separated selection of `joins,leaves,deletions`. Leave unset to disable logging |
+| `DISCORD_STAFF_ACTIVITY_PING_EVENTS` | Optional subset of enabled events, for example `deletions`. Leave unset for quiet logs |
+| `DISCORD_ADMIN_ROLE_ID`, `DISCORD_MOD_ROLE_ID` | Role IDs to ping, at least one required when pings are enabled |
+
+Deletion logs cover channels the bot can see that are visible to `@everyone`. They record the channel, the time Auto Mod saw the deletion, and the message ID for single deletions. Bulk deletions produce one entry with a count. Discord's deletion event supplies no message text or moderator attribution. Departures include voluntary exits, kicks, and bans. Changes to these settings take effect when the worker restarts.
+
+To test, join and leave with a test member and delete a test message in a public channel. Confirm that only the enabled events appear in the staff channel and that only the selected events ping staff. Delete a test message in a private channel to verify the log stays quiet.
+
 ## Test it in Discord
 
 - In `#run-review`, use `/review` to open the oldest pending run, optionally supply a run ID, or use `/list runs`. Arrow buttons edit the same embed. The reply is visible to the staff channel. If the source is down, the last successful queue is labeled with its refresh time.

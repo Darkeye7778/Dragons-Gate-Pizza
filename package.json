@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:discord-staff-activity": "node scripts/discord-staff-activity.mjs",
     "lint": "eslint",
     "test:pricing": "node scripts/run-pricing-tests.mjs"
   },
   "dependencies": {
+    "discord.js": "^14.28.1",
     "next": "^16.1.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
