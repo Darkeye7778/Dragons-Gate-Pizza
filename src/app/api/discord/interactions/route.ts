@@ -1,7 +1,6 @@
 import {createPublicKey, verify} from "node:crypto";
 import {after} from "next/server";
-import {discord, discordApi, DiscordApiError, isId, isRunId, setting, speedrunUrl} from "@/lib/run-lab/config";
-import {isModerator} from "@/lib/run-lab/auth";
+import {discord, discordApi, DiscordApiError, isId, isModerator, isRunId, setting, speedrunUrl} from "@/lib/run-lab/config";
 import {openTickets, ticket} from "@/lib/run-lab/db";
 import {button, embed, noPings, reviewCard, row, ticketCard} from "@/lib/run-lab/messages";
 import {getQueue} from "@/lib/run-lab/queue";
@@ -22,7 +21,7 @@ type Interaction = {
 };
 
 type Message = {embeds: object[]; components?: object[]; allowed_mentions?: object};
-const note = (description: string, title = "Rip It! Run Lab"): Message =>
+const note = (description: string, title = "Auto Mod Boss"): Message =>
   ({embeds: [embed(title, description)], components: [], allowed_mentions: noPings});
 
 function reply(message: Message, ephemeral = false) {
@@ -34,8 +33,8 @@ function work(i: Interaction, kind: "public" | "private" | "update", task: () =>
     let message;
     try { message = await task(); }
     catch (error) {
-      console.error("Run Lab interaction failed", error instanceof Error ? error.message : "Unknown error");
-      message = note("This action couldn’t finish. Try again or contact a moderator.", "Run Lab unavailable");
+      console.error("Auto Mod Boss interaction failed", error instanceof Error ? error.message : "Unknown error");
+      message = note("This action couldn’t finish. Try again or contact a moderator.", "Auto Mod Boss unavailable");
     }
     if (!message) return;
     try {

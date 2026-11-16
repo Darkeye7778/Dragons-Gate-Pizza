@@ -12,16 +12,16 @@ export function setting(name: string): string {
   return value;
 }
 
-export function origin(): string {
-  return new URL(setting("RUN_LAB_ORIGIN")).origin;
-}
-
 export function isId(value: unknown): value is string {
   return typeof value === "string" && /^\d{16,22}$/.test(value);
 }
 
 export function staffRoleIds() {
   return [...new Set([setting("DISCORD_MOD_ROLE_ID"), process.env.DISCORD_ADMIN_ROLE_ID].filter(isId))];
+}
+
+export function isModerator(roles?: string[]) {
+  return staffRoleIds().some(role => roles?.includes(role));
 }
 
 export function isRunId(value: unknown): value is string {

@@ -142,13 +142,69 @@ export const projects: PortfolioProject[] = [
             },
         ],
     },
+
+    {
+        id: "wayfinder",
+        title: "Wayfinder",
+        category: "Full-stack engineering · Vehicle-aware navigation",
+        status: "Prototype",
+        radarLabel: "ROUTE",
+        eyebrow: "Software systems study // 002",
+        summary: "I built a vehicle-aware navigation prototype with a native road-routing engine, an ASP.NET Core API, and a React/TypeScript mapping interface. Alpha 0.2 uses real OpenStreetMap road data to calculate routes for cars and moving trucks.",
+        problem: "Ordinary shortest-path navigation can overlook the vehicle's height, weight, and permitted roads. I wanted the route planner to model real traversal restrictions.",
+        approach: "I imported OSM PBF data into a directed graph, implemented nearest-node lookup, Dijkstra search, vehicle-specific restrictions, and an API consumed by a MapLibre UI.",
+        technologies: ["C#", "ASP.NET Core", ".NET", "React", "TypeScript", "MapLibre", "OpenStreetMap", "Dijkstra", "Docker", "xUnit"],
+        outcome: "The prototype has loaded a Utah-wide graph of approximately 2.3 million nodes and 4.7 million directed edges, with 30 documented passing backend tests. A*, spatial indexing, navigation guidance, and offline support remain planned. Source currently resides in a private development repository.",
+        workstreams: [
+            {title: "Routing graph and vehicle constraints", status: "Implemented", description: "OSM road ingestion, directed edges, car/truck profiles, and height/weight traversal filtering."},
+            {title: "Web application", status: "Implemented", description: "C# API, React/TypeScript UI, and MapLibre route rendering."},
+            {title: "Performance and navigation", status: "In Development", description: "xUnit coverage is in place; faster pathfinding and spatial indexing are future work."},
+        ],
+    },
+    {
+        id: "auto-mod-boss",
+        title: "Auto Mod Boss",
+        category: "Discord automation · Backend systems",
+        status: "In Development",
+        radarLabel: "BOT",
+        eyebrow: "Automation systems study // 003",
+        summary: "I’m developing a Discord moderation bot for the Rip It! speedrunning community with submission review commands, support tickets and appeals, announcements, and customizable staff activity logging.",
+        problem: "A community moderation team needs reliable processes for triaging incoming requests, reviewing submissions, and notifying staff without manual channel monitoring.",
+        approach: "I implemented signed Discord interaction handlers, slash commands, ticket permissions and transcripts, a Speedrun.com polling service, Supabase-backed state, and a Node.js gateway listener. OpenAI Codex supports repository-level implementation, debugging, and test iteration.",
+        technologies: ["TypeScript", "JavaScript", "Node.js", "Next.js", "Discord API", "discord.js", "Supabase", "REST APIs", "SQL", "OpenAI Codex"],
+        outcome: "The codebase includes review and ticket workflows, polling notifications, and per-server join/leave/deletion logging controls. Rollout and end-to-end validation are ongoing. A multi-server dashboard remains planned.",
+        github: "https://github.com/Darkeye7778/Dragons-Gate-Pizza/tree/main/src/app/api/discord",
+        workstreams: [
+            {title: "Run review and announcements", status: "In Development", description: "Speedrun.com queue browsing, Discord interactions, pending-run and verification alerts."},
+            {title: "Tickets and appeals", status: "In Development", description: "Private ticket channels, claiming, participant permissions, closure, and archived transcripts."},
+            {title: "Staff activity logs", status: "In Development", description: "Per-server controls for joins, departures, deletions, and optional role mentions."},
+            {title: "Multi-server dashboard", status: "Planned", description: "A future dedicated configuration interface for a broader public bot."},
+        ],
+    },
+    {
+        id: "offline-ai-assistant",
+        title: "Offline AI Assistant",
+        category: "Applied AI · Local inference",
+        status: "Prototype",
+        radarLabel: "AI",
+        eyebrow: "Applied AI study // 004",
+        summary: "I developed a locally hosted conversational assistant prototype combining adapted language-model inference with speech recognition, text-to-speech, persistence, and retrieval services.",
+        problem: "Explore an assistant that can respond conversationally without relying entirely on remotely hosted inference services.",
+        approach: "I experimented with custom datasets and LoRA model tuning, integrated Python inference and voice processing, and used SQLite for persistent conversation context.",
+        technologies: ["Python", "Local LLMs", "LoRA", "SQLite", "Speech recognition", "Text-to-speech", "Retrieval"],
+        outcome: "An experimental offline-focused prototype integrating local inference, speech services, and persistent context; not a production assistant.",
+        workstreams: [
+            {title: "Local model adaptation", status: "Implemented", description: "Model experiments using custom datasets and LoRA workflows."},
+            {title: "Speech and context", status: "Implemented", description: "Python speech, inference, retrieval, and SQLite context components."},
+        ],
+    },
     {
         id: "just-in-time-training",
         title: "JustInTime Training",
         category: "XR training · Applied AI",
         status: "Pitch Prototype",
         radarLabel: "JIT",
-        eyebrow: "Integrated system study // 002",
+        eyebrow: "Integrated system study // 005",
 
         summary:
             "The team and I built a pitch-ready Unreal Engine 5.6 nursing-training prototype that connects an interactive IV-pump simulation to locally hosted speech recognition, language-model, text-to-speech, and contextual-media systems.",
@@ -214,7 +270,7 @@ export const projects: PortfolioProject[] = [
         category: "Operating systems · Low-level software",
         status: "In Development",
         radarLabel: "OBSIDIA",
-        eyebrow: "Systems study // 003",
+        eyebrow: "Systems study // 006",
         summary:
             "I’m building a freestanding x86 hobby operating-system kernel in C to explore boot architecture, memory management, device input, graphics, storage, and shell design below the application layer.",
         problem:
@@ -268,7 +324,7 @@ export const projects: PortfolioProject[] = [
         category: "Real-time interaction · Unreal Engine",
         status: "Built",
         radarLabel: "VAR",
-        eyebrow: "Interaction study // 004",
+        eyebrow: "Interaction study // 007",
         summary:
             "I built a component-driven Unreal Engine C++ framework for manipulating and assembling objects in VR through direct selection, ray-based pointing, grabbing, docking, world movement, and simulated physical controls.",
         problem:
@@ -315,7 +371,7 @@ export const projects: PortfolioProject[] = [
         category: "Motion systems · Electromechanical integration",
         status: "In Development",
         radarLabel: "6DOF",
-        eyebrow: "Motion systems study // 005",
+        eyebrow: "Motion systems study // 008",
         summary:
             "My 6-DOF motion-platform work began with a custom Stewart-platform design using six servo-driven actuators, then expanded into hands-on integration and testing with an industrial MOOG motion platform as part of a larger Formula One simulator project.",
         problem:
@@ -369,7 +425,7 @@ export const projects: PortfolioProject[] = [
         category: "Vehicle simulation · Real-time systems",
         status: "In Development",
         radarLabel: "F1",
-        eyebrow: "Vehicle simulation study // 006",
+        eyebrow: "Vehicle simulation study // 009",
         summary:
             "I’m collaborating on a Full Sail University final project that combines Unreal Engine vehicle simulation, a six-degree-of-freedom MOOG motion base, three-projector display hardware, and a projection pipeline.",
         problem:
@@ -448,7 +504,7 @@ export const skillGroups: SkillGroup[] = [
     {
         title: "Software",
         index: "01",
-        skills: ["C++", "C", "C#", "Python", "Java", "TypeScript", "JavaScript", "Bash", "SQL", "x86 Assembly"],
+        skills: ["C++", "C", "C#", "Python", "Java", "TypeScript", "JavaScript", "React", "ASP.NET Core", "Bash", "SQL", "x86 Assembly"],
     },
     {
         title: "Simulation / Real-Time",
@@ -468,7 +524,7 @@ export const skillGroups: SkillGroup[] = [
     {
         title: "Engineering / Systems",
         index: "05",
-        skills: ["Systems design", "Client / server architecture", "REST · MQTT · TCP/IP", "Prototyping", "System testing", "Git"],
+        skills: ["Systems design", "Client / server architecture", "REST · MQTT · TCP/IP", "Docker", "xUnit", "OpenAI Codex", "Prototyping", "System testing", "Git"],
     },
 ];
 
@@ -476,7 +532,7 @@ export const about = {
     label: "Working philosophy",
     heading: "Build the whole system, not just the visible layer.",
     paragraphs: [
-        "I work across real-time software, XR training, embedded platforms, low-level systems, and electromechanical simulation hardware. The common thread is integration: making software, interfaces, networks, and physical systems behave as one understandable whole.",
+        "I work across full-stack software, real-time systems, XR training, embedded platforms, low-level operating systems, and electromechanical simulation hardware. The common thread is integration: making software, interfaces, networks, and physical systems behave as one understandable whole.",
         "I’m drawn to multidisciplinary engineering problems in simulation, robotics, themed entertainment, and interactive physical systems—especially work that benefits from rapid prototyping, methodical testing, and clear communication between disciplines.",
     ],
     focusAreas: [

@@ -1,7 +1,7 @@
 import {timingSafeEqual} from "node:crypto";
 import {discord, isId, setting, speedrunUrl, staffRoleIds} from "@/lib/run-lab/config";
 import {db} from "@/lib/run-lab/db";
-import {embed, linkButton, labLink, rolePings, row} from "@/lib/run-lab/messages";
+import {embed, linkButton, rolePings, row} from "@/lib/run-lab/messages";
 import {getQueue, isWorldRecord, readVerifiedRuns, runFlags} from "@/lib/run-lab/queue";
 
 type Notice = {run_id: string; pending_message: string | null; resolved_status: string | null; verified_message: string | null};
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       if (known?.pending_message || known?.resolved_status) continue;
       const message = await discord<{id: string}>(`/channels/${setting("DISCORD_PENDING_RUNS_ID")}/messages`, "POST", {
         embeds: [embed("New run needs review", [`${run.category.slice(0, 100)} · ${run.id}`, ...runFlags(run, queue.runs)].join("\n"))],
-        components: [row(linkButton("Speedrun.com", run.url), linkButton("Open Run Lab", labLink(run.id)))],
+        components: [row(linkButton("Speedrun.com", run.url))],
         ...rolePings(...staffRoleIds()), nonce: `pending-${run.id}`, enforce_nonce: true,
       });
       await db("run_lab_notices", {on_conflict: "run_id"}, "POST", {run_id: run.id, category: run.category, pending_message: message.id},
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         verified++;
       } catch (error) {
         verifiedFailed = true;
-        console.error("Run Lab could not announce verified run", run.id, error instanceof Error ? error.message : "Unknown error");
+        console.error("Auto Mod Boss could not announce verified run", run.id, error instanceof Error ? error.message : "Unknown error");
       }
     }
     if (verifiedFailed) return Response.json({error: "Some verified announcements could not be sent", sent, verified}, {status: 502});
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
     }, "resolution=merge-duplicates,return=minimal");
     return Response.json({pending: queue.runs.length, sent, verified, checkedAt: queue.checkedAt, truncated: queue.truncated});
   } catch (error) {
-    console.error("Run Lab poll failed", error instanceof Error ? error.message : "Unknown error");
+    console.error("Auto Mod Boss poll failed", error instanceof Error ? error.message : "Unknown error");
     return Response.json({error: "Queue or notification processing did not complete"}, {status: 502});
   }
 }

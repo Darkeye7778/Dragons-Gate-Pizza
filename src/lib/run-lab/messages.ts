@@ -1,6 +1,6 @@
-import { isId, origin, setting, speedrunUrl } from "./config";
-import { db, type Ticket } from "./db";
-import { formatTime, runFlags, type Queue, type Report, type Run } from "./queue";
+import { isId, setting, speedrunUrl } from "./config";
+import type { Ticket } from "./db";
+import { formatTime, runFlags, type Queue, type Run } from "./queue";
 
 export const noPings = {parse: []};
 export function rolePings(...ids: (string | undefined)[]) {
@@ -16,18 +16,12 @@ export const mention = (id: string) => `<@${id}>`;
 export const linkButton = (label: string, url: string) => ({type: 2, style: 5, label, url});
 export const button = (label: string, custom_id: string, disabled = false, style = 2) => ({type: 2, style, label, custom_id, disabled});
 export const row = (...components: object[]) => ({type: 1, components});
-export const labLink = (run?: string) => origin() + "/run-lab" + (run ? `?run=${run}` : "");
 
 export async function reviewCard(queue: Queue, stale: boolean, run: Run, paginated: boolean) {
   const index = queue.runs.findIndex(item => item.id === run.id);
   const previous = queue.runs[index - 1];
   const next = queue.runs[index + 1];
   const flags = runFlags(run, queue.runs);
-  let scan: Report | undefined;
-  let reportLine = "No shared scan saved yet.";
-  try {
-    scan = (await db<{report: Report}[]>("run_lab_reports", {run_id: `eq.${run.id}`, select: "report"}))[0]?.report;
-  } catch { reportLine = "Shared scans are unavailable."; }
   const timestamp = Date.parse(run.submitted ?? "");
   const footer = stale ? `Unable to refresh · last checked ${queue.checkedAt}` :
     `${index + 1} of ${queue.runs.length} pending${queue.truncated ? " · partial queue" : ""} · Oldest first`;
@@ -37,7 +31,6 @@ export async function reviewCard(queue: Queue, stale: boolean, run: Run, paginat
         `Submitted ${Number.isFinite(timestamp) ? `<t:${Math.floor(timestamp / 1000)}:f>` : "date unavailable"}`,
         `Reported time: **${formatTime(run.seconds == null ? null : run.seconds * 1000)}**`,
         flags.length ? flags.map(flag => `• ${flag}`).join("\n") : "No metadata flags.",
-        scan ? `Estimated gameplay start: **${formatTime(scan.start)}**\nEstimated finish: **${formatTime(scan.finish)}**` : reportLine,
         "A moderator makes the final decision.",
       ].join("\n")), footer: {text: footer},
     }],
@@ -45,7 +38,7 @@ export async function reviewCard(queue: Queue, stale: boolean, run: Run, paginat
       ...(paginated ? [
         button("← Older", `review:${previous?.id ?? run.id}`, !previous),
         button("Newer →", `review:${next?.id ?? run.id}`, !next),
-      ] : []), linkButton("Speedrun.com", run.url), linkButton("Open Run Lab", labLink(run.id)),
+      ] : []), linkButton("Speedrun.com", run.url),
     )], allowed_mentions: noPings,
   };
 }

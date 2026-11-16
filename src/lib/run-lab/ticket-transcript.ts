@@ -47,7 +47,7 @@ export async function transcriptDestination(ticketChannel: string) {
 
 function transcriptParts(ticket: Ticket, messages: TranscriptMessage[]) {
   const header = [
-    `Rip It! Run Lab ${ticket.kind} ticket ${ticket.id}`,
+    `Auto Mod Boss ${ticket.kind} ticket ${ticket.id}`,
     `Opened by ${ticket.opener} on ${ticket.created_at}`,
     `Closed on ${ticket.closed_at}`,
     ticket.run_id ? `Run ID: ${ticket.run_id}` : "",

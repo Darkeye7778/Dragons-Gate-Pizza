@@ -29,7 +29,7 @@ if (mode === "commands") {
     options: [{type: 3, name: "run", description: "Optional Speedrun.com run ID"}],
   });
   await send(path, {
-    name: "list", description: "Browse a Run Lab queue",
+    name: "list", description: "Browse a moderation queue",
     options: [
       {type: 1, name: "runs", description: "List runs awaiting verification"},
       {type: 1, name: "tickets", description: "Browse open support tickets and appeals"},
